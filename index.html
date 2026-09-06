@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PosterStudio - All In One</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fabric.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+</head>
+<body class="bg-gray-100 font-sans h-screen flex flex-col overflow-hidden">
+
+    <!-- Top Navigation (Tab Switcher) -->
+    <div class="bg-slate-800 text-white p-4 flex justify-between items-center z-20 shadow-md">
+        <h1 class="text-2xl font-bold">PosterStudio <span class="text-sm font-normal text-slate-400">by Bhuvaneshwar</span></h1>
+        <div class="flex gap-4">
+            <button onclick="switchTab('admin')" id="btnAdmin" class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded font-bold transition">Admin Mode (Editor)</button>
+            <button onclick="switchTab('shopkeeper')" id="btnShop" class="bg-slate-600 hover:bg-slate-700 px-6 py-2 rounded font-bold transition">Shopkeeper Mode (View)</button>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 1. ADMIN PANEL (Hidden/Visible based on Tab) -->
+    <!-- ========================================== -->
+    <div id="adminPanel" class="flex-1 flex overflow-hidden">
+        
+        <!-- Left Sidebar: Controls -->
+        <div class="w-80 bg-white shadow-xl flex flex-col h-full z-10 border-r">
+            <div class="p-4 bg-blue-50 text-blue-800 border-b">
+                <h2 class="font-bold">Template Maker</h2>
+                <p class="text-xs">Drag & Drop Editor</p>
+            </div>
+
+            <div class="p-4 flex-1 overflow-y-auto space-y-5">
+                <!-- Background -->
+                <div>
+                    <label class="font-bold text-gray-700 text-sm mb-1 block">1. Set Background Image</label>
+                    <input type="file" id="bgUpload" accept="image/*" class="w-full text-sm border rounded p-1">
+                </div>
+                <hr>
+                <!-- Placeholders -->
+                <div>
+                    <label class="font-bold text-gray-700 text-sm mb-2 block">2. Add Placeholders</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="addText('{{USER_NAME}}')" class="bg-gray-100 border p-2 text-xs font-bold rounded hover:bg-gray-200">+ User Name</button>
+                        <button onclick="addText('{{BIZ_NAME}}')" class="bg-gray-100 border p-2 text-xs font-bold rounded hover:bg-gray-200">+ Biz Name</button>
+                        <button onclick="addBox('PHOTO')" class="bg-gray-100 border p-2 text-xs font-bold rounded hover:bg-gray-200">+ Photo Box</button>
+                        <button onclick="addBox('LOGO')" class="bg-gray-100 border p-2 text-xs font-bold rounded hover:bg-gray-200">+ Logo Box</button>
+                    </div>
+                </div>
+                <hr>
+                <!-- Styling -->
+                <div id="stylePanel" class="opacity-50 pointer-events-none">
+                    <label class="font-bold text-gray-700 text-sm mb-2 block">3. Style Selected Object</label>
+                    <div class="flex gap-2 mb-2">
+                        <input type="color" id="colorPicker" class="w-1/3 h-8 rounded cursor-pointer">
+                        <input type="number" id="fontSize" placeholder="Size" class="w-2/3 border rounded px-2 text-sm">
+                    </div>
+                    <button onclick="deleteObject()" class="w-full bg-red-100 text-red-600 border border-red-300 p-2 text-xs font-bold rounded mt-2">Delete Selected</button>
+                </div>
+            </div>
+
+            <!-- Save Button -->
+            <div class="p-4 bg-gray-50 border-t">
+                <button onclick="saveTemplate()" class="w-full bg-green-600 text-white font-bold py-3 rounded shadow hover:bg-green-700">
+                    Save Template
+                </button>
+            </div>
+        </div>
+
+        <!-- Canvas Area -->
+        <div class="flex-1 bg-gray-200 flex items-center justify-center relative overflow-auto p-4">
+            <div class="bg-white shadow-2xl" style="width: 800px; height: 800px;">
+                <canvas id="adminCanvas"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 2. SHOPKEEPER PANEL (Hidden by Default)    -->
+    <!-- ========================================== -->
+    <div id="shopkeeperPanel" class="flex-1 flex-col hidden overflow-hidden bg-gray-100">
+        
+        <div class="bg-white shadow p-4 flex justify-center gap-6 items-center z-10">
+            <span class="font-bold text-gray-700">Login As:</span>
+            <select id="userSelect" class="border p-2 rounded font-bold bg-slate-50 w-64" onchange="renderShopkeeperPoster()">
+                <option value="0">Ramesh (Hardware)</option>
+                <option value="1">Salman (Mobile Repair)</option>
+                <option value="2">Priya (Boutique)</option>
+            </select>
+            <button onclick="downloadPoster()" class="bg-green-600 text-white font-bold py-2 px-6 rounded shadow hover:bg-green-700">
+                Download Generated Poster
+            </button>
+        </div>
+
+        <div class="flex-1 flex items-center justify-center p-4 overflow-auto">
+            <div class="bg-white shadow-2xl relative" style="width: 800px; height: 800px;">
+                <canvas id="shopCanvas"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- JAVASCRIPT LOGIC                           -->
+    <!-- ========================================== -->
+    <script>
+        // --- 1. GLOBAL VARIABLES & SETUP ---
+        let adminCanvas, shopCanvas;
+        let savedTemplateJSON = null; // Store JSON in memory instead of just localStorage
+
+        // Mock Database
+        const dbUsers = [
+            { id: 1, name: "Ramesh Kumar", bizName: "Ramesh Hardware & Tools", photo: "https://i.pravatar.cc/300?img=11", logo: "https://ui-avatars.com/api/?name=RH&background=0D8ABC&color=fff&size=200" },
+            { id: 2, name: "Salman Khan", bizName: "Salman Mobile Repair", photo: "https://i.pravatar.cc/300?img=12", logo: "https://ui-avatars.com/api/?name=SM&background=FF5733&color=fff&size=200" },
+            { id: 3, name: "Priya Sharma", bizName: "Priya Fashion Boutique", photo: "https://i.pravatar.cc/300?img=5", logo: "https://ui-avatars.com/api/?name=PB&background=E83E8C&color=fff&size=200" }
+        ];
+
+        // Initialize Canvases on Load
+        window.onload = () => {
+            adminCanvas = new fabric.Canvas('adminCanvas', { width: 800, height: 800, preserveObjectStacking: true });
+            shopCanvas = new fabric.StaticCanvas('shopCanvas', { width: 800, height: 800 });
+            setupAdminEvents();
+            
+            // Restore from previous session if exists
+            if(localStorage.getItem('posterData')) {
+                savedTemplateJSON = localStorage.getItem('posterData');
+            }
+        };
+
+        // --- 2. TAB SWITCHING LOGIC ---
+        function switchTab(tab) {
+            const adminPnl = document.getElementById('adminPanel');
+            const shopPnl = document.getElementById('shopkeeperPanel');
+            const btnAdmin = document.getElementById('btnAdmin');
+            const btnShop = document.getElementById('btnShop');
+
+            if (tab === 'admin') {
+                adminPnl.classList.remove('hidden');
+                adminPnl.classList.add('flex');
+                shopPnl.classList.add('hidden');
+                shopPnl.classList.remove('flex');
+                
+                btnAdmin.classList.replace('bg-slate-600', 'bg-blue-600');
+                btnShop.classList.replace('bg-blue-600', 'bg-slate-600');
+            } else {
+                if(!savedTemplateJSON) {
+                    alert("Please Save a template in Admin mode first!");
+                    return;
+                }
+                adminPnl.classList.add('hidden');
+                adminPnl.classList.remove('flex');
+                shopPnl.classList.remove('hidden');
+                shopPnl.classList.add('flex');
+                
+                btnAdmin.classList.replace('bg-blue-600', 'bg-slate-600');
+                btnShop.classList.replace('bg-slate-600', 'bg-blue-600');
+                
+                // Trigger render for Shopkeeper
+                renderShopkeeperPoster();
+            }
+        }
+
+        // --- 3. ADMIN PANEL LOGIC ---
+        function setupAdminEvents() {
+            // Background Upload
+            document.getElementById('bgUpload').addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (f) => {
+                    fabric.Image.fromURL(f.target.result, (img) => {
+                        img.set({ scaleX: 800 / img.width, scaleY: 800 / img.height });
+                        adminCanvas.setBackgroundImage(img, adminCanvas.renderAll.bind(adminCanvas));
+                    });
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // Styling Panel Logic
+            adminCanvas.on('selection:created', updateStylingPanel);
+            adminCanvas.on('selection:updated', updateStylingPanel);
+            adminCanvas.on('selection:cleared', () => { document.getElementById('stylePanel').classList.add('opacity-50', 'pointer-events-none'); });
+
+            document.getElementById('colorPicker').oninput = function() {
+                const obj = adminCanvas.getActiveObject();
+                if(obj) { obj.set('fill', this.value); adminCanvas.renderAll(); }
+            };
+            document.getElementById('fontSize').oninput = function() {
+                const obj = adminCanvas.getActiveObject();
+                if(obj && obj.type === 'i-text') { obj.set('fontSize', parseInt(this.value)); adminCanvas.renderAll(); }
+            };
+        }
+
+        function addText(str) {
+            const text = new fabric.IText(str, { left: 400, top: 400, originX: 'center', originY: 'center', fontSize: 40, fill: '#000000', fontWeight: 'bold', placeholderType: 'TEXT' });
+            adminCanvas.add(text); adminCanvas.setActiveObject(text);
+        }
+
+        function addBox(type) {
+            const rect = new fabric.Rect({ left: 400, top: 400, originX: 'center', originY: 'center', width: type==='PHOTO'?200:150, height: type==='PHOTO'?250:150, fill: 'rgba(100,100,100,0.5)', stroke: 'red', strokeDashArray: [5,5], strokeWidth: 2, placeholderType: type });
+            adminCanvas.add(rect); adminCanvas.setActiveObject(rect);
+        }
+
+        function deleteObject() {
+            const obj = adminCanvas.getActiveObject();
+            if(obj) { adminCanvas.remove(obj); document.getElementById('stylePanel').classList.add('opacity-50', 'pointer-events-none'); }
+        }
+
+        function updateStylingPanel() {
+            const obj = adminCanvas.getActiveObject();
+            if(!obj) return;
+            const panel = document.getElementById('stylePanel');
+            panel.classList.remove('opacity-50', 'pointer-events-none');
+            document.getElementById('colorPicker').value = obj.fill || '#000000';
+            if(obj.type === 'i-text') {
+                document.getElementById('fontSize').value = obj.fontSize;
+                document.getElementById('fontSize').disabled = false;
+            } else {
+                document.getElementById('fontSize').disabled = true;
+            }
+        }
+
+        function saveTemplate() {
+            // Save JSON with custom property
+            const json = adminCanvas.toJSON(['placeholderType']);
+            savedTemplateJSON = JSON.stringify(json);
+            localStorage.setItem('posterData', savedTemplateJSON); // Backup in storage
+            alert('Template Saved! Click "Shopkeeper Mode" at the top right to see the magic.');
+        }
+
+        // --- 4. SHOPKEEPER PANEL LOGIC ---
+        function renderShopkeeperPoster() {
+            if(!savedTemplateJSON) return;
+            
+            const userIndex = document.getElementById('userSelect').value;
+            const user = dbUsers[userIndex];
+
+            // Load JSON onto the shop canvas
+            shopCanvas.loadFromJSON(savedTemplateJSON, () => {
+                const objects = shopCanvas.getObjects();
+                
+                objects.forEach((obj) => {
+                    // Replace Text
+                    if (obj.type === 'i-text' || obj.type === 'text') {
+                        if (obj.text === '{{USER_NAME}}') obj.set('text', user.name);
+                        if (obj.text === '{{BIZ_NAME}}') obj.set('text', user.bizName);
+                    }
+                    
+                    // Replace Images
+                    if (obj.placeholderType === 'PHOTO' || obj.placeholderType === 'LOGO') {
+                        const imgUrl = obj.placeholderType === 'PHOTO' ? user.photo : user.logo;
+                        
+                        fabric.Image.fromURL(imgUrl, (realImg) => {
+                            // Match the exact box size and position the admin created
+                            const sX = (obj.width * obj.scaleX) / realImg.width;
+                            const sY = (obj.height * obj.scaleY) / realImg.height;
+
+                            realImg.set({
+                                left: obj.left, top: obj.top,
+                                originX: obj.originX, originY: obj.originY,
+                                scaleX: sX, scaleY: sY, angle: obj.angle
+                            });
+
+                            shopCanvas.remove(obj); // Remove gray box
+                            shopCanvas.add(realImg); // Add real image
+                            shopCanvas.renderAll();
+                        }, { crossOrigin: 'anonymous' });
+                    }
+                });
+                shopCanvas.renderAll();
+            });
+        }
+
+        function downloadPoster() {
+            const dataURL = shopCanvas.toDataURL({ format: 'jpeg', quality: 1.0 });
+            const link = document.createElement('a');
+            link.download = `Poster_${Date.now()}.jpg`;
+            link.href = dataURL;
+            link.click();
+        }
+    </script>
+</body>
+</html>
