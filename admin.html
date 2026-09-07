@@ -153,15 +153,16 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
-            const firebaseConfig = {
-    apiKey: "AIzaSyAkBV0VxVU3Mn0paHqxU0Dgm-TuNRS6hEg",
-    authDomain: "posterplus-84021.firebaseapp.com",
-    projectId: "posterplus-84021",
-    storageBucket: "posterplus-84021.firebasestorage.app",
-    messagingSenderId: "556835154127",
-    appId: "1:556835154127:web:a5c921e21d83ad8e1cafba",
-    measurementId: "G-KJ3C5YVQ0S"
-  };
+        const firebaseConfig = {
+            apiKey: "AIzaSyAkBV0VxVU3Mn0paHqxU0Dgm-TuNRS6hEg",
+            authDomain: "posterplus-84021.firebaseapp.com",
+            projectId: "posterplus-84021",
+            storageBucket: "posterplus-84021.firebasestorage.app",
+            messagingSenderId: "556835154127",
+            appId: "1:556835154127:web:a5c921e21d83ad8e1cafba",
+            measurementId: "G-KJ3C5YVQ0S"
+        };
+        
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
@@ -216,7 +217,6 @@
                 isAdminLoggedIn = false;
                 loginScreen.classList.remove('hidden');
                 mainApp.classList.replace('flex', 'hidden');
-                // हम यहाँ एरर मेसेज को क्लियर नहीं कर रहे हैं ताकि "Access Denied" स्क्रीन पर बना रहे।
             }
         });
 
@@ -235,7 +235,6 @@
 
         window.logoutUser = async () => {
             await signOut(auth);
-            // लॉगआउट बटन क्लिक करने पर हम पुराने एरर मेसेज क्लियर कर सकते हैं 
             document.getElementById("authStatus").classList.add('hidden');
         };
 
@@ -327,10 +326,20 @@
             shopCanvas.loadFromJSON(savedTemplateJSON, () => {
                 const objects = shopCanvas.getObjects();
                 objects.forEach((obj) => {
+                    // 👉 TEXT REPLACEMENT & DIMENSION FIX 👈
                     if (obj.type === 'i-text' || obj.type === 'text') {
-                        if (obj.text.includes('{{USER_NAME}}')) obj.set('text', obj.text.replace('{{USER_NAME}}', user.name));
-                        if (obj.text.includes('{{BIZ_NAME}}')) obj.set('text', obj.text.replace('{{BIZ_NAME}}', user.bizName));
+                        if (obj.text.includes('{{USER_NAME}}')) {
+                            obj.set('text', obj.text.replace('{{USER_NAME}}', user.name));
+                        }
+                        if (obj.text.includes('{{BIZ_NAME}}')) {
+                            obj.set('text', obj.text.replace('{{BIZ_NAME}}', user.bizName));
+                        }
+                        
+                        // नया टेक्स्ट सेट होने के बाद उसकी चौड़ाई और पोजीशन को रीसेट करना
+                        obj.initDimensions();
+                        obj.setCoords();
                     }
+                    
                     if (obj.placeholderType === 'PHOTO' || obj.placeholderType === 'LOGO') {
                         const imgUrl = obj.placeholderType === 'PHOTO' ? user.photo : user.logo;
                         fabric.Image.fromURL(imgUrl, (realImg) => {
