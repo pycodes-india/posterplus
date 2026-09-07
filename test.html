@@ -47,6 +47,52 @@
     </div>
 
     <!-- ========================================== -->
+    <!-- 1.5. REGISTRATION SCREEN (For New Clients) -->
+    <!-- ========================================== -->
+    <div id="registrationScreen" class="absolute inset-0 bg-slate-100 z-40 hidden items-center justify-center overflow-y-auto p-4">
+        <div class="bg-white rounded-2xl p-8 w-full max-w-lg shadow-xl my-auto">
+            <h2 class="text-2xl font-bold mb-2 text-gray-800">Complete Your Profile</h2>
+            <p class="text-gray-500 mb-6 text-sm">Please provide your business details to generate your posters.</p>
+            
+            <form id="regForm" onsubmit="event.preventDefault(); window.submitRegistration();" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Your Full Name</label>
+                    <input type="text" id="regName" required class="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Business/Shop Name</label>
+                    <input type="text" id="regBizName" required class="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:border-blue-500">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">WhatsApp No.</label>
+                        <input type="tel" id="regWhatsapp" required class="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">City/Address</label>
+                        <input type="text" id="regAddress" required class="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:border-blue-500">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4 mt-2">
+                    <div class="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                        <label class="block text-xs font-bold text-blue-800 mb-1">Upload Your Photo</label>
+                        <input type="file" id="regPhoto" accept="image/*" required class="text-xs w-full">
+                    </div>
+                    <div class="bg-amber-50 p-3 rounded-lg border border-amber-100">
+                        <label class="block text-xs font-bold text-amber-800 mb-1">Upload Business Logo</label>
+                        <input type="file" id="regLogo" accept="image/*" required class="text-xs w-full">
+                    </div>
+                </div>
+                
+                <button type="submit" id="regSubmitBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg mt-4 shadow-md transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-rocket"></i> Save & Continue
+                </button>
+                <p id="regStatus" class="text-center text-sm font-semibold mt-2 hidden"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
     <!-- 2. MAIN APP CONTAINER -->
     <!-- ========================================== -->
     <div id="mainApp" class="hidden flex-col h-screen w-full">
@@ -358,17 +404,14 @@
         };
 
         window.switchBottomTab = (tab) => {
-            // Hide all
             document.getElementById('appTabPosters').classList.add('hidden');
             document.getElementById('appTabPayments').classList.add('hidden');
             document.getElementById('appTabProfile').classList.add('hidden');
             
-            // Reset Nav Icons
             document.getElementById('navPosters').className = "flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-gray-600 transition-colors";
             document.getElementById('navPayments').className = "flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-gray-600 transition-colors";
             document.getElementById('navProfile').className = "flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-gray-600 transition-colors relative";
 
-            // Show Selected
             if(tab === 'posters') {
                 if(!currentClientData) { alert("Please complete your profile first."); window.switchBottomTab('profile'); return; }
                 document.getElementById('appTabPosters').classList.remove('hidden');
@@ -393,7 +436,6 @@
             document.getElementById('profBizName').value = currentClientData.bizName || '';
             document.getElementById('profWhatsapp').value = currentClientData.whatsapp || '';
             document.getElementById('profAddress').value = currentClientData.address || '';
-            // Required only if new
             document.getElementById('profPhoto').required = false; 
             document.getElementById('profLogo').required = false;
         }
@@ -409,7 +451,7 @@
         };
 
         window.submitProfile = async () => {
-            if(IMGBB_API_KEY === "49ae9c7a7f287d75ec6730c026dd6f5e") { alert("Missing ImgBB API Key"); return; }
+            if(IMGBB_API_KEY === "YOUR_IMGBB_API_KEY_HERE") { alert("Missing ImgBB API Key"); return; }
             const btn = document.getElementById('profSubmitBtn');
             const originalHTML = btn.innerHTML;
             btn.disabled = true;
@@ -459,7 +501,49 @@
             }
         };
 
-        // --- FEED / POSTERS RENDER LOGIC ---
+        // --- REGISTRATION LOGIC ---
+        window.submitRegistration = async () => {
+            if(IMGBB_API_KEY === "49ae9c7a7f287d75ec6730c026dd6f5e") { alert("Please configure ImgBB API Key in code first."); return; }
+
+            const btn = document.getElementById('regSubmitBtn');
+            const status = document.getElementById('regStatus');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving Profile...';
+            
+            try {
+                const photoFile = document.getElementById('regPhoto').files[0];
+                const logoFile = document.getElementById('regLogo').files[0];
+                
+                const [photoUrl, logoUrl] = await Promise.all([ uploadToImgBB(photoFile), uploadToImgBB(logoFile) ]);
+
+                const newClient = {
+                    email: auth.currentUser.email,
+                    name: document.getElementById('regName').value,
+                    bizName: document.getElementById('regBizName').value,
+                    whatsapp: document.getElementById('regWhatsapp').value,
+                    address: document.getElementById('regAddress').value,
+                    photo: photoUrl,
+                    logo: logoUrl,
+                    joinedAt: new Date().toISOString()
+                };
+
+                await setDoc(doc(db, "clients", auth.currentUser.uid), newClient);
+                currentClientData = newClient;
+                
+                document.getElementById('registrationScreen').classList.replace('flex', 'hidden');
+                document.getElementById('mainApp').classList.replace('hidden', 'flex');
+                window.switchMainTab('app');
+
+            } catch(e) {
+                console.error("Registration Error:", e);
+                status.className = "text-center text-sm font-semibold mt-2 text-red-600 block";
+                status.innerText = "Error saving profile. Try again.";
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-rocket"></i> Save & Continue';
+            }
+        };
+
+        // --- FEED / POSTERS SHARE & RENDER LOGIC ---
         let currentFilter = 'Today';
         window.setFilter = (filterType) => {
             currentFilter = filterType;
@@ -480,13 +564,35 @@
             link.click();
         };
 
+        // 👉 WHATSAPP WEB SHARE API LOGIC 👈
+        window.sharePoster = async (dataUrl) => {
+            try {
+                // Convert base64 dataUrl to an actual File object
+                const res = await fetch(dataUrl);
+                const blob = await res.blob();
+                const file = new File([blob], `Poster_${Date.now()}.png`, { type: "image/png" });
+
+                // Check if browser supports sharing files (Works best on Mobile Chrome/Safari)
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        title: 'My Poster',
+                        text: 'Check out my latest update!',
+                        files: [file]
+                    });
+                } else {
+                    alert("Your browser does not support direct image sharing. Please download the poster first.");
+                }
+            } catch (error) {
+                console.log("Error sharing:", error);
+            }
+        };
+
         async function loadPostersFeed() {
             if(!currentClientData) return;
             const grid = document.getElementById('postersGrid');
             grid.innerHTML = '<div class="col-span-full text-center text-gray-500 py-10"><i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i><br>Generating Posters...</div>';
 
             try {
-                // Fetching templates (You can loop if you have multiple docs, here we fetch main_poster)
                 const docSnap = await getDoc(doc(db, "templates", "main_poster"));
                 if (!docSnap.exists()) {
                     grid.innerHTML = '<div class="col-span-full text-center text-gray-500 py-10">No templates found. Admin needs to create one!</div>';
@@ -495,11 +601,8 @@
                 
                 const templateJSON = docSnap.data().templateData;
                 
-                // Process JSON in offscreen canvas
                 offscreenFabricCanvas.loadFromJSON(templateJSON, () => {
                     const objects = offscreenFabricCanvas.getObjects();
-                    
-                    // We need a promise array for images
                     let promises = [];
 
                     objects.forEach((obj) => {
@@ -527,34 +630,34 @@
                         }
                     });
 
-                    // Wait for all images to load into canvas
                     Promise.all(promises).then(() => {
                         offscreenFabricCanvas.renderAll();
-                        // Generate Final Image URL
                         const finalImageURL = offscreenFabricCanvas.toDataURL({ format: 'png', multiplier: 1.5 });
                         
-                        // INJECT HTML
+                        // INJECT HTML WITH NEW BUTTONS
                         grid.innerHTML = `
                             <div class="bg-white p-3 rounded-2xl shadow-sm border border-gray-100 flex flex-col">
                                 <img src="${finalImageURL}" class="w-full h-auto rounded-xl border border-gray-100 mb-3" />
-                                <div class="mt-auto flex justify-between items-center px-1">
-                                    <span class="text-sm font-bold text-gray-800 truncate">Festival Special</span>
-                                    <button onclick="window.downloadPosterImage('${finalImageURL}')" class="bg-blue-50 hover:bg-blue-100 text-blue-600 px-4 py-1.5 rounded-lg text-sm font-bold transition-colors shrink-0">
-                                        <i class="fa-solid fa-download mr-1"></i> Save
+                                
+                                <div class="mt-auto flex flex-col gap-2">
+                                    <button onclick="window.sharePoster('${finalImageURL}')" class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors flex items-center justify-center gap-2 shadow-sm">
+                                        <i class="fa-brands fa-whatsapp text-lg"></i> Share to WhatsApp Story
+                                    </button>
+                                    <button onclick="window.downloadPosterImage('${finalImageURL}')" class="w-full bg-blue-50 hover:bg-blue-100 text-blue-600 px-4 py-2 rounded-lg text-sm font-bold transition-colors flex items-center justify-center gap-2 border border-blue-200">
+                                        <i class="fa-solid fa-download"></i> Download Poster
                                     </button>
                                 </div>
                             </div>
                         `;
                         
-                        // Fake second poster for UI demonstration (if 'All' is selected)
+                        // Fake second poster for UI demonstration
                         if(currentFilter === 'All') {
                             grid.innerHTML += `
                                 <div class="bg-white p-3 rounded-2xl shadow-sm border border-gray-100 flex flex-col opacity-75">
                                     <img src="${finalImageURL}" class="w-full h-auto rounded-xl border border-gray-100 mb-3 grayscale" />
-                                    <div class="mt-auto flex justify-between items-center px-1">
-                                        <span class="text-sm font-bold text-gray-800 truncate">Old Template</span>
-                                        <button class="bg-gray-100 text-gray-400 px-4 py-1.5 rounded-lg text-sm font-bold shrink-0 cursor-not-allowed">
-                                            <i class="fa-solid fa-lock mr-1"></i> Pro
+                                    <div class="mt-auto flex flex-col gap-2">
+                                        <button class="w-full bg-gray-100 text-gray-400 px-4 py-2 rounded-lg text-sm font-bold shrink-0 cursor-not-allowed flex justify-center items-center gap-2">
+                                            <i class="fa-solid fa-lock"></i> Pro Required
                                         </button>
                                     </div>
                                 </div>
@@ -568,7 +671,7 @@
             }
         }
 
-        // 👉 ADMIN EDITOR FUNCTIONS (Same as before) 👈
+        // 👉 ADMIN EDITOR FUNCTIONS 👈
         document.getElementById('bgUpload').addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
