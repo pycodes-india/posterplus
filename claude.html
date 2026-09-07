@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0a0e1f">
+    <title>PosterStudio — Pro Studio</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fabric.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Sora + Inter for the app chrome, plus poster-design fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Roboto:wght@400;700&family=Oswald:wght@400;700&family=Lobster&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root{
+            --bg-950:#080b18;
+            --bg-900:#0d1226;
+            --bg-800:#141a35;
+            --violet-500:#8b5cf6;
+            --violet-600:#7c3aed;
+            --fuchsia-500:#e879f9;
+            --amber-400:#fbbf24;
+            --glass:rgba(255,255,255,0.055);
+            --glass-strong:rgba(255,255,255,0.10);
+            --glass-border:rgba(255,255,255,0.13);
+            --text-hi:#f5f4ff;
+            --text-mid:#aeacd6;
+            --text-low:#726fa0;
+            --whatsapp:#25D366;
+        }
+
+        *{ -webkit-tap-highlight-color: transparent; }
+
+        html,body{ height:100%; }
+        body{
+            font-family:'Inter', ui-sans-serif, system-ui, sans-serif;
+            color:var(--text-hi);
+            background:var(--bg-950);
+        }
+        .font-display{ font-family:'Sora', 'Inter', sans-serif; }
+
+        /* ---------- Scrollbars ---------- */
+        ::-webkit-scrollbar{ width:6px; height:6px; }
+        ::-webkit-scrollbar-track{ background:transparent; }
+        ::-webkit-scrollbar-thumb{ background:linear-gradient(var(--violet-500), var(--fuchsia-500)); border-radius:10px; }
+
+        /* ---------- Accessibility ---------- */
+        :focus-visible{ outline:2px solid #c4b5fd; outline-offset:2px; border-radius:6px; }
+
+        /* ---------- Aurora ambient background ---------- */
+        .aurora-field{ position:fixed; inset:0; overflow:hidden; z-index:0; pointer-events:none; background:
+            radial-gradient(ellipse at top, #12173a 0%, var(--bg-950) 55%);
+        }
+        .aurora-blob{ position:absolute; border-radius:9999px; filter:blur(90px); opacity:.55; will-change:transform; }
+        .blob-a{ width:46vw; height:46vw; top:-14vw; left:-10vw; background:radial-gradient(circle, rgba(139,92,246,.55), transparent 70%); animation:auroraDrift 22s ease-in-out infinite; }
+        .blob-b{ width:38vw; height:38vw; bottom:-12vw; right:-8vw; background:radial-gradient(circle, rgba(232,121,249,.45), transparent 70%); animation:auroraDrift 26s ease-in-out infinite reverse; }
+        .blob-c{ width:32vw; height:32vw; top:35%; left:55%; background:radial-gradient(circle, rgba(251,191,36,.28), transparent 70%); animation:auroraDrift 30s ease-in-out infinite; animation-delay:-6s; }
+        @keyframes auroraDrift{ 0%,100%{ transform:translate(0,0) scale(1); } 50%{ transform:translate(4%,-5%) scale(1.12); } }
+
+        @keyframes fadeInUp{ from{ opacity:0; transform:translateY(18px) scale(.985); } to{ opacity:1; transform:translateY(0) scale(1); } }
+        .enter-anim{ animation:fadeInUp .6s cubic-bezier(.16,1,.3,1) both; }
+
+        @keyframes floatY{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-10px); } }
+        .float-anim{ animation:floatY 4.2s ease-in-out infinite; }
+
+        @keyframes glowPulse{ 0%,100%{ box-shadow:0 0 0 0 rgba(139,92,246,.45); } 50%{ box-shadow:0 0 0 10px rgba(139,92,246,0); } }
+        .glow-pulse{ animation:glowPulse 2.4s ease-out infinite; }
+
+        @media (prefers-reduced-motion: reduce){
+            .aurora-blob, .float-anim, .glow-pulse, .enter-anim{ animation:none !important; }
+        }
+
+        /* ---------- Glass surfaces ---------- */
+        .glass-panel{
+            background:var(--glass);
+            backdrop-filter:blur(22px) saturate(160%);
+            -webkit-backdrop-filter:blur(22px) saturate(160%);
+            border:1px solid var(--glass-border);
+        }
+        .glass-card{
+            background:var(--glass);
+            backdrop-filter:blur(20px) saturate(160%);
+            -webkit-backdrop-filter:blur(20px) saturate(160%);
+            border:1px solid var(--glass-border);
+            box-shadow:0 8px 30px -10px rgba(0,0,0,.55);
+            transition:transform .28s cubic-bezier(.16,1,.3,1), box-shadow .28s ease, border-color .28s ease;
+        }
+        .glass-card.hoverable:hover{ transform:translateY(-5px); border-color:rgba(255,255,255,.24); box-shadow:0 20px 44px -12px rgba(139,92,246,.30); }
+
+        /* ---------- Gradient text ---------- */
+        .gradient-text{
+            background:linear-gradient(115deg, #c9b8ff 0%, #f0abfc 48%, #fbbf24 100%);
+            -webkit-background-clip:text; background-clip:text; color:transparent;
+        }
+
+        /* ---------- Buttons ---------- */
+        .btn-primary{
+            background:linear-gradient(135deg, var(--violet-500), var(--fuchsia-500));
+            color:#fff; box-shadow:0 10px 26px -8px rgba(139,92,246,.55);
+            transition:transform .2s ease, box-shadow .2s ease, filter .2s ease, opacity .2s ease;
+        }
+        .btn-primary:hover:not(:disabled){ transform:translateY(-2px); filter:brightness(1.07); box-shadow:0 14px 30px -6px rgba(217,70,239,.6); }
+        .btn-primary:active:not(:disabled){ transform:translateY(0); }
+        .btn-primary:disabled{ opacity:.6; cursor:not-allowed; transform:none; }
+
+        .btn-success{
+            background:linear-gradient(135deg, #22c55e, #16a34a);
+            color:#fff; box-shadow:0 10px 26px -8px rgba(34,197,94,.5);
+        }
+
+        .btn-whatsapp{
+            background:linear-gradient(135deg, #25D366, #128C7E);
+            color:#fff; box-shadow:0 8px 20px -8px rgba(37,211,102,.55);
+            transition:transform .2s ease, box-shadow .2s ease;
+        }
+        .btn-whatsapp:hover{ transform:translateY(-2px); box-shadow:0 12px 24px -6px rgba(37,211,102,.65); }
+
+        .btn-glass{
+            background:var(--glass); border:1px solid var(--glass-border); color:var(--text-hi);
+            transition:background .2s ease, border-color .2s ease, transform .2s ease;
+        }
+        .btn-glass:hover{ background:var(--glass-strong); border-color:rgba(255,255,255,.26); transform:translateY(-1px); }
+
+        .btn-danger-glass{
+            background:rgba(239,68,68,.10); border:1px solid rgba(239,68,68,.28); color:#fca5a5;
+            transition:background .2s ease;
+        }
+        .btn-danger-glass:hover{ background:rgba(239,68,68,.18); }
+
+        /* ---------- Segmented control (used for mode toggle + filters) ---------- */
+        .seg-track{ background:rgba(255,255,255,.05); border:1px solid var(--glass-border); }
+        .seg-btn{ color:var(--text-mid); transition:color .2s ease, background .2s ease, box-shadow .2s ease; }
+        .seg-btn:hover{ color:var(--text-hi); }
+        .seg-btn.seg-active{
+            color:#fff; background:linear-gradient(135deg, var(--violet-500), var(--fuchsia-500));
+            box-shadow:0 6px 16px -4px rgba(217,70,239,.55);
+        }
+
+        /* ---------- Bottom nav ---------- */
+        .nav-item{ color:var(--text-low); transition:color .2s ease; }
+        .nav-item:hover{ color:var(--text-mid); }
+        .nav-item.nav-active{ color:#fff; }
+        .nav-icon-wrap{ width:38px; height:38px; border-radius:12px; display:flex; align-items:center; justify-content:center; transition:background .25s ease, box-shadow .25s ease, transform .25s ease; }
+        .nav-item.nav-active .nav-icon-wrap{
+            background:linear-gradient(135deg, var(--violet-500), var(--fuchsia-500));
+            box-shadow:0 6px 16px -4px rgba(217,70,239,.6);
+            transform:translateY(-2px);
+        }
+
+        /* ---------- Form inputs ---------- */
+        .input-glass{
+            background:rgba(255,255,255,.045); border:1px solid var(--glass-border); color:var(--text-hi);
+            transition:border-color .2s ease, background .2s ease, box-shadow .2s ease;
+        }
+        .input-glass::placeholder{ color:var(--text-low); }
+        .input-glass:focus{ outline:none; border-color:#a78bfa; background:rgba(255,255,255,.07); box-shadow:0 0 0 4px rgba(139,92,246,.18); }
+        label.form-label{ color:var(--text-mid); }
+
+        .dropzone{
+            position:relative; border:1.5px dashed var(--glass-border); background:rgba(255,255,255,.03);
+            transition:border-color .2s ease, background .2s ease;
+        }
+        .dropzone:hover{ border-color:rgba(196,181,253,.55); background:rgba(255,255,255,.05); }
+        .dropzone input[type="file"]{ position:absolute; inset:0; opacity:0; cursor:pointer; }
+
+        /* ---------- Admin canvas frame ---------- */
+        .canvas-frame{
+            background:#fff; box-shadow:0 25px 60px -18px rgba(139,92,246,.35), 0 0 0 1px rgba(255,255,255,.06);
+        }
+
+        /* ---------- Poster grid image ---------- */
+        .poster-thumb{ box-shadow:0 4px 16px -4px rgba(0,0,0,.4); }
+
+        /* Utility bg tint for admin style buttons */
+        .swatch-photo{ background:rgba(139,92,246,.12); border:1px solid rgba(139,92,246,.35); color:#c4b5fd; }
+        .swatch-photo:hover{ background:rgba(139,92,246,.2); }
+        .swatch-logo{ background:rgba(251,191,36,.12); border:1px solid rgba(251,191,36,.35); color:#fcd34d; }
+        .swatch-logo:hover{ background:rgba(251,191,36,.2); }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden relative">
+
+    <!-- Ambient aurora background, sits behind everything -->
+    <div class="aurora-field">
+        <div class="aurora-blob blob-a"></div>
+        <div class="aurora-blob blob-b"></div>
+        <div class="aurora-blob blob-c"></div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 1. FULLSCREEN LOGIN SCREEN -->
+    <!-- ========================================== -->
+    <div id="loginScreen" class="absolute inset-0 z-50 flex items-center justify-center p-4">
+        <div class="glass-panel enter-anim rounded-3xl p-10 w-full max-w-md text-center shadow-2xl">
+            <div class="w-20 h-20 mx-auto rounded-2xl flex items-center justify-center text-3xl mb-6 float-anim" style="background:linear-gradient(135deg, var(--violet-500), var(--fuchsia-500)); box-shadow:0 14px 34px -8px rgba(217,70,239,.55);">
+                <i class="fa-solid fa-wand-magic-sparkles text-white"></i>
+            </div>
+            <h1 class="font-display text-3xl font-extrabold gradient-text mb-2 tracking-tight">PosterStudio</h1>
+            <p class="mb-8" style="color:var(--text-mid)">Sign in to reach your workspace</p>
+
+            <button id="googleLoginBtn" onclick="window.loginWithGoogle()" class="btn-glass w-full flex items-center justify-center gap-3 font-bold py-3.5 px-4 rounded-xl">
+                <svg class="w-6 h-6" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path fill="#4285F4" d="M21.35 12.27c0-.73-.06-1.43-.18-2.09H12v3.95h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.69 2.91-4.18 2.91-7.25z"/>
+                    <path fill="#34A853" d="M12 21.82c2.63 0 4.84-.87 6.45-2.35l-3.14-2.45c-.87.58-1.98.92-3.31.92-2.54 0-4.69-1.72-5.46-4.03H3.3v2.53A9.75 9.75 0 0 0 12 21.82z"/>
+                    <path fill="#FBBC05" d="M6.54 13.91A5.86 5.86 0 0 1 6.23 12c0-.66.11-1.3.31-1.91V7.56H3.3A9.75 9.75 0 0 0 2.25 12c0 1.57.38 3.05 1.05 4.44l3.24-2.53z"/>
+                    <path fill="#EA4335" d="M12 6.06c1.43 0 2.71.49 3.72 1.45l2.79-2.79C16.84 3.14 14.63 2.18 12 2.18a9.75 9.75 0 0 0-8.7 5.38l3.24 2.53C7.31 7.78 9.46 6.06 12 6.06z"/>
+                </svg>
+                Continue with Google
+            </button>
+            <p id="authStatus" class="mt-4 text-sm font-semibold hidden"></p>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 1.5. REGISTRATION SCREEN (For New Clients) -->
+    <!-- ========================================== -->
+    <div id="registrationScreen" class="absolute inset-0 z-40 hidden items-center justify-center overflow-y-auto p-4">
+        <div class="glass-panel enter-anim rounded-3xl p-8 w-full max-w-lg my-auto shadow-2xl">
+            <h2 class="font-display text-2xl font-bold gradient-text mb-2">Complete Your Profile</h2>
+            <p class="mb-6 text-sm" style="color:var(--text-mid)">Add your business details so we can personalize every poster.</p>
+
+            <form id="regForm" onsubmit="event.preventDefault(); window.submitRegistration();" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-bold form-label mb-1">Your Full Name</label>
+                    <input type="text" id="regName" required class="input-glass w-full rounded-lg px-4 py-2.5">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold form-label mb-1">Business/Shop Name</label>
+                    <input type="text" id="regBizName" required class="input-glass w-full rounded-lg px-4 py-2.5">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold form-label mb-1">WhatsApp No.</label>
+                        <input type="tel" id="regWhatsapp" required class="input-glass w-full rounded-lg px-4 py-2.5">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold form-label mb-1">City/Address</label>
+                        <input type="text" id="regAddress" required class="input-glass w-full rounded-lg px-4 py-2.5">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4 mt-2">
+                    <label class="dropzone rounded-xl p-3 text-center cursor-pointer">
+                        <i class="fa-solid fa-camera-retro text-lg mb-1" style="color:#c4b5fd"></i>
+                        <div class="text-xs font-bold" style="color:#c4b5fd">Your Photo</div>
+                        <div id="regPhotoName" class="text-[10px] mt-0.5 truncate" style="color:var(--text-low)">Tap to upload</div>
+                        <input type="file" id="regPhoto" accept="image/*" required>
+                    </label>
+                    <label class="dropzone rounded-xl p-3 text-center cursor-pointer">
+                        <i class="fa-solid fa-circle-check text-lg mb-1" style="color:#fcd34d"></i>
+                        <div class="text-xs font-bold" style="color:#fcd34d">Business Logo</div>
+                        <div id="regLogoName" class="text-[10px] mt-0.5 truncate" style="color:var(--text-low)">Tap to upload</div>
+                        <input type="file" id="regLogo" accept="image/*" required>
+                    </label>
+                </div>
+
+                <button type="submit" id="regSubmitBtn" class="btn-primary w-full font-bold py-3 rounded-lg mt-4 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-rocket"></i> Save & Continue
+                </button>
+                <p id="regStatus" class="text-center text-sm font-semibold mt-2 hidden"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 2. MAIN APP CONTAINER -->
+    <!-- ========================================== -->
+    <div id="mainApp" class="hidden flex-col h-screen w-full relative z-10">
+
+        <!-- HEADER (Shared) -->
+        <header class="glass-panel text-white px-6 py-3 flex justify-between items-center z-20 relative">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg, var(--violet-500), var(--fuchsia-500))">
+                    <i class="fa-solid fa-wand-magic-sparkles text-white text-sm"></i>
+                </div>
+                <h1 class="font-display text-xl font-bold tracking-wide gradient-text">PosterStudio</h1>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <div class="flex gap-1 seg-track p-1 rounded-lg">
+                    <button onclick="window.switchMainTab('admin')" id="btnAdmin" class="hidden seg-btn px-4 py-1.5 rounded text-sm font-semibold items-center gap-2">
+                        <i class="fa-solid fa-pen-ruler"></i> Editor Mode
+                    </button>
+                    <button onclick="window.switchMainTab('app')" id="btnApp" class="flex seg-btn seg-active px-4 py-1.5 rounded text-sm font-semibold items-center gap-2">
+                        <i class="fa-solid fa-mobile-screen"></i> App Mode
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- ========================================== -->
+        <!-- 3. ADMIN PANEL (Hidden by Default) -->
+        <!-- ========================================== -->
+        <div id="adminPanel" class="flex-1 hidden overflow-hidden">
+            <!-- Sidebar -->
+            <aside class="w-80 glass-panel flex flex-col h-full z-10">
+                <div class="p-5 flex-1 overflow-y-auto space-y-6">
+                    <div class="glass-card rounded-xl p-4">
+                        <label class="font-bold text-sm mb-3 flex items-center gap-2"><i class="fa-regular fa-image" style="color:#c4b5fd"></i> 1. Background</label>
+                        <label id="bgUploadLabel" class="dropzone cursor-pointer text-sm text-center py-2 px-4 rounded-lg block relative overflow-hidden" style="color:var(--text-hi)">
+                            <span id="bgUploadText"><i class="fa-solid fa-upload mr-1"></i> Upload Image</span>
+                            <input type="file" id="bgUpload" accept="image/*" class="hidden">
+                        </label>
+                    </div>
+                    <div>
+                        <label class="font-bold text-sm mb-3 flex items-center gap-2"><i class="fa-solid fa-layer-group" style="color:#c4b5fd"></i> 2. Add Elements</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button onclick="window.addText('{{USER_NAME}}')" class="btn-glass p-3 text-xs font-semibold rounded-lg flex flex-col items-center gap-1"><i class="fa-solid fa-user text-lg"></i> User Name</button>
+                            <button onclick="window.addText('{{BIZ_NAME}}')" class="btn-glass p-3 text-xs font-semibold rounded-lg flex flex-col items-center gap-1"><i class="fa-solid fa-shop text-lg"></i> Biz Name</button>
+                            <button onclick="window.addBox('PHOTO')" class="swatch-photo p-3 text-xs font-semibold rounded-lg flex flex-col items-center gap-1"><i class="fa-solid fa-camera-retro text-lg"></i> Photo Box</button>
+                            <button onclick="window.addBox('LOGO')" class="swatch-logo p-3 text-xs font-semibold rounded-lg flex flex-col items-center gap-1"><i class="fa-solid fa-circle-check text-lg"></i> Logo Box</button>
+                        </div>
+                    </div>
+                    <div id="stylePanel" class="opacity-50 pointer-events-none transition-opacity">
+                        <label class="font-bold text-sm mb-3 flex items-center gap-2"><i class="fa-solid fa-palette" style="color:#c4b5fd"></i> 3. Style Object</label>
+                        <div class="glass-card p-4 rounded-xl space-y-3">
+                            <div class="flex gap-2">
+                                <select id="fontFamily" class="input-glass w-2/3 rounded-md px-2 py-1.5 text-sm"><option value="sans-serif">Default</option><option value="Roboto">Roboto</option><option value="Poppins">Poppins</option><option value="Oswald">Oswald</option></select>
+                                <input type="number" id="fontSize" placeholder="Size" class="input-glass w-1/3 rounded-md px-2 py-1.5 text-sm">
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <input type="color" id="colorPicker" class="w-10 h-8 rounded border-0 cursor-pointer bg-transparent">
+                                <div class="flex-1 flex rounded-md p-1" style="background:rgba(255,255,255,.05)">
+                                    <button onclick="window.setTextAlign('left')" class="flex-1 rounded py-1 text-sm btn-glass !border-0 !shadow-none"><i class="fa-solid fa-align-left"></i></button>
+                                    <button onclick="window.setTextAlign('center')" class="flex-1 rounded py-1 text-sm btn-glass !border-0 !shadow-none"><i class="fa-solid fa-align-center"></i></button>
+                                    <button onclick="window.setTextAlign('right')" class="flex-1 rounded py-1 text-sm btn-glass !border-0 !shadow-none"><i class="fa-solid fa-align-right"></i></button>
+                                </div>
+                            </div>
+                            <button onclick="window.deleteObject()" class="btn-danger-glass w-full py-2 text-sm font-semibold rounded mt-2 flex justify-center items-center gap-2"><i class="fa-solid fa-trash-can"></i> Delete</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-5"><button onclick="window.saveTemplate()" class="btn-primary w-full font-bold py-3 rounded-lg flex justify-center items-center gap-2"><i class="fa-solid fa-floppy-disk"></i> Save Template</button></div>
+            </aside>
+            <main class="flex-1 flex items-center justify-center relative overflow-auto p-8">
+                <div class="canvas-frame relative rounded-lg" style="width: 800px; height: 800px; background-image: linear-gradient(45deg, #f0f0f0 25%, transparent 25%), linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #f0f0f0 75%), linear-gradient(-45deg, transparent 75%, #f0f0f0 75%); background-size: 20px 20px;">
+                    <canvas id="adminCanvas"></canvas>
+                </div>
+            </main>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- 4. CLIENT APP VIEW (With Bottom Bar) -->
+        <!-- ========================================== -->
+        <div id="clientApp" class="flex-1 flex flex-col relative overflow-hidden">
+
+            <!-- App Content Area (Scrollable) -->
+            <main class="flex-1 overflow-y-auto pb-24">
+
+                <!-- TAB 1: POSTERS PAGE -->
+                <div id="appTabPosters" class="p-4 max-w-5xl mx-auto w-full">
+                    <div class="flex justify-between items-center mb-6 mt-2">
+                        <div>
+                            <h2 class="font-display text-2xl font-bold">Your <span class="gradient-text">Posters</span></h2>
+                            <p class="text-sm" style="color:var(--text-mid)">Ready to download &amp; share</p>
+                        </div>
+                        <!-- Filters -->
+                        <div class="flex seg-track p-1 rounded-lg">
+                            <button onclick="window.setFilter('Today')" id="filterToday" class="seg-btn seg-active px-4 py-1.5 rounded-md text-sm font-bold">Today</button>
+                            <button onclick="window.setFilter('All')" id="filterAll" class="seg-btn px-4 py-1.5 rounded-md text-sm font-bold">All</button>
+                        </div>
+                    </div>
+
+                    <!-- Posters Grid -->
+                    <div id="postersGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Posters will be injected here via JS -->
+                        <div class="col-span-full text-center py-10" style="color:var(--text-mid)">
+                            <i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i><br>Loading Posters...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: PAYMENTS PAGE -->
+                <div id="appTabPayments" class="hidden p-4 h-full flex items-center justify-center">
+                    <div class="glass-card text-center p-8 rounded-2xl w-full max-w-md enter-anim">
+                        <div class="w-16 h-16 rounded-full flex items-center justify-center text-2xl mx-auto mb-4" style="background:linear-gradient(135deg,#22c55e,#16a34a); color:#fff;">
+                            <i class="fa-solid fa-wallet"></i>
+                        </div>
+                        <h2 class="font-display text-xl font-bold mb-2">Payments &amp; Subscription</h2>
+                        <p class="mb-6 text-sm" style="color:var(--text-mid)">Your active plans and payment history will appear here.</p>
+                        <button class="btn-glass font-bold py-2 px-6 rounded-lg cursor-not-allowed opacity-70">Coming Soon</button>
+                    </div>
+                </div>
+
+                <!-- TAB 3: PROFILE PAGE -->
+                <div id="appTabProfile" class="hidden p-4 max-w-lg mx-auto w-full">
+                    <div class="glass-card rounded-2xl p-6 mt-2">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="font-display text-xl font-bold">Business Profile</h2>
+                            <button onclick="window.logoutUser()" class="btn-danger-glass px-3 py-1 rounded text-xs font-bold"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</button>
+                        </div>
+
+                        <form id="profileForm" onsubmit="event.preventDefault(); window.submitProfile();" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold form-label mb-1">Your Full Name</label>
+                                <input type="text" id="profName" required class="input-glass w-full rounded-lg px-4 py-2.5 font-semibold">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold form-label mb-1">Business/Shop Name</label>
+                                <input type="text" id="profBizName" required class="input-glass w-full rounded-lg px-4 py-2.5 font-semibold">
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold form-label mb-1">WhatsApp No.</label>
+                                    <input type="tel" id="profWhatsapp" required class="input-glass w-full rounded-lg px-4 py-2.5 font-semibold">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold form-label mb-1">City/Address</label>
+                                    <input type="text" id="profAddress" required class="input-glass w-full rounded-lg px-4 py-2.5 font-semibold">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 mt-2">
+                                <label class="dropzone rounded-xl p-3 text-center cursor-pointer">
+                                    <i class="fa-solid fa-camera-retro text-lg mb-1" style="color:#c4b5fd"></i>
+                                    <div class="text-xs font-bold" style="color:#c4b5fd">Update Photo</div>
+                                    <div id="profPhotoName" class="text-[10px] mt-0.5 truncate" style="color:var(--text-low)">Leave empty to keep current</div>
+                                    <input type="file" id="profPhoto" accept="image/*">
+                                </label>
+                                <label class="dropzone rounded-xl p-3 text-center cursor-pointer">
+                                    <i class="fa-solid fa-circle-check text-lg mb-1" style="color:#fcd34d"></i>
+                                    <div class="text-xs font-bold" style="color:#fcd34d">Update Logo</div>
+                                    <div id="profLogoName" class="text-[10px] mt-0.5 truncate" style="color:var(--text-low)">Leave empty to keep current</div>
+                                    <input type="file" id="profLogo" accept="image/*">
+                                </label>
+                            </div>
+
+                            <button type="submit" id="profSubmitBtn" class="btn-primary w-full font-bold py-3 rounded-lg mt-6 flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-floppy-disk"></i> Save Details
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+            </main>
+
+            <!-- Bottom Navigation Bar -->
+            <nav class="absolute bottom-0 w-full glass-panel flex justify-around items-center h-16 px-2 pb-safe z-50">
+                <button onclick="window.switchBottomTab('posters')" id="navPosters" class="nav-item nav-active flex flex-col items-center justify-center gap-1 w-full h-full">
+                    <span class="nav-icon-wrap"><i class="fa-solid fa-images text-base"></i></span>
+                    <span class="text-[10px] font-bold">Posters</span>
+                </button>
+                <button onclick="window.switchBottomTab('payments')" id="navPayments" class="nav-item flex flex-col items-center justify-center gap-1 w-full h-full">
+                    <span class="nav-icon-wrap"><i class="fa-solid fa-wallet text-base"></i></span>
+                    <span class="text-[10px] font-bold">Payments</span>
+                </button>
+                <button onclick="window.switchBottomTab('profile')" id="navProfile" class="nav-item flex flex-col items-center justify-center gap-1 w-full h-full relative">
+                    <span class="nav-icon-wrap"><i class="fa-solid fa-user-gear text-base"></i></span>
+                    <span class="text-[10px] font-bold">Profile</span>
+                    <!-- Notification dot for incomplete profile -->
+                    <span id="profileAlertDot" class="hidden absolute top-1 right-7 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-[var(--bg-950)] animate-pulse"></span>
+                </button>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Hidden canvas for generating poster images in the background -->
+    <canvas id="offscreenCanvas" style="display:none;"></canvas>
+
+<!-- ========================================== -->
+    <!-- JAVASCRIPT LOGIC -->
+    <!-- ========================================== -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, getDocs, collection } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAkBV0VxVU3Mn0paHqxU0Dgm-TuNRS6hEg",
+            authDomain: "posterplus-84021.firebaseapp.com",
+            projectId: "posterplus-84021",
+            storageBucket: "posterplus-84021.firebasestorage.app",
+            messagingSenderId: "556835154127",
+            appId: "1:556835154127:web:a5c921e21d83ad8e1cafba",
+            measurementId: "G-KJ3C5YVQ0S"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+        const db = getFirestore(app);
+
+        // 🔴 API KEY FOR IMGBB
+        const IMGBB_API_KEY = "49ae9c7a7f287d75ec6730c026dd6f5e";
+
+        let adminCanvas;
+        let offscreenFabricCanvas;
+        let isAdminLoggedIn = false;
+        let currentClientData = null;
+
+        const allowedAdminEmails = ["jkhdpix@gmail.com"];
+
+        adminCanvas = new fabric.Canvas('adminCanvas', { width: 800, height: 800, preserveObjectStacking: true });
+        offscreenFabricCanvas = new fabric.StaticCanvas('offscreenCanvas', { width: 800, height: 800 });
+
+        // --- AUTHENTICATION & ROUTING ---
+        onAuthStateChanged(auth, async (user) => {
+            const loginScreen = document.getElementById('loginScreen');
+            const mainApp = document.getElementById('mainApp');
+            const btnAdmin = document.getElementById('btnAdmin');
+
+            if (user) {
+                if (allowedAdminEmails.includes(user.email)) {
+                    isAdminLoggedIn = true;
+                    btnAdmin.classList.replace('hidden', 'flex');
+                } else {
+                    isAdminLoggedIn = false;
+                    btnAdmin.classList.replace('flex', 'hidden');
+                }
+
+                loginScreen.classList.add('hidden');
+                mainApp.classList.replace('hidden', 'flex');
+
+                const docSnap = await getDoc(doc(db, "clients", user.uid));
+                if (docSnap.exists()) {
+                    currentClientData = docSnap.data();
+                    populateProfileForm();
+                    window.switchMainTab('app');
+                    window.switchBottomTab('posters');
+                    document.getElementById('profileAlertDot').classList.add('hidden');
+                } else {
+                    currentClientData = null;
+                    window.switchMainTab('app');
+                    window.switchBottomTab('profile');
+                    document.getElementById('profileAlertDot').classList.remove('hidden');
+                    alert("Welcome! Please complete your Business Profile first to see your posters.");
+                }
+            } else {
+                isAdminLoggedIn = false;
+                currentClientData = null;
+                loginScreen.classList.remove('hidden');
+                mainApp.classList.replace('flex', 'hidden');
+            }
+        });
+
+        window.loginWithGoogle = async () => {
+            document.getElementById("authStatus").className = "mt-4 text-sm font-semibold block";
+            document.getElementById("authStatus").style.color = "#c4b5fd";
+            document.getElementById("authStatus").innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Connecting...';
+            try { await signInWithPopup(auth, provider); } catch (e) {
+                document.getElementById("authStatus").className = "mt-4 text-sm font-bold block";
+                document.getElementById("authStatus").style.color = "#fca5a5";
+                document.getElementById("authStatus").innerText = 'Login failed.';
+            }
+        };
+
+        window.logoutUser = async () => { await signOut(auth); };
+
+        // --- NAVIGATION TABS ---
+        window.switchMainTab = (mode) => {
+            const adminPnl = document.getElementById('adminPanel');
+            const clientApp = document.getElementById('clientApp');
+            const btnAdmin = document.getElementById('btnAdmin');
+            const btnApp = document.getElementById('btnApp');
+
+            if (mode === 'admin' && isAdminLoggedIn) {
+                adminPnl.classList.replace('hidden', 'flex');
+                clientApp.classList.replace('flex', 'hidden');
+                btnAdmin.classList.add('seg-active');
+                btnApp.classList.remove('seg-active');
+            } else {
+                adminPnl.classList.replace('flex', 'hidden');
+                clientApp.classList.replace('hidden', 'flex');
+                btnApp.classList.add('seg-active');
+                if (isAdminLoggedIn) btnAdmin.classList.remove('seg-active');
+                if (currentClientData) loadPostersFeed();
+            }
+        };
+
+        window.switchBottomTab = (tab) => {
+            document.getElementById('appTabPosters').classList.add('hidden');
+            document.getElementById('appTabPayments').classList.add('hidden');
+            document.getElementById('appTabProfile').classList.add('hidden');
+
+            document.getElementById('navPosters').classList.remove('nav-active');
+            document.getElementById('navPayments').classList.remove('nav-active');
+            document.getElementById('navProfile').classList.remove('nav-active');
+
+            if(tab === 'posters') {
+                if(!currentClientData) { alert("Please complete your profile first."); window.switchBottomTab('profile'); return; }
+                document.getElementById('appTabPosters').classList.remove('hidden');
+                document.getElementById('navPosters').classList.add('nav-active');
+                loadPostersFeed();
+            }
+            else if(tab === 'payments') {
+                if(!currentClientData) { alert("Please complete your profile first."); window.switchBottomTab('profile'); return; }
+                document.getElementById('appTabPayments').classList.remove('hidden');
+                document.getElementById('navPayments').classList.add('nav-active');
+            }
+            else if(tab === 'profile') {
+                document.getElementById('appTabProfile').classList.remove('hidden');
+                document.getElementById('navProfile').classList.add('nav-active');
+            }
+        };
+
+        // --- FILE INPUT NAME PREVIEWS ---
+        function bindFileLabel(inputId, labelId, defaultText) {
+            const input = document.getElementById(inputId);
+            const label = document.getElementById(labelId);
+            if (!input || !label) return;
+            input.addEventListener('change', () => {
+                if (input.files && input.files[0]) {
+                    label.textContent = input.files[0].name;
+                    label.style.color = '#86efac';
+                } else {
+                    label.textContent = defaultText;
+                    label.style.color = '';
+                }
+            });
+        }
+        bindFileLabel('regPhoto', 'regPhotoName', 'Tap to upload');
+        bindFileLabel('regLogo', 'regLogoName', 'Tap to upload');
+        bindFileLabel('profPhoto', 'profPhotoName', 'Leave empty to keep current');
+        bindFileLabel('profLogo', 'profLogoName', 'Leave empty to keep current');
+
+        // --- PROFILE LOGIC ---
+        function populateProfileForm() {
+            if(!currentClientData) return;
+            document.getElementById('profName').value = currentClientData.name || '';
+            document.getElementById('profBizName').value = currentClientData.bizName || '';
+            document.getElementById('profWhatsapp').value = currentClientData.whatsapp || '';
+            document.getElementById('profAddress').value = currentClientData.address || '';
+            document.getElementById('profPhoto').required = false;
+            document.getElementById('profLogo').required = false;
+        }
+
+        const uploadToImgBB = async (file) => {
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('key', IMGBB_API_KEY);
+            const res = await fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: formData });
+            const data = await res.json();
+            if(data.success) return data.data.url;
+            throw new Error("Upload Failed");
+        };
+
+        window.submitProfile = async () => {
+            const btn = document.getElementById('profSubmitBtn');
+            const originalHTML = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+            try {
+                let photoUrl = currentClientData ? currentClientData.photo : null;
+                let logoUrl = currentClientData ? currentClientData.logo : null;
+                const photoFile = document.getElementById('profPhoto').files[0];
+                const logoFile = document.getElementById('profLogo').files[0];
+
+                if (photoFile) photoUrl = await uploadToImgBB(photoFile);
+                if (logoFile) logoUrl = await uploadToImgBB(logoFile);
+
+                if(!photoUrl || !logoUrl) throw new Error("Images are required for new profile.");
+
+                const profileData = {
+                    email: auth.currentUser.email,
+                    name: document.getElementById('profName').value,
+                    bizName: document.getElementById('profBizName').value,
+                    whatsapp: document.getElementById('profWhatsapp').value,
+                    address: document.getElementById('profAddress').value,
+                    photo: photoUrl,
+                    logo: logoUrl,
+                    updatedAt: new Date().toISOString()
+                };
+
+                await setDoc(doc(db, "clients", auth.currentUser.uid), profileData, { merge: true });
+                currentClientData = profileData;
+                document.getElementById('profileAlertDot').classList.add('hidden');
+
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Saved!';
+                btn.classList.replace('btn-primary', 'btn-success');
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML; btn.classList.replace('btn-success', 'btn-primary');
+                    btn.disabled = false; window.switchBottomTab('posters');
+                }, 1500);
+            } catch(e) {
+                alert("Error saving profile: " + e.message);
+                btn.innerHTML = originalHTML; btn.disabled = false;
+            }
+        };
+
+        window.submitRegistration = async () => {
+            const btn = document.getElementById('regSubmitBtn');
+            const status = document.getElementById('regStatus');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving Profile...';
+            try {
+                const photoFile = document.getElementById('regPhoto').files[0];
+                const logoFile = document.getElementById('regLogo').files[0];
+                const [photoUrl, logoUrl] = await Promise.all([ uploadToImgBB(photoFile), uploadToImgBB(logoFile) ]);
+
+                const newClient = {
+                    email: auth.currentUser.email,
+                    name: document.getElementById('regName').value,
+                    bizName: document.getElementById('regBizName').value,
+                    whatsapp: document.getElementById('regWhatsapp').value,
+                    address: document.getElementById('regAddress').value,
+                    photo: photoUrl,
+                    logo: logoUrl,
+                    joinedAt: new Date().toISOString()
+                };
+
+                await setDoc(doc(db, "clients", auth.currentUser.uid), newClient);
+                currentClientData = newClient;
+
+                document.getElementById('registrationScreen').classList.replace('flex', 'hidden');
+                document.getElementById('mainApp').classList.replace('hidden', 'flex');
+                window.switchMainTab('app');
+            } catch(e) {
+                status.className = "text-center text-sm font-semibold mt-2 block";
+                status.style.color = "#fca5a5";
+                status.innerText = "Error saving profile. Try again.";
+                btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-rocket"></i> Save & Continue';
+            }
+        };
+
+        // --- FEED / POSTERS RENDER LOGIC ---
+        let currentFilter = 'Today';
+        window.setFilter = (filterType) => {
+            currentFilter = filterType;
+            document.getElementById('filterToday').classList.remove('seg-active');
+            document.getElementById('filterAll').classList.remove('seg-active');
+            document.getElementById('filter' + filterType).classList.add('seg-active');
+            loadPostersFeed();
+        };
+
+        window.downloadPosterImage = (dataUrl) => {
+            const link = document.createElement('a');
+            link.download = `Poster_${Date.now()}.png`; link.href = dataUrl; link.click();
+        };
+
+        window.sharePoster = async (dataUrl) => {
+            try {
+                const res = await fetch(dataUrl);
+                const blob = await res.blob();
+                const file = new File([blob], `Poster_${Date.now()}.png`, { type: "image/png" });
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({ title: 'My Poster', text: 'Check out my latest update!', files: [file] });
+                } else { alert("Your browser does not support direct image sharing. Please download the poster first."); }
+            } catch (error) { console.log("Error sharing:", error); }
+        };
+
+        // 👉 LOAD ALL POSTERS FROM DATABASE 👈
+        async function loadPostersFeed() {
+            if(!currentClientData) return;
+            const grid = document.getElementById('postersGrid');
+            grid.innerHTML = '<div class="col-span-full text-center py-10" style="color:var(--text-mid)"><i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i><br>Generating Posters...</div>';
+
+            try {
+                // Fetch ALL templates instead of just one
+                const querySnapshot = await getDocs(collection(db, "templates"));
+
+                if (querySnapshot.empty) {
+                    grid.innerHTML = '<div class="col-span-full text-center py-10" style="color:var(--text-mid)">No templates found. Admin needs to create one!</div>';
+                    return;
+                }
+
+                grid.innerHTML = ''; // Clear loading spinner
+
+                // Process templates one by one
+                for (const documentSnapshot of querySnapshot.docs) {
+                    const templateJSON = documentSnapshot.data().templateData;
+
+                    await new Promise((resolveTemplate) => {
+                        offscreenFabricCanvas.loadFromJSON(templateJSON, () => {
+                            const objects = offscreenFabricCanvas.getObjects();
+                            let promises = [];
+
+                            objects.forEach((obj) => {
+                                if (obj.type === 'i-text' || obj.type === 'text') {
+                                    if (obj.text.includes('{{USER_NAME}}')) obj.set('text', obj.text.replace('{{USER_NAME}}', currentClientData.name));
+                                    if (obj.text.includes('{{BIZ_NAME}}')) obj.set('text', obj.text.replace('{{BIZ_NAME}}', currentClientData.bizName));
+                                    obj.initDimensions(); obj.setCoords();
+                                }
+
+                                if (obj.placeholderType === 'PHOTO' || obj.placeholderType === 'LOGO') {
+                                    const imgUrl = obj.placeholderType === 'PHOTO' ? currentClientData.photo : currentClientData.logo;
+                                    let p = new Promise((resolveImg) => {
+                                        fabric.Image.fromURL(imgUrl, (realImg) => {
+                                            const sX = (obj.width * obj.scaleX) / realImg.width;
+                                            const sY = (obj.height * obj.scaleY) / realImg.height;
+                                            realImg.set({ left: obj.left, top: obj.top, originX: obj.originX, originY: obj.originY, scaleX: sX, scaleY: sY, angle: obj.angle });
+                                            offscreenFabricCanvas.remove(obj);
+                                            offscreenFabricCanvas.add(realImg);
+                                            realImg.moveTo(offscreenFabricCanvas.getObjects().indexOf(obj));
+                                            resolveImg();
+                                        }, { crossOrigin: 'anonymous' });
+                                    });
+                                    promises.push(p);
+                                }
+                            });
+
+                            Promise.all(promises).then(() => {
+                                offscreenFabricCanvas.renderAll();
+                                const finalImageURL = offscreenFabricCanvas.toDataURL({ format: 'png', multiplier: 1.5 });
+
+                                // Inject into DOM
+                                grid.innerHTML += `
+                                    <div class="glass-card hoverable p-3 rounded-2xl flex flex-col">
+                                        <img src="${finalImageURL}" class="w-full h-auto rounded-xl poster-thumb mb-3" />
+                                        <div class="mt-auto flex flex-col gap-2">
+                                            <button onclick="window.sharePoster('${finalImageURL}')" class="btn-whatsapp w-full px-4 py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2">
+                                                <i class="fa-brands fa-whatsapp text-lg"></i> Share
+                                            </button>
+                                            <button onclick="window.downloadPosterImage('${finalImageURL}')" class="btn-glass w-full px-4 py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2">
+                                                <i class="fa-solid fa-download"></i> Download
+                                            </button>
+                                        </div>
+                                    </div>
+                                `;
+                                resolveTemplate(); // Move to the next template
+                            });
+                        });
+                    });
+                }
+            } catch (error) {
+                console.error(error);
+                grid.innerHTML = '<div class="col-span-full text-center py-10" style="color:#fca5a5">Error loading posters.</div>';
+            }
+        }
+
+        // 👉 ADMIN EDITOR FUNCTIONS 👈
+        document.getElementById('bgUpload').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const bgUploadLabel = document.getElementById('bgUploadLabel');
+            const bgUploadText = document.getElementById('bgUploadText');
+            const originalHTML = bgUploadText.innerHTML;
+            bgUploadText.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Uploading...';
+            bgUploadLabel.style.pointerEvents = 'none';
+            try {
+                const downloadURL = await uploadToImgBB(file);
+                fabric.Image.fromURL(downloadURL, (img) => {
+                    const scale = Math.max(800 / img.width, 800 / img.height);
+                    img.set({ scaleX: scale, scaleY: scale, originX: 'center', originY: 'center', top: 400, left: 400 });
+                    adminCanvas.setBackgroundImage(img, adminCanvas.renderAll.bind(adminCanvas));
+                    bgUploadText.innerHTML = '<i class="fa-solid fa-check text-green-400 mr-1"></i> Uploaded!';
+                    setTimeout(() => { bgUploadText.innerHTML = originalHTML; bgUploadLabel.style.pointerEvents = 'auto'; }, 2000);
+                }, { crossOrigin: 'anonymous' });
+            } catch (error) {
+                alert("Failed to upload background!");
+                bgUploadText.innerHTML = originalHTML; bgUploadLabel.style.pointerEvents = 'auto';
+            }
+        });
+
+        adminCanvas.on('selection:created', updateStylingPanel);
+        adminCanvas.on('selection:updated', updateStylingPanel);
+        adminCanvas.on('selection:cleared', () => { document.getElementById('stylePanel').classList.add('opacity-50', 'pointer-events-none'); });
+        document.getElementById('colorPicker').oninput = function() { const obj = adminCanvas.getActiveObject(); if(obj) { obj.set('fill', this.value); adminCanvas.renderAll(); }};
+        document.getElementById('fontSize').oninput = function() { const obj = adminCanvas.getActiveObject(); if(obj && obj.type === 'i-text') { obj.set('fontSize', parseInt(this.value)); adminCanvas.renderAll(); }};
+        document.getElementById('fontFamily').onchange = function() { const obj = adminCanvas.getActiveObject(); if(obj && obj.type === 'i-text') { obj.set('fontFamily', this.value); adminCanvas.renderAll(); }};
+
+        window.addText = (str) => {
+            const text = new fabric.IText(str, { left: 400, top: 400, originX: 'center', originY: 'center', fontFamily: 'Poppins', fontSize: 50, fill: '#1e293b', fontWeight: 'bold', placeholderType: 'TEXT', shadow: new fabric.Shadow({ color: 'rgba(255,255,255,0.8)', blur: 2, offsetX: 1, offsetY: 1 }) });
+            adminCanvas.add(text); adminCanvas.setActiveObject(text);
+        };
+        window.addBox = (type) => {
+            const isPhoto = type === 'PHOTO';
+            const rect = new fabric.Rect({ left: 400, top: 400, originX: 'center', originY: 'center', width: isPhoto ? 250 : 150, height: isPhoto ? 300 : 150, fill: isPhoto ? 'rgba(59, 130, 246, 0.2)' : 'rgba(245, 158, 11, 0.2)', stroke: isPhoto ? '#3b82f6' : '#f59e0b', strokeDashArray: [8,8], strokeWidth: 3, placeholderType: type });
+            adminCanvas.add(rect); adminCanvas.setActiveObject(rect);
+        };
+        window.deleteObject = () => { const obj = adminCanvas.getActiveObject(); if(obj) { adminCanvas.remove(obj); document.getElementById('stylePanel').classList.add('opacity-50', 'pointer-events-none'); } };
+        window.setTextAlign = (align) => { const obj = adminCanvas.getActiveObject(); if(obj && obj.type === 'i-text') { obj.set('textAlign', align); adminCanvas.renderAll(); } };
+
+        function updateStylingPanel() {
+            const obj = adminCanvas.getActiveObject();
+            if(!obj) return;
+            document.getElementById('stylePanel').classList.remove('opacity-50', 'pointer-events-none');
+            document.getElementById('colorPicker').value = obj.fill || '#000000';
+            if(obj.type === 'i-text') { document.getElementById('fontSize').value = obj.fontSize; document.getElementById('fontFamily').value = obj.fontFamily || 'sans-serif'; }
+        }
+
+        // 👉 SAVE EVERY TEMPLATE WITH A UNIQUE ID 👈
+        window.saveTemplate = async () => {
+            const saveBtn = document.querySelector('button[onclick="window.saveTemplate()"]');
+            const originalHTML = saveBtn.innerHTML;
+            saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving to Cloud...';
+            try {
+                const json = adminCanvas.toJSON(['placeholderType']);
+                const savedTemplateJSON = JSON.stringify(json);
+
+                // हर पोस्टर को अलग ID से सेव करें
+                const templateId = "poster_" + Date.now();
+
+                await setDoc(doc(db, "templates", templateId), {
+                    templateData: savedTemplateJSON,
+                    updatedAt: new Date().toISOString()
+                });
+
+                // सेव होने के बाद एडमिन कैनवास खाली कर दें ताकि वो नया बना सके
+                adminCanvas.clear();
+                document.getElementById('bgUpload').value = '';
+
+                saveBtn.innerHTML = '<i class="fa-solid fa-check"></i> Cloud Saved!';
+                saveBtn.classList.replace('btn-primary', 'btn-success');
+                setTimeout(() => { saveBtn.innerHTML = originalHTML; saveBtn.classList.replace('btn-success', 'btn-primary'); }, 2000);
+            } catch (error) {
+                alert("Error saving to cloud! Check Firestore rules.");
+                saveBtn.innerHTML = originalHTML;
+            }
+        };
+    </script>
+</body>
+</html>
