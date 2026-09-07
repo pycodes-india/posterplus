@@ -282,7 +282,7 @@
     <!-- Hidden canvas for generating poster images in the background -->
     <canvas id="offscreenCanvas" style="display:none;"></canvas>
 
-  <!-- ========================================== -->
+<!-- ========================================== -->
     <!-- JAVASCRIPT LOGIC -->
     <!-- ========================================== -->
     <script type="module">
@@ -305,7 +305,7 @@
         const provider = new GoogleAuthProvider();
         const db = getFirestore(app);
 
-        // ✅ API KEY सही जगह पर सेट कर दी गई है
+        // 🔴 API KEY FOR IMGBB
         const IMGBB_API_KEY = "49ae9c7a7f287d75ec6730c026dd6f5e"; 
 
         let adminCanvas;
@@ -325,7 +325,6 @@
             const btnAdmin = document.getElementById('btnAdmin');
             
             if (user) {
-                // If ADMIN
                 if (allowedAdminEmails.includes(user.email)) {
                     isAdminLoggedIn = true;
                     btnAdmin.classList.replace('hidden', 'flex'); 
@@ -337,16 +336,14 @@
                 loginScreen.classList.add('hidden');
                 mainApp.classList.replace('hidden', 'flex');
 
-                // Check Client Profile
                 const docSnap = await getDoc(doc(db, "clients", user.uid));
                 if (docSnap.exists()) {
                     currentClientData = docSnap.data();
                     populateProfileForm();
-                    window.switchMainTab('app'); // Go to App Mode
+                    window.switchMainTab('app'); 
                     window.switchBottomTab('posters');
                     document.getElementById('profileAlertDot').classList.add('hidden');
                 } else {
-                    // Force user to Profile Tab to complete registration
                     currentClientData = null;
                     window.switchMainTab('app');
                     window.switchBottomTab('profile');
@@ -370,9 +367,7 @@
             }
         };
 
-        window.logoutUser = async () => {
-            await signOut(auth);
-        };
+        window.logoutUser = async () => { await signOut(auth); };
 
         // --- NAVIGATION TABS ---
         window.switchMainTab = (mode) => {
@@ -397,8 +392,6 @@
                     btnAdmin.classList.replace('bg-blue-600', 'bg-transparent');
                     btnAdmin.classList.replace('text-white', 'text-gray-300');
                 }
-                
-                // If in app mode and profile exists, load posters
                 if(currentClientData) loadPostersFeed();
             }
         };
@@ -429,7 +422,7 @@
             }
         };
 
-        // --- PROFILE LOGIC (SAVE & UPDATE) ---
+        // --- PROFILE LOGIC ---
         function populateProfileForm() {
             if(!currentClientData) return;
             document.getElementById('profName').value = currentClientData.name || '';
@@ -451,23 +444,20 @@
         };
 
         window.submitProfile = async () => {
-            if(!IMGBB_API_KEY || IMGBB_API_KEY === "YOUR_IMGBB_API_KEY_HERE") { alert("Missing ImgBB API Key"); return; }
             const btn = document.getElementById('profSubmitBtn');
             const originalHTML = btn.innerHTML;
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
-            
             try {
                 let photoUrl = currentClientData ? currentClientData.photo : null;
                 let logoUrl = currentClientData ? currentClientData.logo : null;
-
                 const photoFile = document.getElementById('profPhoto').files[0];
                 const logoFile = document.getElementById('profLogo').files[0];
                 
                 if (photoFile) photoUrl = await uploadToImgBB(photoFile);
                 if (logoFile) logoUrl = await uploadToImgBB(logoFile);
 
-                if(!photoUrl || !logoUrl) { throw new Error("Images are required for new profile."); }
+                if(!photoUrl || !logoUrl) throw new Error("Images are required for new profile.");
 
                 const profileData = {
                     email: auth.currentUser.email,
@@ -481,39 +471,29 @@
                 };
 
                 await setDoc(doc(db, "clients", auth.currentUser.uid), profileData, { merge: true });
-                
                 currentClientData = profileData;
                 document.getElementById('profileAlertDot').classList.add('hidden');
                 
                 btn.innerHTML = '<i class="fa-solid fa-check"></i> Saved!';
                 btn.classList.replace('bg-blue-600', 'bg-green-600');
                 setTimeout(() => { 
-                    btn.innerHTML = originalHTML; 
-                    btn.classList.replace('bg-green-600', 'bg-blue-600'); 
-                    btn.disabled = false;
-                    window.switchBottomTab('posters');
+                    btn.innerHTML = originalHTML; btn.classList.replace('bg-green-600', 'bg-blue-600'); 
+                    btn.disabled = false; window.switchBottomTab('posters');
                 }, 1500);
-
             } catch(e) {
                 alert("Error saving profile: " + e.message);
-                btn.innerHTML = originalHTML;
-                btn.disabled = false;
+                btn.innerHTML = originalHTML; btn.disabled = false;
             }
         };
 
-        // --- REGISTRATION LOGIC ---
         window.submitRegistration = async () => {
-            if(!IMGBB_API_KEY || IMGBB_API_KEY === "YOUR_IMGBB_API_KEY_HERE") { alert("Please configure ImgBB API Key in code first."); return; }
-
             const btn = document.getElementById('regSubmitBtn');
             const status = document.getElementById('regStatus');
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving Profile...';
-            
             try {
                 const photoFile = document.getElementById('regPhoto').files[0];
                 const logoFile = document.getElementById('regLogo').files[0];
-                
                 const [photoUrl, logoUrl] = await Promise.all([ uploadToImgBB(photoFile), uploadToImgBB(logoFile) ]);
 
                 const newClient = {
@@ -533,17 +513,14 @@
                 document.getElementById('registrationScreen').classList.replace('flex', 'hidden');
                 document.getElementById('mainApp').classList.replace('hidden', 'flex');
                 window.switchMainTab('app');
-
             } catch(e) {
-                console.error("Registration Error:", e);
                 status.className = "text-center text-sm font-semibold mt-2 text-red-600 block";
                 status.innerText = "Error saving profile. Try again.";
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-rocket"></i> Save & Continue';
+                btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-rocket"></i> Save & Continue';
             }
         };
 
-        // --- FEED / POSTERS SHARE & RENDER LOGIC ---
+        // --- FEED / POSTERS RENDER LOGIC ---
         let currentFilter = 'Today';
         window.setFilter = (filterType) => {
             currentFilter = filterType;
@@ -559,108 +536,93 @@
 
         window.downloadPosterImage = (dataUrl) => {
             const link = document.createElement('a'); 
-            link.download = `Poster_${Date.now()}.png`; 
-            link.href = dataUrl; 
-            link.click();
+            link.download = `Poster_${Date.now()}.png`; link.href = dataUrl; link.click();
         };
 
-        // 👉 WHATSAPP WEB SHARE API LOGIC 👈
         window.sharePoster = async (dataUrl) => {
             try {
                 const res = await fetch(dataUrl);
                 const blob = await res.blob();
                 const file = new File([blob], `Poster_${Date.now()}.png`, { type: "image/png" });
-
                 if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    await navigator.share({
-                        title: 'My Poster',
-                        text: 'Check out my latest update!',
-                        files: [file]
-                    });
-                } else {
-                    alert("Your browser does not support direct image sharing. Please download the poster first.");
-                }
-            } catch (error) {
-                console.log("Error sharing:", error);
-            }
+                    await navigator.share({ title: 'My Poster', text: 'Check out my latest update!', files: [file] });
+                } else { alert("Your browser does not support direct image sharing. Please download the poster first."); }
+            } catch (error) { console.log("Error sharing:", error); }
         };
 
+        // 👉 UPDATED LOGIC: LOAD ALL POSTERS FROM DATABASE 👈
         async function loadPostersFeed() {
             if(!currentClientData) return;
             const grid = document.getElementById('postersGrid');
             grid.innerHTML = '<div class="col-span-full text-center text-gray-500 py-10"><i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i><br>Generating Posters...</div>';
 
             try {
-                const docSnap = await getDoc(doc(db, "templates", "main_poster"));
-                if (!docSnap.exists()) {
+                // Fetch ALL templates instead of just one
+                const querySnapshot = await getDocs(collection(db, "templates"));
+                
+                if (querySnapshot.empty) {
                     grid.innerHTML = '<div class="col-span-full text-center text-gray-500 py-10">No templates found. Admin needs to create one!</div>';
                     return;
                 }
                 
-                const templateJSON = docSnap.data().templateData;
+                grid.innerHTML = ''; // Clear loading spinner
                 
-                offscreenFabricCanvas.loadFromJSON(templateJSON, () => {
-                    const objects = offscreenFabricCanvas.getObjects();
-                    let promises = [];
+                // Process templates one by one
+                for (const documentSnapshot of querySnapshot.docs) {
+                    const templateJSON = documentSnapshot.data().templateData;
+                    
+                    await new Promise((resolveTemplate) => {
+                        offscreenFabricCanvas.loadFromJSON(templateJSON, () => {
+                            const objects = offscreenFabricCanvas.getObjects();
+                            let promises = [];
 
-                    objects.forEach((obj) => {
-                        if (obj.type === 'i-text' || obj.type === 'text') {
-                            if (obj.text.includes('{{USER_NAME}}')) obj.set('text', obj.text.replace('{{USER_NAME}}', currentClientData.name));
-                            if (obj.text.includes('{{BIZ_NAME}}')) obj.set('text', obj.text.replace('{{BIZ_NAME}}', currentClientData.bizName));
-                            obj.initDimensions(); obj.setCoords();
-                        }
-                        
-                        if (obj.placeholderType === 'PHOTO' || obj.placeholderType === 'LOGO') {
-                            const imgUrl = obj.placeholderType === 'PHOTO' ? currentClientData.photo : currentClientData.logo;
-                            
-                            let p = new Promise((resolve) => {
-                                fabric.Image.fromURL(imgUrl, (realImg) => {
-                                    const sX = (obj.width * obj.scaleX) / realImg.width;
-                                    const sY = (obj.height * obj.scaleY) / realImg.height;
-                                    realImg.set({ left: obj.left, top: obj.top, originX: obj.originX, originY: obj.originY, scaleX: sX, scaleY: sY, angle: obj.angle });
-                                    offscreenFabricCanvas.remove(obj); 
-                                    offscreenFabricCanvas.add(realImg); 
-                                    realImg.moveTo(offscreenFabricCanvas.getObjects().indexOf(obj));
-                                    resolve();
-                                }, { crossOrigin: 'anonymous' });
-                            });
-                            promises.push(p);
-                        }
-                    });
-
-                    Promise.all(promises).then(() => {
-                        offscreenFabricCanvas.renderAll();
-                        const finalImageURL = offscreenFabricCanvas.toDataURL({ format: 'png', multiplier: 1.5 });
-                        
-                        grid.innerHTML = `
-                            <div class="bg-white p-3 rounded-2xl shadow-sm border border-gray-100 flex flex-col">
-                                <img src="${finalImageURL}" class="w-full h-auto rounded-xl border border-gray-100 mb-3" />
+                            objects.forEach((obj) => {
+                                if (obj.type === 'i-text' || obj.type === 'text') {
+                                    if (obj.text.includes('{{USER_NAME}}')) obj.set('text', obj.text.replace('{{USER_NAME}}', currentClientData.name));
+                                    if (obj.text.includes('{{BIZ_NAME}}')) obj.set('text', obj.text.replace('{{BIZ_NAME}}', currentClientData.bizName));
+                                    obj.initDimensions(); obj.setCoords();
+                                }
                                 
-                                <div class="mt-auto flex flex-col gap-2">
-                                    <button onclick="window.sharePoster('${finalImageURL}')" class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors flex items-center justify-center gap-2 shadow-sm">
-                                        <i class="fa-brands fa-whatsapp text-lg"></i> Share to WhatsApp Story
-                                    </button>
-                                    <button onclick="window.downloadPosterImage('${finalImageURL}')" class="w-full bg-blue-50 hover:bg-blue-100 text-blue-600 px-4 py-2 rounded-lg text-sm font-bold transition-colors flex items-center justify-center gap-2 border border-blue-200">
-                                        <i class="fa-solid fa-download"></i> Download Poster
-                                    </button>
-                                </div>
-                            </div>
-                        `;
-                        
-                        if(currentFilter === 'All') {
-                            grid.innerHTML += `
-                                <div class="bg-white p-3 rounded-2xl shadow-sm border border-gray-100 flex flex-col opacity-75">
-                                    <img src="${finalImageURL}" class="w-full h-auto rounded-xl border border-gray-100 mb-3 grayscale" />
-                                    <div class="mt-auto flex flex-col gap-2">
-                                        <button class="w-full bg-gray-100 text-gray-400 px-4 py-2 rounded-lg text-sm font-bold shrink-0 cursor-not-allowed flex justify-center items-center gap-2">
-                                            <i class="fa-solid fa-lock"></i> Pro Required
-                                        </button>
+                                if (obj.placeholderType === 'PHOTO' || obj.placeholderType === 'LOGO') {
+                                    const imgUrl = obj.placeholderType === 'PHOTO' ? currentClientData.photo : currentClientData.logo;
+                                    let p = new Promise((resolveImg) => {
+                                        fabric.Image.fromURL(imgUrl, (realImg) => {
+                                            const sX = (obj.width * obj.scaleX) / realImg.width;
+                                            const sY = (obj.height * obj.scaleY) / realImg.height;
+                                            realImg.set({ left: obj.left, top: obj.top, originX: obj.originX, originY: obj.originY, scaleX: sX, scaleY: sY, angle: obj.angle });
+                                            offscreenFabricCanvas.remove(obj); 
+                                            offscreenFabricCanvas.add(realImg); 
+                                            realImg.moveTo(offscreenFabricCanvas.getObjects().indexOf(obj));
+                                            resolveImg();
+                                        }, { crossOrigin: 'anonymous' });
+                                    });
+                                    promises.push(p);
+                                }
+                            });
+
+                            Promise.all(promises).then(() => {
+                                offscreenFabricCanvas.renderAll();
+                                const finalImageURL = offscreenFabricCanvas.toDataURL({ format: 'png', multiplier: 1.5 });
+                                
+                                // Inject into DOM
+                                grid.innerHTML += `
+                                    <div class="bg-white p-3 rounded-2xl shadow-sm border border-gray-100 flex flex-col">
+                                        <img src="${finalImageURL}" class="w-full h-auto rounded-xl border border-gray-100 mb-3" />
+                                        <div class="mt-auto flex flex-col gap-2">
+                                            <button onclick="window.sharePoster('${finalImageURL}')" class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors flex items-center justify-center gap-2 shadow-sm">
+                                                <i class="fa-brands fa-whatsapp text-lg"></i> Share
+                                            </button>
+                                            <button onclick="window.downloadPosterImage('${finalImageURL}')" class="w-full bg-blue-50 hover:bg-blue-100 text-blue-600 px-4 py-2 rounded-lg text-sm font-bold transition-colors flex items-center justify-center gap-2 border border-blue-200">
+                                                <i class="fa-solid fa-download"></i> Download
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-                            `;
-                        }
+                                `;
+                                resolveTemplate(); // Move to the next template
+                            });
+                        });
                     });
-                });
+                }
             } catch (error) {
                 console.error(error);
                 grid.innerHTML = '<div class="col-span-full text-center text-red-500 py-10">Error loading posters.</div>';
@@ -671,15 +633,11 @@
         document.getElementById('bgUpload').addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
-            
-            if(!IMGBB_API_KEY || IMGBB_API_KEY === "YOUR_IMGBB_API_KEY_HERE") { alert("Missing ImgBB API Key"); return; }
-            
             const bgUploadLabel = document.getElementById('bgUploadLabel');
             const bgUploadText = document.getElementById('bgUploadText');
             const originalHTML = bgUploadText.innerHTML;
             bgUploadText.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Uploading...';
             bgUploadLabel.style.pointerEvents = 'none';
-            
             try {
                 const downloadURL = await uploadToImgBB(file);
                 fabric.Image.fromURL(downloadURL, (img) => {
@@ -691,15 +649,13 @@
                 }, { crossOrigin: 'anonymous' });
             } catch (error) {
                 alert("Failed to upload background!");
-                bgUploadText.innerHTML = originalHTML;
-                bgUploadLabel.style.pointerEvents = 'auto';
+                bgUploadText.innerHTML = originalHTML; bgUploadLabel.style.pointerEvents = 'auto';
             }
         });
 
         adminCanvas.on('selection:created', updateStylingPanel);
         adminCanvas.on('selection:updated', updateStylingPanel);
         adminCanvas.on('selection:cleared', () => { document.getElementById('stylePanel').classList.add('opacity-50', 'pointer-events-none'); });
-
         document.getElementById('colorPicker').oninput = function() { const obj = adminCanvas.getActiveObject(); if(obj) { obj.set('fill', this.value); adminCanvas.renderAll(); }};
         document.getElementById('fontSize').oninput = function() { const obj = adminCanvas.getActiveObject(); if(obj && obj.type === 'i-text') { obj.set('fontSize', parseInt(this.value)); adminCanvas.renderAll(); }};
         document.getElementById('fontFamily').onchange = function() { const obj = adminCanvas.getActiveObject(); if(obj && obj.type === 'i-text') { obj.set('fontFamily', this.value); adminCanvas.renderAll(); }};
@@ -721,20 +677,30 @@
             if(!obj) return;
             document.getElementById('stylePanel').classList.remove('opacity-50', 'pointer-events-none');
             document.getElementById('colorPicker').value = obj.fill || '#000000';
-            if(obj.type === 'i-text') {
-                document.getElementById('fontSize').value = obj.fontSize;
-                document.getElementById('fontFamily').value = obj.fontFamily || 'sans-serif';
-            }
+            if(obj.type === 'i-text') { document.getElementById('fontSize').value = obj.fontSize; document.getElementById('fontFamily').value = obj.fontFamily || 'sans-serif'; }
         }
 
+        // 👉 UPDATED LOGIC: SAVE EVERY TEMPLATE WITH A UNIQUE ID 👈
         window.saveTemplate = async () => {
             const saveBtn = document.querySelector('button[onclick="window.saveTemplate()"]');
             const originalHTML = saveBtn.innerHTML;
             saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving to Cloud...';
             try {
                 const json = adminCanvas.toJSON(['placeholderType']);
-                savedTemplateJSON = JSON.stringify(json);
-                await setDoc(doc(db, "templates", "main_poster"), { templateData: savedTemplateJSON, updatedAt: new Date().toISOString() });
+                const savedTemplateJSON = JSON.stringify(json);
+                
+                // नया बदलाव: हर पोस्टर को अलग ID से सेव करें
+                const templateId = "poster_" + Date.now();
+                
+                await setDoc(doc(db, "templates", templateId), { 
+                    templateData: savedTemplateJSON, 
+                    updatedAt: new Date().toISOString() 
+                });
+                
+                // सेव होने के बाद एडमिन कैनवास खाली कर दें ताकि वो नया बना सके
+                adminCanvas.clear();
+                document.getElementById('bgUpload').value = '';
+                
                 saveBtn.innerHTML = '<i class="fa-solid fa-check"></i> Cloud Saved!';
                 saveBtn.classList.replace('bg-blue-600', 'bg-green-600');
                 setTimeout(() => { saveBtn.innerHTML = originalHTML; saveBtn.classList.replace('bg-green-600', 'bg-blue-600'); }, 2000);
