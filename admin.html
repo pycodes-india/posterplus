@@ -150,9 +150,12 @@
     <!-- JAVASCRIPT LOGIC (Firebase + Fabric) -->
     <!-- ========================================== -->
     <script type="module">
+        // 1. Firebase Imports (Added Firestore)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
+        // 2. Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyAkBV0VxVU3Mn0paHqxU0Dgm-TuNRS6hEg",
             authDomain: "posterplus-84021.firebaseapp.com",
@@ -163,15 +166,17 @@
             measurementId: "G-KJ3C5YVQ0S"
         };
         
+        // 3. Initialize Firebase & Firestore
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
+        const db = getFirestore(app);
 
         let adminCanvas, shopCanvas;
-        let savedTemplateJSON = localStorage.getItem('posterData') || null;
+        let savedTemplateJSON = null; // Local Storage Removed!
         let isAdminLoggedIn = false;
 
-        // 🔴 यहाँ वह ईमेल डालें जिन्हें आप अलाउ करना चाहते हैं
+        // 🔴 Allowed Admin Email
         const allowedAdminEmails = ["jkhdpix@gmail.com"];
 
         const dbUsers = [
@@ -192,9 +197,7 @@
             const status = document.getElementById("authStatus");
             
             if (user) {
-                // चेक करें कि ईमेल अलाउड लिस्ट में है या नहीं
                 if (allowedAdminEmails.includes(user.email)) {
-                    // ✅ एक्सेस मिल गया (Admin Logged In)
                     isAdminLoggedIn = true;
                     loginScreen.classList.add('hidden');
                     mainApp.classList.replace('hidden', 'flex');
@@ -202,25 +205,22 @@
                     btnAdmin.classList.replace('hidden', 'flex'); 
                     window.switchTab('admin'); 
                 } else {
-                    // ❌ गलत यूज़र (Access Denied)
                     isAdminLoggedIn = false;
-                    window.logoutUser(); // तुरंत लॉगआउट करें
+                    window.logoutUser();
                     
-                    // UI पर एरर दिखाएं
                     loginScreen.classList.remove('hidden');
                     mainApp.classList.replace('flex', 'hidden');
                     status.className = "mt-4 text-sm font-bold text-red-700 block bg-red-100 p-3 rounded-lg border border-red-300 shadow-inner";
                     status.innerHTML = `<i class="fa-solid fa-circle-xmark mr-1"></i> Account Not Found! Access Denied.`;
                 }
             } else {
-                // User is naturally logged out
                 isAdminLoggedIn = false;
                 loginScreen.classList.remove('hidden');
                 mainApp.classList.replace('flex', 'hidden');
             }
         });
 
-        // --- LOGIN FUNCTION ---
+        // --- LOGIN & LOGOUT FUNCTION ---
         window.loginWithGoogle = async () => {
             const status = document.getElementById("authStatus");
             status.className = "mt-4 text-sm font-semibold text-blue-600 block";
@@ -257,7 +257,8 @@
                 if(isAdminLoggedIn) {
                     btnAdmin.className = "flex bg-transparent hover:bg-gray-700 text-gray-300 px-5 py-2 rounded text-sm font-semibold transition-all items-center gap-2";
                 }
-                if(savedTemplateJSON) window.renderShopkeeperPoster();
+                // Call fetch & render function automatically
+                window.renderShopkeeperPoster();
             }
         };
 
@@ -310,23 +311,62 @@
             }
         }
 
-        window.saveTemplate = () => {
-            const json = adminCanvas.toJSON(['placeholderType']);
-            savedTemplateJSON = JSON.stringify(json);
-            localStorage.setItem('posterData', savedTemplateJSON); 
-            alert("Template Saved successfully!");
+        // 👉 CLOUD SAVE LOGIC 👈
+        window.saveTemplate = async () => {
+            const saveBtn = document.querySelector('button[onclick="window.saveTemplate()"]');
+            const originalHTML = saveBtn.innerHTML;
+            
+            saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving to Cloud...';
+            
+            try {
+                const json = adminCanvas.toJSON(['placeholderType']);
+                savedTemplateJSON = JSON.stringify(json);
+                
+                // Firestore में डेटा सेव करें
+                await setDoc(doc(db, "templates", "main_poster"), {
+                    templateData: savedTemplateJSON,
+                    updatedAt: new Date().toISOString()
+                });
+                
+                saveBtn.innerHTML = '<i class="fa-solid fa-check"></i> Cloud Saved!';
+                saveBtn.classList.replace('bg-blue-600', 'bg-green-600');
+                setTimeout(() => {
+                    saveBtn.innerHTML = originalHTML;
+                    saveBtn.classList.replace('bg-green-600', 'bg-blue-600');
+                }, 2000);
+            } catch (error) {
+                console.error("Cloud Save Error: ", error);
+                alert("Error saving to cloud! Check Firestore rules.");
+                saveBtn.innerHTML = originalHTML;
+            }
         };
 
-        // --- SHOPKEEPER RENDER LOGIC ---
-        window.renderShopkeeperPoster = () => {
-            if(!savedTemplateJSON) return;
+        // 👉 CLOUD FETCH & RENDER LOGIC 👈
+        window.renderShopkeeperPoster = async () => {
+            // अगर टेम्पलेट मेमोरी में नहीं है, तो Firestore से फेच करें
+            if (!savedTemplateJSON) {
+                try {
+                    const docSnap = await getDoc(doc(db, "templates", "main_poster"));
+                    if (docSnap.exists()) {
+                        savedTemplateJSON = docSnap.data().templateData;
+                    } else {
+                        console.log("No template found in Cloud.");
+                        return;
+                    }
+                } catch (error) {
+                    console.error("Cloud Fetch Error: ", error);
+                    alert("Unable to fetch template from cloud.");
+                    return;
+                }
+            }
+
             const userIndex = document.getElementById('userSelect').value;
             const user = dbUsers[userIndex];
 
             shopCanvas.loadFromJSON(savedTemplateJSON, () => {
                 const objects = shopCanvas.getObjects();
                 objects.forEach((obj) => {
-                    // 👉 TEXT REPLACEMENT & DIMENSION FIX 👈
+                    
                     if (obj.type === 'i-text' || obj.type === 'text') {
                         if (obj.text.includes('{{USER_NAME}}')) {
                             obj.set('text', obj.text.replace('{{USER_NAME}}', user.name));
@@ -335,7 +375,6 @@
                             obj.set('text', obj.text.replace('{{BIZ_NAME}}', user.bizName));
                         }
                         
-                        // नया टेक्स्ट सेट होने के बाद उसकी चौड़ाई और पोजीशन को रीसेट करना
                         obj.initDimensions();
                         obj.setCoords();
                     }
