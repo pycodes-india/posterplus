@@ -20,7 +20,7 @@
     <!-- 1. FULLSCREEN LOGIN SCREEN (Visible by Default) -->
     <!-- ========================================== -->
     <div id="loginScreen" class="absolute inset-0 bg-slate-900 z-50 flex items-center justify-center">
-        <div class="bg-white rounded-2xl p-10 w-full max-w-md text-center shadow-2xl">
+        <div class="bg-white rounded-2xl p-10 w-full max-w-md text-center shadow-2xl transition-all duration-300">
             <div class="w-20 h-20 mx-auto bg-blue-600 text-white rounded-2xl flex items-center justify-center text-3xl font-bold mb-6 shadow-lg">
                 <i class="fa-solid fa-wand-magic-sparkles"></i>
             </div>
@@ -36,6 +36,8 @@
                 </svg>
                 Continue with Google
             </button>
+            
+            <!-- Status/Error Message Container -->
             <p id="authStatus" class="mt-4 text-sm font-semibold hidden"></p>
         </div>
     </div>
@@ -53,19 +55,15 @@
             </div>
             
             <div class="flex items-center gap-4">
-                <!-- Mode Switchers -->
                 <div class="flex gap-2 bg-gray-800 p-1 rounded-lg">
-                    <!-- Admin Only Button -->
                     <button onclick="window.switchTab('admin')" id="btnAdmin" class="hidden bg-transparent hover:bg-gray-700 text-gray-300 px-5 py-2 rounded text-sm font-semibold transition-all items-center gap-2">
                         <i class="fa-solid fa-pen-ruler"></i> Editor Mode
                     </button>
-                    <!-- Shopkeeper Button -->
                     <button onclick="window.switchTab('shopkeeper')" id="btnShop" class="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2 rounded shadow-sm text-sm font-semibold transition-all flex items-center gap-2">
                         <i class="fa-solid fa-store"></i> Shop Mode
                     </button>
                 </div>
 
-                <!-- User Profile Section -->
                 <div class="flex items-center gap-3 ml-2 pl-4 border-l border-gray-700">
                     <img id="userAvatar" src="" alt="Profile" class="w-9 h-9 rounded-full border-2 border-blue-500 object-cover">
                     <button onclick="window.logoutUser()" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded text-xs font-bold transition-colors">
@@ -155,7 +153,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
-           const firebaseConfig = {
+            const firebaseConfig = {
     apiKey: "AIzaSyAkBV0VxVU3Mn0paHqxU0Dgm-TuNRS6hEg",
     authDomain: "posterplus-84021.firebaseapp.com",
     projectId: "posterplus-84021",
@@ -172,7 +170,7 @@
         let savedTemplateJSON = localStorage.getItem('posterData') || null;
         let isAdminLoggedIn = false;
 
-        // 🔴 यहाँ अपनी एडमिन ईमेल डालें
+        // 🔴 यहाँ वह ईमेल डालें जिन्हें आप अलाउ करना चाहते हैं
         const allowedAdminEmails = ["jkhdpix@gmail.com"];
 
         const dbUsers = [
@@ -190,45 +188,55 @@
             const mainApp = document.getElementById('mainApp');
             const userAvatar = document.getElementById('userAvatar');
             const btnAdmin = document.getElementById('btnAdmin');
+            const status = document.getElementById("authStatus");
             
             if (user) {
-                // User is logged in -> Hide Login Screen, Show Main App
-                loginScreen.classList.add('hidden');
-                mainApp.classList.replace('hidden', 'flex');
-                userAvatar.src = user.photoURL || "https://via.placeholder.com/150";
-
-                // Check Admin Access
+                // चेक करें कि ईमेल अलाउड लिस्ट में है या नहीं
                 if (allowedAdminEmails.includes(user.email)) {
+                    // ✅ एक्सेस मिल गया (Admin Logged In)
                     isAdminLoggedIn = true;
-                    btnAdmin.classList.replace('hidden', 'flex'); // Show Editor Button
-                    window.switchTab('admin'); // Default to Admin
+                    loginScreen.classList.add('hidden');
+                    mainApp.classList.replace('hidden', 'flex');
+                    userAvatar.src = user.photoURL || "https://via.placeholder.com/150";
+                    btnAdmin.classList.replace('hidden', 'flex'); 
+                    window.switchTab('admin'); 
                 } else {
+                    // ❌ गलत यूज़र (Access Denied)
                     isAdminLoggedIn = false;
-                    btnAdmin.classList.replace('flex', 'hidden'); // Hide Editor Button
-                    window.switchTab('shopkeeper'); // Default to Shop
+                    window.logoutUser(); // तुरंत लॉगआउट करें
+                    
+                    // UI पर एरर दिखाएं
+                    loginScreen.classList.remove('hidden');
+                    mainApp.classList.replace('flex', 'hidden');
+                    status.className = "mt-4 text-sm font-bold text-red-700 block bg-red-100 p-3 rounded-lg border border-red-300 shadow-inner";
+                    status.innerHTML = `<i class="fa-solid fa-circle-xmark mr-1"></i> Account Not Found! Access Denied.`;
                 }
             } else {
-                // User is logged out -> Show Login Screen, Hide Main App
+                // User is naturally logged out
                 isAdminLoggedIn = false;
                 loginScreen.classList.remove('hidden');
                 mainApp.classList.replace('flex', 'hidden');
+                // हम यहाँ एरर मेसेज को क्लियर नहीं कर रहे हैं ताकि "Access Denied" स्क्रीन पर बना रहे।
             }
         });
 
+        // --- LOGIN FUNCTION ---
         window.loginWithGoogle = async () => {
             const status = document.getElementById("authStatus");
             status.className = "mt-4 text-sm font-semibold text-blue-600 block";
-            status.textContent = "Connecting to Google...";
+            status.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Connecting to Google...';
             try {
                 await signInWithPopup(auth, provider);
             } catch (error) {
-                status.className = "mt-4 text-sm font-semibold text-red-600 block";
-                status.textContent = "Login failed or cancelled.";
+                status.className = "mt-4 text-sm font-bold text-red-700 block bg-red-100 p-3 rounded-lg border border-red-300 shadow-inner";
+                status.innerHTML = '<i class="fa-solid fa-circle-exclamation mr-1"></i> Login failed or cancelled.';
             }
         };
 
         window.logoutUser = async () => {
             await signOut(auth);
+            // लॉगआउट बटन क्लिक करने पर हम पुराने एरर मेसेज क्लियर कर सकते हैं 
+            document.getElementById("authStatus").classList.add('hidden');
         };
 
         // --- TAB LOGIC ---
