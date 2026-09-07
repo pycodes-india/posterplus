@@ -79,8 +79,8 @@
                 <div class="p-5 flex-1 overflow-y-auto space-y-6">
                     <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
                         <label class="font-bold text-gray-700 text-sm mb-3 flex items-center gap-2"><i class="fa-regular fa-image text-blue-500"></i> 1. Background</label>
-                        <label class="cursor-pointer bg-white border border-gray-300 hover:border-blue-500 text-gray-700 text-sm text-center py-2 px-4 rounded block shadow-sm">
-                            <i class="fa-solid fa-upload mr-1"></i> Upload Image
+                        <label id="bgUploadLabel" class="cursor-pointer bg-white border border-gray-300 hover:border-blue-500 text-gray-700 text-sm text-center py-2 px-4 rounded block shadow-sm relative overflow-hidden">
+                            <span id="bgUploadText"><i class="fa-solid fa-upload mr-1"></i> Upload Image</span>
                             <input type="file" id="bgUpload" accept="image/*" class="hidden">
                         </label>
                     </div>
@@ -150,10 +150,11 @@
     <!-- JAVASCRIPT LOGIC (Firebase + Fabric) -->
     <!-- ========================================== -->
     <script type="module">
-        // 1. Firebase Imports (Added Firestore)
+        // 1. Firebase Imports (Added Storage)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
 
         // 2. Firebase Config
         const firebaseConfig = {
@@ -166,14 +167,15 @@
             measurementId: "G-KJ3C5YVQ0S"
         };
         
-        // 3. Initialize Firebase & Firestore
+        // 3. Initialize Firebase, Firestore, and Storage
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
         const db = getFirestore(app);
+        const storage = getStorage(app); // Storage Init
 
         let adminCanvas, shopCanvas;
-        let savedTemplateJSON = null; // Local Storage Removed!
+        let savedTemplateJSON = null; 
         let isAdminLoggedIn = false;
 
         // 🔴 Allowed Admin Email
@@ -257,24 +259,51 @@
                 if(isAdminLoggedIn) {
                     btnAdmin.className = "flex bg-transparent hover:bg-gray-700 text-gray-300 px-5 py-2 rounded text-sm font-semibold transition-all items-center gap-2";
                 }
-                // Call fetch & render function automatically
                 window.renderShopkeeperPoster();
             }
         };
 
-        // --- FABRIC JS ADMIN EDITOR LOGIC ---
-        document.getElementById('bgUpload').addEventListener('change', (e) => {
+        // --- FABRIC JS ADMIN EDITOR LOGIC & STORAGE UPLOAD ---
+        document.getElementById('bgUpload').addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (f) => {
-                fabric.Image.fromURL(f.target.result, (img) => {
+
+            const bgUploadLabel = document.getElementById('bgUploadLabel');
+            const bgUploadText = document.getElementById('bgUploadText');
+            const originalHTML = bgUploadText.innerHTML;
+
+            // UI Feedback during upload
+            bgUploadText.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Uploading...';
+            bgUploadLabel.style.pointerEvents = 'none';
+
+            try {
+                // 1. Upload to Firebase Storage
+                const storageRef = ref(storage, 'backgrounds/' + Date.now() + '_' + file.name);
+                await uploadBytesResumable(storageRef, file);
+                
+                // 2. Get Download URL
+                const downloadURL = await getDownloadURL(storageRef);
+
+                // 3. Load from Cloud URL into Fabric Canvas
+                fabric.Image.fromURL(downloadURL, (img) => {
                     const scale = Math.max(800 / img.width, 800 / img.height);
                     img.set({ scaleX: scale, scaleY: scale, originX: 'center', originY: 'center', top: 400, left: 400 });
                     adminCanvas.setBackgroundImage(img, adminCanvas.renderAll.bind(adminCanvas));
-                });
-            };
-            reader.readAsDataURL(file);
+                    
+                    // Restore UI
+                    bgUploadText.innerHTML = '<i class="fa-solid fa-check text-green-500 mr-1"></i> Uploaded!';
+                    setTimeout(() => {
+                        bgUploadText.innerHTML = originalHTML;
+                        bgUploadLabel.style.pointerEvents = 'auto';
+                    }, 2000);
+                }, { crossOrigin: 'anonymous' });
+
+            } catch (error) {
+                console.error("Image Upload Error: ", error);
+                alert("Failed to upload background image!");
+                bgUploadText.innerHTML = originalHTML;
+                bgUploadLabel.style.pointerEvents = 'auto';
+            }
         });
 
         adminCanvas.on('selection:created', updateStylingPanel);
@@ -322,7 +351,6 @@
                 const json = adminCanvas.toJSON(['placeholderType']);
                 savedTemplateJSON = JSON.stringify(json);
                 
-                // Firestore में डेटा सेव करें
                 await setDoc(doc(db, "templates", "main_poster"), {
                     templateData: savedTemplateJSON,
                     updatedAt: new Date().toISOString()
@@ -343,7 +371,6 @@
 
         // 👉 CLOUD FETCH & RENDER LOGIC 👈
         window.renderShopkeeperPoster = async () => {
-            // अगर टेम्पलेट मेमोरी में नहीं है, तो Firestore से फेच करें
             if (!savedTemplateJSON) {
                 try {
                     const docSnap = await getDoc(doc(db, "templates", "main_poster"));
