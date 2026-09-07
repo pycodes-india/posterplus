@@ -282,7 +282,7 @@
     <!-- Hidden canvas for generating poster images in the background -->
     <canvas id="offscreenCanvas" style="display:none;"></canvas>
 
-    <!-- ========================================== -->
+  <!-- ========================================== -->
     <!-- JAVASCRIPT LOGIC -->
     <!-- ========================================== -->
     <script type="module">
@@ -305,8 +305,8 @@
         const provider = new GoogleAuthProvider();
         const db = getFirestore(app);
 
-        // 🔴 API KEY FOR IMGBB
-        const IMGBB_API_KEY = "YOUR_IMGBB_API_KEY_HERE"; 
+        // ✅ API KEY सही जगह पर सेट कर दी गई है
+        const IMGBB_API_KEY = "49ae9c7a7f287d75ec6730c026dd6f5e"; 
 
         let adminCanvas;
         let offscreenFabricCanvas;
@@ -451,7 +451,7 @@
         };
 
         window.submitProfile = async () => {
-            if(IMGBB_API_KEY === "49ae9c7a7f287d75ec6730c026dd6f5e") { alert("Missing ImgBB API Key"); return; }
+            if(!IMGBB_API_KEY || IMGBB_API_KEY === "YOUR_IMGBB_API_KEY_HERE") { alert("Missing ImgBB API Key"); return; }
             const btn = document.getElementById('profSubmitBtn');
             const originalHTML = btn.innerHTML;
             btn.disabled = true;
@@ -503,7 +503,7 @@
 
         // --- REGISTRATION LOGIC ---
         window.submitRegistration = async () => {
-            if(IMGBB_API_KEY === "49ae9c7a7f287d75ec6730c026dd6f5e") { alert("Please configure ImgBB API Key in code first."); return; }
+            if(!IMGBB_API_KEY || IMGBB_API_KEY === "YOUR_IMGBB_API_KEY_HERE") { alert("Please configure ImgBB API Key in code first."); return; }
 
             const btn = document.getElementById('regSubmitBtn');
             const status = document.getElementById('regStatus');
@@ -567,12 +567,10 @@
         // 👉 WHATSAPP WEB SHARE API LOGIC 👈
         window.sharePoster = async (dataUrl) => {
             try {
-                // Convert base64 dataUrl to an actual File object
                 const res = await fetch(dataUrl);
                 const blob = await res.blob();
                 const file = new File([blob], `Poster_${Date.now()}.png`, { type: "image/png" });
 
-                // Check if browser supports sharing files (Works best on Mobile Chrome/Safari)
                 if (navigator.canShare && navigator.canShare({ files: [file] })) {
                     await navigator.share({
                         title: 'My Poster',
@@ -634,7 +632,6 @@
                         offscreenFabricCanvas.renderAll();
                         const finalImageURL = offscreenFabricCanvas.toDataURL({ format: 'png', multiplier: 1.5 });
                         
-                        // INJECT HTML WITH NEW BUTTONS
                         grid.innerHTML = `
                             <div class="bg-white p-3 rounded-2xl shadow-sm border border-gray-100 flex flex-col">
                                 <img src="${finalImageURL}" class="w-full h-auto rounded-xl border border-gray-100 mb-3" />
@@ -650,7 +647,6 @@
                             </div>
                         `;
                         
-                        // Fake second poster for UI demonstration
                         if(currentFilter === 'All') {
                             grid.innerHTML += `
                                 <div class="bg-white p-3 rounded-2xl shadow-sm border border-gray-100 flex flex-col opacity-75">
@@ -675,12 +671,15 @@
         document.getElementById('bgUpload').addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
-            if(IMGBB_API_KEY === "49ae9c7a7f287d75ec6730c026dd6f5e") { alert("Missing ImgBB API Key"); return; }
+            
+            if(!IMGBB_API_KEY || IMGBB_API_KEY === "YOUR_IMGBB_API_KEY_HERE") { alert("Missing ImgBB API Key"); return; }
+            
             const bgUploadLabel = document.getElementById('bgUploadLabel');
             const bgUploadText = document.getElementById('bgUploadText');
             const originalHTML = bgUploadText.innerHTML;
             bgUploadText.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Uploading...';
             bgUploadLabel.style.pointerEvents = 'none';
+            
             try {
                 const downloadURL = await uploadToImgBB(file);
                 fabric.Image.fromURL(downloadURL, (img) => {
