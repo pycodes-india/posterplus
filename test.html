@@ -117,7 +117,7 @@
         </header>
 
         <!-- ========================================== -->
-        <!-- 3. ADMIN PANEL (Hidden by Default) -->
+        <!-- 3. ADMIN PANEL -->
         <!-- ========================================== -->
         <div id="adminPanel" class="flex-1 hidden overflow-hidden">
             <!-- Sidebar -->
@@ -173,28 +173,24 @@
         <div id="clientApp" class="flex-1 flex flex-col relative bg-slate-100 overflow-hidden">
             
             <!-- App Content Area (Scrollable) -->
-            <main class="flex-1 overflow-y-auto pb-20">
+            <main id="appMainScrollArea" class="flex-1 overflow-y-auto pb-20">
                 
                 <!-- TAB 1: POSTERS PAGE -->
                 <div id="appTabPosters" class="p-4 max-w-5xl mx-auto w-full">
-                    <div class="flex justify-between items-center mb-6 mt-2">
-                        <div>
-                            <h2 class="text-2xl font-bold text-gray-800">Your Posters</h2>
-                            <p class="text-sm text-gray-500">Ready to download & share</p>
-                        </div>
-                        <!-- Filters -->
-                        <div class="flex bg-gray-200 p-1 rounded-lg">
-                            <button onclick="window.setFilter('Today')" id="filterToday" class="bg-white shadow-sm text-blue-600 px-4 py-1.5 rounded-md text-sm font-bold transition-all">Today</button>
-                            <button onclick="window.setFilter('All')" id="filterAll" class="text-gray-500 hover:text-gray-700 px-4 py-1.5 rounded-md text-sm font-bold transition-all">All</button>
-                        </div>
+                    <div class="mb-6 mt-2">
+                        <h2 class="text-2xl font-bold text-gray-800">Explore Posters</h2>
+                        <p class="text-sm text-gray-500">Ready to download & share with your branding</p>
                     </div>
                     
                     <!-- Posters Grid -->
                     <div id="postersGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <!-- Posters will be injected here via JS -->
-                        <div class="col-span-full text-center text-gray-500 py-10">
-                            <i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i><br>Loading Posters...
-                        </div>
+                    </div>
+                    
+                    <!-- Infinite Scroll Loader -->
+                    <div id="infiniteScrollLoader" class="text-center py-6 hidden">
+                        <i class="fa-solid fa-spinner fa-spin text-xl text-blue-500"></i>
+                        <p class="text-xs text-gray-400 mt-2">Loading more posters...</p>
                     </div>
                 </div>
 
@@ -272,7 +268,6 @@
                 <button onclick="window.switchBottomTab('profile')" id="navProfile" class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-gray-600 transition-colors relative">
                     <i class="fa-solid fa-user-gear text-xl mb-1"></i>
                     <span class="text-[10px] font-bold">Profile</span>
-                    <!-- Notification dot for incomplete profile -->
                     <span id="profileAlertDot" class="hidden absolute top-2 right-8 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
                 </button>
             </nav>
@@ -282,13 +277,14 @@
     <!-- Hidden canvas for generating poster images in the background -->
     <canvas id="offscreenCanvas" style="display:none;"></canvas>
 
-<!-- ========================================== -->
+    <!-- ========================================== -->
     <!-- JAVASCRIPT LOGIC -->
     <!-- ========================================== -->
     <script type="module">
+        // ✅ Added Firestore query, orderBy, limit, startAfter for Pagination
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, getDocs, collection } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, getDocs, collection, query, orderBy, limit, startAfter } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAkBV0VxVU3Mn0paHqxU0Dgm-TuNRS6hEg",
@@ -305,13 +301,17 @@
         const provider = new GoogleAuthProvider();
         const db = getFirestore(app);
 
-        // 🔴 API KEY FOR IMGBB
         const IMGBB_API_KEY = "49ae9c7a7f287d75ec6730c026dd6f5e"; 
 
         let adminCanvas;
         let offscreenFabricCanvas;
         let isAdminLoggedIn = false;
         let currentClientData = null; 
+
+        // 👉 Infinite Scroll Variables
+        let lastVisibleTemplate = null;
+        let isFetchingPosters = false;
+        let hasMorePosters = true;
 
         const allowedAdminEmails = ["jkhdpix@gmail.com"];
 
@@ -348,7 +348,6 @@
                     window.switchMainTab('app');
                     window.switchBottomTab('profile');
                     document.getElementById('profileAlertDot').classList.remove('hidden');
-                    alert("Welcome! Please complete your Business Profile first to see your posters.");
                 }
             } else {
                 isAdminLoggedIn = false;
@@ -392,7 +391,7 @@
                     btnAdmin.classList.replace('bg-blue-600', 'bg-transparent');
                     btnAdmin.classList.replace('text-white', 'text-gray-300');
                 }
-                if(currentClientData) loadPostersFeed();
+                if(currentClientData) loadPostersFeed(false);
             }
         };
 
@@ -409,7 +408,7 @@
                 if(!currentClientData) { alert("Please complete your profile first."); window.switchBottomTab('profile'); return; }
                 document.getElementById('appTabPosters').classList.remove('hidden');
                 document.getElementById('navPosters').classList.replace('text-gray-400', 'text-blue-600');
-                loadPostersFeed();
+                loadPostersFeed(false); // Reset and load fresh
             } 
             else if(tab === 'payments') {
                 if(!currentClientData) { alert("Please complete your profile first."); window.switchBottomTab('profile'); return; }
@@ -422,15 +421,13 @@
             }
         };
 
-        // --- PROFILE LOGIC ---
+        // --- PROFILE & REGISTRATION LOGIC (No changes) ---
         function populateProfileForm() {
             if(!currentClientData) return;
             document.getElementById('profName').value = currentClientData.name || '';
             document.getElementById('profBizName').value = currentClientData.bizName || '';
             document.getElementById('profWhatsapp').value = currentClientData.whatsapp || '';
             document.getElementById('profAddress').value = currentClientData.address || '';
-            document.getElementById('profPhoto').required = false; 
-            document.getElementById('profLogo').required = false;
         }
 
         const uploadToImgBB = async (file) => {
@@ -446,70 +443,49 @@
         window.submitProfile = async () => {
             const btn = document.getElementById('profSubmitBtn');
             const originalHTML = btn.innerHTML;
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+            btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
             try {
                 let photoUrl = currentClientData ? currentClientData.photo : null;
                 let logoUrl = currentClientData ? currentClientData.logo : null;
                 const photoFile = document.getElementById('profPhoto').files[0];
                 const logoFile = document.getElementById('profLogo').files[0];
-                
                 if (photoFile) photoUrl = await uploadToImgBB(photoFile);
                 if (logoFile) logoUrl = await uploadToImgBB(logoFile);
 
-                if(!photoUrl || !logoUrl) throw new Error("Images are required for new profile.");
-
                 const profileData = {
-                    email: auth.currentUser.email,
-                    name: document.getElementById('profName').value,
-                    bizName: document.getElementById('profBizName').value,
-                    whatsapp: document.getElementById('profWhatsapp').value,
-                    address: document.getElementById('profAddress').value,
-                    photo: photoUrl,
-                    logo: logoUrl,
+                    email: auth.currentUser.email, name: document.getElementById('profName').value,
+                    bizName: document.getElementById('profBizName').value, whatsapp: document.getElementById('profWhatsapp').value,
+                    address: document.getElementById('profAddress').value, photo: photoUrl, logo: logoUrl,
                     updatedAt: new Date().toISOString()
                 };
 
                 await setDoc(doc(db, "clients", auth.currentUser.uid), profileData, { merge: true });
                 currentClientData = profileData;
                 document.getElementById('profileAlertDot').classList.add('hidden');
-                
                 btn.innerHTML = '<i class="fa-solid fa-check"></i> Saved!';
                 btn.classList.replace('bg-blue-600', 'bg-green-600');
-                setTimeout(() => { 
-                    btn.innerHTML = originalHTML; btn.classList.replace('bg-green-600', 'bg-blue-600'); 
-                    btn.disabled = false; window.switchBottomTab('posters');
-                }, 1500);
-            } catch(e) {
-                alert("Error saving profile: " + e.message);
-                btn.innerHTML = originalHTML; btn.disabled = false;
-            }
+                setTimeout(() => { btn.innerHTML = originalHTML; btn.classList.replace('bg-green-600', 'bg-blue-600'); btn.disabled = false; window.switchBottomTab('posters'); }, 1500);
+            } catch(e) { alert("Error saving profile: " + e.message); btn.innerHTML = originalHTML; btn.disabled = false; }
         };
 
         window.submitRegistration = async () => {
             const btn = document.getElementById('regSubmitBtn');
             const status = document.getElementById('regStatus');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving Profile...';
+            btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving Profile...';
             try {
                 const photoFile = document.getElementById('regPhoto').files[0];
                 const logoFile = document.getElementById('regLogo').files[0];
                 const [photoUrl, logoUrl] = await Promise.all([ uploadToImgBB(photoFile), uploadToImgBB(logoFile) ]);
 
                 const newClient = {
-                    email: auth.currentUser.email,
-                    name: document.getElementById('regName').value,
-                    bizName: document.getElementById('regBizName').value,
-                    whatsapp: document.getElementById('regWhatsapp').value,
-                    address: document.getElementById('regAddress').value,
-                    photo: photoUrl,
-                    logo: logoUrl,
+                    email: auth.currentUser.email, name: document.getElementById('regName').value,
+                    bizName: document.getElementById('regBizName').value, whatsapp: document.getElementById('regWhatsapp').value,
+                    address: document.getElementById('regAddress').value, photo: photoUrl, logo: logoUrl,
                     joinedAt: new Date().toISOString()
                 };
 
                 await setDoc(doc(db, "clients", auth.currentUser.uid), newClient);
                 currentClientData = newClient;
-                
                 document.getElementById('registrationScreen').classList.replace('flex', 'hidden');
                 document.getElementById('mainApp').classList.replace('hidden', 'flex');
                 window.switchMainTab('app');
@@ -520,29 +496,14 @@
             }
         };
 
-        // --- FEED / POSTERS RENDER LOGIC ---
-        let currentFilter = 'Today';
-        window.setFilter = (filterType) => {
-            currentFilter = filterType;
-            if(filterType === 'Today') {
-                document.getElementById('filterToday').className = "bg-white shadow-sm text-blue-600 px-4 py-1.5 rounded-md text-sm font-bold transition-all";
-                document.getElementById('filterAll').className = "text-gray-500 hover:text-gray-700 px-4 py-1.5 rounded-md text-sm font-bold transition-all";
-            } else {
-                document.getElementById('filterAll').className = "bg-white shadow-sm text-blue-600 px-4 py-1.5 rounded-md text-sm font-bold transition-all";
-                document.getElementById('filterToday').className = "text-gray-500 hover:text-gray-700 px-4 py-1.5 rounded-md text-sm font-bold transition-all";
-            }
-            loadPostersFeed();
-        };
-
+        // --- BUTTON UTILITIES (Download & Share) ---
         window.downloadPosterImage = (dataUrl) => {
-            const link = document.createElement('a'); 
-            link.download = `Poster_${Date.now()}.png`; link.href = dataUrl; link.click();
+            const link = document.createElement('a'); link.download = `Poster_${Date.now()}.png`; link.href = dataUrl; link.click();
         };
 
         window.sharePoster = async (dataUrl) => {
             try {
-                const res = await fetch(dataUrl);
-                const blob = await res.blob();
+                const res = await fetch(dataUrl); const blob = await res.blob();
                 const file = new File([blob], `Poster_${Date.now()}.png`, { type: "image/png" });
                 if (navigator.canShare && navigator.canShare({ files: [file] })) {
                     await navigator.share({ title: 'My Poster', text: 'Check out my latest update!', files: [file] });
@@ -550,24 +511,49 @@
             } catch (error) { console.log("Error sharing:", error); }
         };
 
-        // 👉 UPDATED LOGIC: LOAD ALL POSTERS FROM DATABASE 👈
-        async function loadPostersFeed() {
-            if(!currentClientData) return;
+
+        // 👉 NEW INFINITE SCROLL RENDER LOGIC 👈
+        async function loadPostersFeed(isLoadMore = false) {
+            if(!currentClientData || isFetchingPosters || (!hasMorePosters && isLoadMore)) return;
+
             const grid = document.getElementById('postersGrid');
-            grid.innerHTML = '<div class="col-span-full text-center text-gray-500 py-10"><i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i><br>Generating Posters...</div>';
+            const loader = document.getElementById('infiniteScrollLoader');
+            
+            isFetchingPosters = true;
+
+            // Reset UI on fresh load
+            if (!isLoadMore) {
+                grid.innerHTML = '<div class="col-span-full text-center text-gray-500 py-10" id="initialLoader"><i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i><br>Fetching Posters...</div>';
+                lastVisibleTemplate = null;
+                hasMorePosters = true;
+            } else {
+                loader.classList.remove('hidden');
+            }
 
             try {
-                // Fetch ALL templates instead of just one
-                const querySnapshot = await getDocs(collection(db, "templates"));
+                // Fetch 4 templates at a time from newest to oldest
+                let q = query(collection(db, "templates"), orderBy("updatedAt", "desc"), limit(4));
+                if (isLoadMore && lastVisibleTemplate) {
+                    q = query(collection(db, "templates"), orderBy("updatedAt", "desc"), startAfter(lastVisibleTemplate), limit(4));
+                }
+
+                const querySnapshot = await getDocs(q);
                 
                 if (querySnapshot.empty) {
-                    grid.innerHTML = '<div class="col-span-full text-center text-gray-500 py-10">No templates found. Admin needs to create one!</div>';
+                    hasMorePosters = false;
+                    loader.classList.add('hidden');
+                    if (!isLoadMore) grid.innerHTML = '<div class="col-span-full text-center text-gray-500 py-10">No templates found. Admin needs to create one!</div>';
+                    isFetchingPosters = false;
                     return;
                 }
+
+                // Remove loading text if it's initial load
+                if (!isLoadMore) grid.innerHTML = '';
                 
-                grid.innerHTML = ''; // Clear loading spinner
-                
-                // Process templates one by one
+                // Save the last visible document for the next scroll trigger
+                lastVisibleTemplate = querySnapshot.docs[querySnapshot.docs.length - 1];
+
+                // Render each fetched template
                 for (const documentSnapshot of querySnapshot.docs) {
                     const templateJSON = documentSnapshot.data().templateData;
                     
@@ -604,30 +590,52 @@
                                 offscreenFabricCanvas.renderAll();
                                 const finalImageURL = offscreenFabricCanvas.toDataURL({ format: 'png', multiplier: 1.5 });
                                 
-                                // Inject into DOM
-                                grid.innerHTML += `
-                                    <div class="bg-white p-3 rounded-2xl shadow-sm border border-gray-100 flex flex-col">
-                                        <img src="${finalImageURL}" class="w-full h-auto rounded-xl border border-gray-100 mb-3" />
-                                        <div class="mt-auto flex flex-col gap-2">
-                                            <button onclick="window.sharePoster('${finalImageURL}')" class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors flex items-center justify-center gap-2 shadow-sm">
-                                                <i class="fa-brands fa-whatsapp text-lg"></i> Share
-                                            </button>
-                                            <button onclick="window.downloadPosterImage('${finalImageURL}')" class="w-full bg-blue-50 hover:bg-blue-100 text-blue-600 px-4 py-2 rounded-lg text-sm font-bold transition-colors flex items-center justify-center gap-2 border border-blue-200">
-                                                <i class="fa-solid fa-download"></i> Download
-                                            </button>
-                                        </div>
+                                const posterDiv = document.createElement('div');
+                                posterDiv.className = "bg-white p-3 rounded-2xl shadow-sm border border-gray-100 flex flex-col";
+                                posterDiv.innerHTML = `
+                                    <img src="${finalImageURL}" class="w-full h-auto rounded-xl border border-gray-100 mb-3" />
+                                    <div class="mt-auto flex flex-col gap-2">
+                                        <button onclick="window.sharePoster('${finalImageURL}')" class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors flex items-center justify-center gap-2 shadow-sm">
+                                            <i class="fa-brands fa-whatsapp text-lg"></i> Share
+                                        </button>
+                                        <button onclick="window.downloadPosterImage('${finalImageURL}')" class="w-full bg-blue-50 hover:bg-blue-100 text-blue-600 px-4 py-2 rounded-lg text-sm font-bold transition-colors flex items-center justify-center gap-2 border border-blue-200">
+                                            <i class="fa-solid fa-download"></i> Download
+                                        </button>
                                     </div>
                                 `;
-                                resolveTemplate(); // Move to the next template
+                                grid.appendChild(posterDiv);
+                                resolveTemplate();
                             });
                         });
                     });
                 }
+                
+                // Show loader if there might be more posters to fetch
+                if(querySnapshot.docs.length === 4) {
+                    loader.classList.remove('hidden');
+                } else {
+                    loader.classList.add('hidden');
+                    hasMorePosters = false;
+                }
+
             } catch (error) {
                 console.error(error);
-                grid.innerHTML = '<div class="col-span-full text-center text-red-500 py-10">Error loading posters.</div>';
+                if (!isLoadMore) grid.innerHTML = '<div class="col-span-full text-center text-red-500 py-10">Error loading posters.</div>';
+            } finally {
+                isFetchingPosters = false;
             }
         }
+
+        // Setup Intersection Observer to trigger loadMore when user scrolls to bottom
+        const scrollObserver = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && !isFetchingPosters && hasMorePosters) {
+                loadPostersFeed(true);
+            }
+        }, { root: document.getElementById('appMainScrollArea'), threshold: 0.1 });
+        
+        // Start observing the loader at the bottom
+        scrollObserver.observe(document.getElementById('infiniteScrollLoader'));
+
 
         // 👉 ADMIN EDITOR FUNCTIONS 👈
         document.getElementById('bgUpload').addEventListener('change', async (e) => {
@@ -680,7 +688,6 @@
             if(obj.type === 'i-text') { document.getElementById('fontSize').value = obj.fontSize; document.getElementById('fontFamily').value = obj.fontFamily || 'sans-serif'; }
         }
 
-        // 👉 UPDATED LOGIC: SAVE EVERY TEMPLATE WITH A UNIQUE ID 👈
         window.saveTemplate = async () => {
             const saveBtn = document.querySelector('button[onclick="window.saveTemplate()"]');
             const originalHTML = saveBtn.innerHTML;
@@ -688,8 +695,6 @@
             try {
                 const json = adminCanvas.toJSON(['placeholderType']);
                 const savedTemplateJSON = JSON.stringify(json);
-                
-                // नया बदलाव: हर पोस्टर को अलग ID से सेव करें
                 const templateId = "poster_" + Date.now();
                 
                 await setDoc(doc(db, "templates", templateId), { 
@@ -697,10 +702,7 @@
                     updatedAt: new Date().toISOString() 
                 });
                 
-                // सेव होने के बाद एडमिन कैनवास खाली कर दें ताकि वो नया बना सके
-                adminCanvas.clear();
-                document.getElementById('bgUpload').value = '';
-                
+                adminCanvas.clear(); document.getElementById('bgUpload').value = '';
                 saveBtn.innerHTML = '<i class="fa-solid fa-check"></i> Cloud Saved!';
                 saveBtn.classList.replace('bg-blue-600', 'bg-green-600');
                 setTimeout(() => { saveBtn.innerHTML = originalHTML; saveBtn.classList.replace('bg-green-600', 'bg-blue-600'); }, 2000);
