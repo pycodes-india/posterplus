@@ -7,14 +7,15 @@
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Fabric.js (Secured with SRI) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js" integrity="sha512-CeIsOAsgJnmevfCi2C7Zsyy6bQKi43utIjdA87Q0ZY84oDqnI0uwfM9+bKi5QvD7e51T7xFmvi8x/001a1B2OQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <!-- FontAwesome (Secured with SRI) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Fabric.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Oswald:wght@400;700&family=Lobster&family=Poppins:wght@400;700;800&display=swap" rel="stylesheet">
     
     <style>
+        /* Hide scrollbar for a native app feel */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
@@ -25,7 +26,8 @@
     <!-- 1. FULLSCREEN LOGIN SCREEN -->
     <!-- ========================================== -->
     <div id="loginScreen" class="absolute inset-0 bg-slate-900 z-50 flex items-center justify-center">
-        <div class="bg-white rounded-3xl p-10 w-full max-w-md text-center shadow-2xl transition-all duration-300 mx-4">
+        <div class="bg-white rounded-3xl p-10 w-full max-w-md text-center shadow-2xl transition-all duration-300">
+            <!-- Modern Logo for Login -->
             <div class="w-20 h-20 mx-auto bg-gradient-to-br from-emerald-400 to-emerald-600 text-white rounded-2xl flex items-center justify-center text-4xl shadow-lg shadow-emerald-200 mb-6">
                 <i class="fa-solid fa-plus font-bold"></i>
             </div>
@@ -49,7 +51,7 @@
     <!-- 1.5. REGISTRATION SCREEN -->
     <!-- ========================================== -->
     <div id="registrationScreen" class="absolute inset-0 bg-slate-100 z-40 hidden items-center justify-center overflow-y-auto p-4">
-        <div class="bg-white rounded-3xl p-6 md:p-8 w-full max-w-lg shadow-xl my-auto">
+        <div class="bg-white rounded-3xl p-8 w-full max-w-lg shadow-xl my-auto">
             <h2 class="text-2xl font-bold mb-2 text-slate-800">Complete Your Profile</h2>
             <p class="text-slate-500 mb-6 text-sm">Please provide your business details to generate your posters.</p>
             
@@ -65,7 +67,7 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-bold text-slate-700 mb-1">WhatsApp No.</label>
-                        <input type="tel" id="regWhatsapp" required pattern="[0-9]{10}" placeholder="10 Digits" class="w-full border border-slate-300 rounded-lg px-4 py-2 outline-none focus:border-emerald-500">
+                        <input type="tel" id="regWhatsapp" required class="w-full border border-slate-300 rounded-lg px-4 py-2 outline-none focus:border-emerald-500">
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-slate-700 mb-1">City/Address</label>
@@ -74,17 +76,17 @@
                 </div>
                 <div class="grid grid-cols-2 gap-4 mt-2">
                     <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100">
-                        <label class="block text-xs font-bold text-emerald-800 mb-1">Upload Photo (Max 2MB)</label>
-                        <input type="file" id="regPhoto" accept=".jpg, .jpeg, .png, .webp" required class="text-xs w-full text-emerald-700">
+                        <label class="block text-xs font-bold text-emerald-800 mb-1">Upload Your Photo</label>
+                        <input type="file" id="regPhoto" accept="image/*" required class="text-xs w-full text-emerald-700">
                     </div>
                     <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100">
-                        <label class="block text-xs font-bold text-emerald-800 mb-1">Upload Logo (Max 2MB)</label>
-                        <input type="file" id="regLogo" accept=".jpg, .jpeg, .png, .webp" required class="text-xs w-full text-emerald-700">
+                        <label class="block text-xs font-bold text-emerald-800 mb-1">Upload Business Logo</label>
+                        <input type="file" id="regLogo" accept="image/*" required class="text-xs w-full text-emerald-700">
                     </div>
                 </div>
                 
                 <button type="submit" id="regSubmitBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl mt-4 shadow-md transition-all flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-shield-check"></i> Securely Save Profile
+                    <i class="fa-solid fa-rocket"></i> Save & Continue
                 </button>
                 <p id="regStatus" class="text-center text-sm font-semibold mt-2 hidden"></p>
             </form>
@@ -96,7 +98,9 @@
     <!-- ========================================== -->
     <div id="mainApp" class="hidden flex-col h-screen w-full">
         
+        <!-- HEADER (Updated: White, Clean Logo, Dynamic Button) -->
         <header class="bg-white px-5 md:px-8 py-3.5 flex justify-between items-center z-20 shadow-sm border-b border-slate-200">
+            <!-- Modern PosterPlus Logo -->
             <div class="flex items-center gap-2.5">
                 <div class="w-10 h-10 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center text-white shadow-md shadow-emerald-200">
                     <i class="fa-solid fa-plus text-xl font-bold"></i>
@@ -105,6 +109,7 @@
             </div>
             
             <div class="flex items-center gap-4">
+                <!-- Dynamic Admin/App Button -->
                 <button onclick="window.switchMainTab('admin')" id="btnAdmin" class="hidden bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg text-sm font-bold transition-all items-center gap-2 border border-slate-200">
                     <i class="fa-solid fa-pen-ruler"></i> <span class="hidden md:inline">Editor Mode</span>
                 </button>
@@ -118,13 +123,14 @@
         <!-- 3. ADMIN PANEL -->
         <!-- ========================================== -->
         <div id="adminPanel" class="flex-1 hidden overflow-hidden">
+            <!-- Sidebar -->
             <aside class="w-80 bg-white shadow-xl flex flex-col h-full z-10 border-r border-slate-200">
                 <div class="p-5 flex-1 overflow-y-auto space-y-6">
                     <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
                         <label class="font-bold text-slate-700 text-sm mb-3 flex items-center gap-2"><i class="fa-regular fa-image text-emerald-500"></i> 1. Background</label>
                         <label id="bgUploadLabel" class="cursor-pointer bg-white border border-slate-300 hover:border-emerald-500 text-slate-700 text-sm text-center py-2 px-4 rounded block shadow-sm relative overflow-hidden">
                             <span id="bgUploadText"><i class="fa-solid fa-upload mr-1"></i> Upload Image</span>
-                            <input type="file" id="bgUpload" accept=".jpg, .jpeg, .png, .webp" class="hidden">
+                            <input type="file" id="bgUpload" accept="image/*" class="hidden">
                         </label>
                     </div>
                     <div>
@@ -155,7 +161,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="p-5 bg-white border-t border-slate-200"><button onclick="window.saveTemplate()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-md flex justify-center items-center gap-2"><i class="fa-solid fa-shield-check"></i> Save Securely</button></div>
+                <div class="p-5 bg-white border-t border-slate-200"><button onclick="window.saveTemplate()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-md flex justify-center items-center gap-2"><i class="fa-solid fa-floppy-disk"></i> Save Template</button></div>
             </aside>
             <main class="flex-1 bg-slate-200 flex items-center justify-center relative overflow-auto p-8">
                 <div class="bg-white shadow-2xl relative border" style="width: 800px; height: 800px; background-image: linear-gradient(45deg, #f0f0f0 25%, transparent 25%), linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #f0f0f0 75%), linear-gradient(-45deg, transparent 75%, #f0f0f0 75%); background-size: 20px 20px;">
@@ -168,20 +174,25 @@
         <!-- 4. CLIENT APP VIEW -->
         <!-- ========================================== -->
         <div id="clientApp" class="flex-1 flex flex-col relative bg-slate-50 overflow-hidden">
+            
             <main id="appMainScrollArea" class="flex-1 overflow-y-auto pb-20">
                 
+                <!-- TAB 1: POSTERS PAGE -->
                 <div id="appTabPosters" class="p-3 md:p-6 max-w-6xl mx-auto w-full">
-                    <div class="mb-6 mt-2 px-1">
-                        <h2 class="text-2xl font-bold text-slate-800">Explore Posters</h2>
-                        <p class="text-sm text-slate-500">Ready to download & share with your branding</p>
+                    
+                    <!-- Updated Grid: 2 cols on mobile, 3 on PC -->
+                    <div id="postersGrid" class="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6 mt-2">
+                        <!-- Posters will be injected here via JS -->
                     </div>
-                    <div id="postersGrid" class="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6 mt-2"></div>
+                    
+                    <!-- Infinite Scroll Loader -->
                     <div id="infiniteScrollLoader" class="text-center py-6 hidden">
                         <i class="fa-solid fa-spinner fa-spin text-xl text-emerald-500"></i>
                         <p class="text-xs text-slate-400 mt-2">Loading more posters...</p>
                     </div>
                 </div>
 
+                <!-- TAB 2: PAYMENTS PAGE -->
                 <div id="appTabPayments" class="hidden p-4 h-full flex items-center justify-center">
                     <div class="text-center bg-white p-8 rounded-3xl shadow-sm border border-slate-100 w-full max-w-md">
                         <div class="w-16 h-16 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center text-2xl mx-auto mb-4">
@@ -193,11 +204,12 @@
                     </div>
                 </div>
 
+                <!-- TAB 3: PROFILE PAGE -->
                 <div id="appTabProfile" class="hidden p-4 max-w-lg mx-auto w-full">
                     <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mt-2">
                         <div class="flex justify-between items-center mb-6">
                             <h2 class="text-xl font-bold text-slate-800">Business Profile</h2>
-                            <button onclick="window.logoutUser()" class="text-red-500 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</button>
+                            <button onclick="window.logoutUser()" class="text-red-500 bg-red-50 px-3 py-1.5 rounded-lg text-xs font-bold"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</button>
                         </div>
                         
                         <form id="profileForm" onsubmit="event.preventDefault(); window.submitProfile();" class="space-y-4">
@@ -212,7 +224,7 @@
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 mb-1">WhatsApp No.</label>
-                                    <input type="tel" id="profWhatsapp" required pattern="[0-9]{10}" class="w-full border border-slate-300 rounded-xl px-4 py-2.5 outline-none focus:border-emerald-500 font-semibold text-slate-700">
+                                    <input type="tel" id="profWhatsapp" required class="w-full border border-slate-300 rounded-xl px-4 py-2.5 outline-none focus:border-emerald-500 font-semibold text-slate-700">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 mb-1">City/Address</label>
@@ -221,50 +233,55 @@
                             </div>
                             <div class="grid grid-cols-2 gap-4 mt-2">
                                 <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100">
-                                    <label class="block text-xs font-bold text-emerald-800 mb-1">Update Photo (Max 2MB)</label>
-                                    <input type="file" id="profPhoto" accept=".jpg, .jpeg, .png, .webp" class="text-xs w-full text-emerald-600">
+                                    <label class="block text-xs font-bold text-emerald-800 mb-1">Update Photo</label>
+                                    <input type="file" id="profPhoto" accept="image/*" class="text-xs w-full text-emerald-600">
+                                    <p class="text-[10px] text-emerald-500 mt-1">Leave empty to keep current</p>
                                 </div>
                                 <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100">
-                                    <label class="block text-xs font-bold text-emerald-800 mb-1">Update Logo (Max 2MB)</label>
-                                    <input type="file" id="profLogo" accept=".jpg, .jpeg, .png, .webp" class="text-xs w-full text-emerald-600">
+                                    <label class="block text-xs font-bold text-emerald-800 mb-1">Update Logo</label>
+                                    <input type="file" id="profLogo" accept="image/*" class="text-xs w-full text-emerald-600">
+                                    <p class="text-[10px] text-emerald-500 mt-1">Leave empty to keep current</p>
                                 </div>
                             </div>
                             
                             <button type="submit" id="profSubmitBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl mt-6 shadow-md transition-all flex items-center justify-center gap-2">
-                                <i class="fa-solid fa-shield-check"></i> Save Securely
+                                <i class="fa-solid fa-floppy-disk"></i> Save Details
                             </button>
                         </form>
                     </div>
                 </div>
+
             </main>
 
+            <!-- Bottom Navigation Bar -->
             <nav class="absolute bottom-0 w-full bg-white border-t border-slate-200 flex justify-around items-center h-16 px-2 pb-safe z-50 shadow-[0_-4px_10px_-1px_rgba(0,0,0,0.05)]">
                 <button onclick="window.switchBottomTab('posters')" id="navPosters" class="flex flex-col items-center justify-center w-full h-full text-emerald-600 transition-colors">
-                    <i class="fa-solid fa-images text-xl mb-1"></i><span class="text-[10px] font-bold">Posters</span>
+                    <i class="fa-solid fa-images text-xl mb-1"></i>
+                    <span class="text-[10px] font-bold">Posters</span>
                 </button>
                 <button onclick="window.switchBottomTab('payments')" id="navPayments" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-600 transition-colors">
-                    <i class="fa-solid fa-wallet text-xl mb-1"></i><span class="text-[10px] font-bold">Payments</span>
+                    <i class="fa-solid fa-wallet text-xl mb-1"></i>
+                    <span class="text-[10px] font-bold">Payments</span>
                 </button>
                 <button onclick="window.switchBottomTab('profile')" id="navProfile" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-600 transition-colors relative">
-                    <i class="fa-solid fa-user-gear text-xl mb-1"></i><span class="text-[10px] font-bold">Profile</span>
+                    <i class="fa-solid fa-user-gear text-xl mb-1"></i>
+                    <span class="text-[10px] font-bold">Profile</span>
                     <span id="profileAlertDot" class="hidden absolute top-2 right-8 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
                 </button>
             </nav>
         </div>
     </div>
 
+    <!-- Hidden canvas for generating poster images in the background -->
     <canvas id="offscreenCanvas" style="display:none;"></canvas>
 
     <!-- ========================================== -->
-    <!-- SECURED JAVASCRIPT LOGIC -->
+    <!-- JAVASCRIPT LOGIC -->
     <!-- ========================================== -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, getDocs, collection, query, orderBy, limit, startAfter } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
-        // 🔴 SECURITY: Cloud Functions and App Check
-        import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js";
-        import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app-check.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAkBV0VxVU3Mn0paHqxU0Dgm-TuNRS6hEg",
@@ -280,15 +297,8 @@
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
         const db = getFirestore(app);
-        const functions = getFunctions(app);
 
-        // 👉 APP CHECK: Initialize (Replace YOUR_RECAPTCHA_SITE_KEY with real key)
-        try {
-            const appCheck = initializeAppCheck(app, {
-                provider: new ReCaptchaV3Provider('YOUR_RECAPTCHA_SITE_KEY'),
-                isTokenAutoRefreshEnabled: true
-            });
-        } catch (e) { console.warn("App Check not fully configured."); }
+        const IMGBB_API_KEY = "49ae9c7a7f287d75ec6730c026dd6f5e"; 
 
         let adminCanvas;
         let offscreenFabricCanvas;
@@ -300,36 +310,9 @@
         let hasMorePosters = true;
 
         const allowedAdminEmails = ["jkhdpix@gmail.com"];
-        const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB Limit
 
         adminCanvas = new fabric.Canvas('adminCanvas', { width: 800, height: 800, preserveObjectStacking: true });
         offscreenFabricCanvas = new fabric.StaticCanvas('offscreenCanvas', { width: 800, height: 800 });
-
-        // --- FILE VALIDATION UTILITY ---
-        function validateFile(file) {
-            if (!file) return false;
-            const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
-            if (!validTypes.includes(file.type)) { alert("Only JPG, PNG and WEBP images allowed."); return false; }
-            if (file.size > MAX_FILE_SIZE) { alert("File is too large! Maximum 2MB allowed."); return false; }
-            return true;
-        }
-
-        // --- SECURE UPLOAD VIA CLOUD FUNCTION ---
-        const uploadViaCloudFunction = async (file) => {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = async () => {
-                    try {
-                        const base64Image = reader.result.split(',')[1];
-                        const uploadImageFunction = httpsCallable(functions, 'uploadImage');
-                        const result = await uploadImageFunction({ base64Image: base64Image });
-                        resolve(result.data.url);
-                    } catch (error) { reject(new Error("Server Upload Failed")); }
-                };
-                reader.onerror = (error) => reject(error);
-            });
-        };
 
         // --- AUTHENTICATION & ROUTING ---
         onAuthStateChanged(auth, async (user) => {
@@ -339,38 +322,40 @@
             
             if (user) {
                 if (allowedAdminEmails.includes(user.email)) {
-                    isAdminLoggedIn = true; btnAdmin.classList.replace('hidden', 'flex'); 
+                    isAdminLoggedIn = true;
+                    btnAdmin.classList.replace('hidden', 'flex'); 
                 } else {
-                    isAdminLoggedIn = false; btnAdmin.classList.replace('flex', 'hidden');
+                    isAdminLoggedIn = false;
+                    btnAdmin.classList.replace('flex', 'hidden');
                 }
 
                 loginScreen.classList.add('hidden');
                 mainApp.classList.replace('hidden', 'flex');
 
-                try {
-                    const docSnap = await getDoc(doc(db, "clients", user.uid));
-                    if (docSnap.exists()) {
-                        currentClientData = docSnap.data();
-                        populateProfileForm();
-                        window.switchMainTab('app'); 
-                        window.switchBottomTab('posters');
-                        document.getElementById('profileAlertDot').classList.add('hidden');
-                    } else {
-                        currentClientData = null;
-                        window.switchMainTab('app');
-                        window.switchBottomTab('profile');
-                        document.getElementById('profileAlertDot').classList.remove('hidden');
-                    }
-                } catch(err) { console.error("Error fetching profile:", err); }
+                const docSnap = await getDoc(doc(db, "clients", user.uid));
+                if (docSnap.exists()) {
+                    currentClientData = docSnap.data();
+                    populateProfileForm();
+                    window.switchMainTab('app'); 
+                    window.switchBottomTab('posters');
+                    document.getElementById('profileAlertDot').classList.add('hidden');
+                } else {
+                    currentClientData = null;
+                    window.switchMainTab('app');
+                    window.switchBottomTab('profile');
+                    document.getElementById('profileAlertDot').classList.remove('hidden');
+                }
             } else {
-                isAdminLoggedIn = false; currentClientData = null;
-                loginScreen.classList.remove('hidden'); mainApp.classList.replace('flex', 'hidden');
+                isAdminLoggedIn = false;
+                currentClientData = null;
+                loginScreen.classList.remove('hidden');
+                mainApp.classList.replace('flex', 'hidden');
             }
         });
 
         window.loginWithGoogle = async () => {
             document.getElementById("authStatus").className = "mt-4 text-sm font-semibold text-emerald-600 block";
-            document.getElementById("authStatus").innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Connecting securely...';
+            document.getElementById("authStatus").innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Connecting...';
             try { await signInWithPopup(auth, provider); } catch (e) {
                 document.getElementById("authStatus").className = "mt-4 text-sm font-bold text-red-600 block";
                 document.getElementById("authStatus").innerText = 'Login failed.';
@@ -379,6 +364,7 @@
 
         window.logoutUser = async () => { await signOut(auth); };
 
+        // --- DYNAMIC BUTTON LOGIC FOR HEADER ---
         window.switchMainTab = (mode) => {
             const adminPnl = document.getElementById('adminPanel');
             const clientApp = document.getElementById('clientApp');
@@ -388,13 +374,17 @@
             if (mode === 'admin' && isAdminLoggedIn) {
                 adminPnl.classList.replace('hidden', 'flex');
                 clientApp.classList.replace('flex', 'hidden');
+                // Hide Admin button, show App button
                 btnAdmin.classList.replace('flex', 'hidden');
                 btnApp.classList.replace('hidden', 'flex');
             } else {
                 adminPnl.classList.replace('flex', 'hidden');
                 clientApp.classList.replace('hidden', 'flex');
+                // Hide App button, show Admin button (if logged in)
                 btnApp.classList.replace('flex', 'hidden');
-                if(isAdminLoggedIn) btnAdmin.classList.replace('hidden', 'flex');
+                if(isAdminLoggedIn) {
+                    btnAdmin.classList.replace('hidden', 'flex');
+                }
                 if(currentClientData) loadPostersFeed(false);
             }
         };
@@ -425,6 +415,7 @@
             }
         };
 
+        // --- PROFILE LOGIC ---
         function populateProfileForm() {
             if(!currentClientData) return;
             document.getElementById('profName').value = currentClientData.name || '';
@@ -433,27 +424,30 @@
             document.getElementById('profAddress').value = currentClientData.address || '';
         }
 
+        const uploadToImgBB = async (file) => {
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('key', IMGBB_API_KEY);
+            const res = await fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: formData });
+            const data = await res.json();
+            if(data.success) return data.data.url;
+            throw new Error("Upload Failed");
+        };
+
         window.submitProfile = async () => {
             const btn = document.getElementById('profSubmitBtn');
             const originalHTML = btn.innerHTML;
-            btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving securely...';
-            
+            btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
             try {
                 let photoUrl = currentClientData ? currentClientData.photo : null;
                 let logoUrl = currentClientData ? currentClientData.logo : null;
                 const photoFile = document.getElementById('profPhoto').files[0];
                 const logoFile = document.getElementById('profLogo').files[0];
                 
-                if (photoFile) { 
-                    if(!validateFile(photoFile)) throw new Error("Validation Failed"); 
-                    photoUrl = await uploadViaCloudFunction(photoFile); 
-                }
-                if (logoFile) { 
-                    if(!validateFile(logoFile)) throw new Error("Validation Failed"); 
-                    logoUrl = await uploadViaCloudFunction(logoFile); 
-                }
-                
-                if(!photoUrl || !logoUrl) throw new Error("Images are required.");
+                if (photoFile) photoUrl = await uploadToImgBB(photoFile);
+                if (logoFile) logoUrl = await uploadToImgBB(logoFile);
+
+                if(!photoUrl || !logoUrl) throw new Error("Images are required for new profile.");
 
                 const profileData = {
                     email: auth.currentUser.email,
@@ -477,7 +471,7 @@
                     btn.disabled = false; window.switchBottomTab('posters');
                 }, 1500);
             } catch(e) {
-                if(e.message !== "Validation Failed") alert("Error saving profile: " + e.message);
+                alert("Error saving profile: " + e.message);
                 btn.innerHTML = originalHTML; btn.disabled = false;
             }
         };
@@ -485,14 +479,11 @@
         window.submitRegistration = async () => {
             const btn = document.getElementById('regSubmitBtn');
             const status = document.getElementById('regStatus');
-            btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Securing Profile...';
-            
+            btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving Profile...';
             try {
                 const photoFile = document.getElementById('regPhoto').files[0];
                 const logoFile = document.getElementById('regLogo').files[0];
-                if(!validateFile(photoFile) || !validateFile(logoFile)) { throw new Error("Validation Failed"); }
-                
-                const [photoUrl, logoUrl] = await Promise.all([ uploadViaCloudFunction(photoFile), uploadViaCloudFunction(logoFile) ]);
+                const [photoUrl, logoUrl] = await Promise.all([ uploadToImgBB(photoFile), uploadToImgBB(logoFile) ]);
 
                 const newClient = {
                     email: auth.currentUser.email,
@@ -512,14 +503,13 @@
                 document.getElementById('mainApp').classList.replace('hidden', 'flex');
                 window.switchMainTab('app');
             } catch(e) {
-                if(e.message !== "Validation Failed") {
-                    status.className = "text-center text-sm font-semibold mt-2 text-red-600 block";
-                    status.innerText = "Error saving profile. Try again.";
-                }
+                status.className = "text-center text-sm font-semibold mt-2 text-red-600 block";
+                status.innerText = "Error saving profile. Try again.";
                 btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-rocket"></i> Save & Continue';
             }
         };
 
+        // --- BUTTON UTILITIES (Download & Share) ---
         window.downloadPosterImage = (dataUrl) => {
             const link = document.createElement('a'); link.download = `Poster_${Date.now()}.png`; link.href = dataUrl; link.click();
         };
@@ -530,22 +520,27 @@
                 const file = new File([blob], `Poster_${Date.now()}.png`, { type: "image/png" });
                 if (navigator.canShare && navigator.canShare({ files: [file] })) {
                     await navigator.share({ title: 'My Poster', text: 'Check out my latest update!', files: [file] });
-                } else { alert("Your browser does not support direct sharing. Please download first."); }
+                } else { alert("Your browser does not support direct image sharing. Please download the poster first."); }
             } catch (error) { console.log("Error sharing:", error); }
         };
 
-        // 👉 INFINITE SCROLL FEED LOGIC 👈
+
+        // 👉 INFINITE SCROLL RENDER LOGIC (Responsive Cards) 👈
         async function loadPostersFeed(isLoadMore = false) {
             if(!currentClientData || isFetchingPosters || (!hasMorePosters && isLoadMore)) return;
 
             const grid = document.getElementById('postersGrid');
             const loader = document.getElementById('infiniteScrollLoader');
+            
             isFetchingPosters = true;
 
             if (!isLoadMore) {
                 grid.innerHTML = '<div class="col-span-full text-center text-slate-500 py-10 mt-10" id="initialLoader"><i class="fa-solid fa-spinner fa-spin text-3xl mb-3 text-emerald-500"></i><br>Crafting your posters...</div>';
-                lastVisibleTemplate = null; hasMorePosters = true;
-            } else { loader.classList.remove('hidden'); }
+                lastVisibleTemplate = null;
+                hasMorePosters = true;
+            } else {
+                loader.classList.remove('hidden');
+            }
 
             try {
                 let q = query(collection(db, "templates"), orderBy("updatedAt", "desc"), limit(4));
@@ -556,12 +551,15 @@
                 const querySnapshot = await getDocs(q);
                 
                 if (querySnapshot.empty) {
-                    hasMorePosters = false; loader.classList.add('hidden');
+                    hasMorePosters = false;
+                    loader.classList.add('hidden');
                     if (!isLoadMore) grid.innerHTML = '<div class="col-span-full text-center text-slate-500 py-10 mt-10"><i class="fa-solid fa-folder-open text-4xl mb-3 text-slate-300"></i><br>No posters available yet.</div>';
-                    isFetchingPosters = false; return;
+                    isFetchingPosters = false;
+                    return;
                 }
 
                 if (!isLoadMore) grid.innerHTML = '';
+                
                 lastVisibleTemplate = querySnapshot.docs[querySnapshot.docs.length - 1];
 
                 for (const documentSnapshot of querySnapshot.docs) {
@@ -625,29 +623,31 @@
 
             } catch (error) {
                 console.error(error);
-                if (!isLoadMore) grid.innerHTML = '<div class="col-span-full text-center text-red-500 py-10">Error loading posters. Check permissions.</div>';
-            } finally { isFetchingPosters = false; }
+                if (!isLoadMore) grid.innerHTML = '<div class="col-span-full text-center text-red-500 py-10">Error loading posters.</div>';
+            } finally {
+                isFetchingPosters = false;
+            }
         }
 
         const scrollObserver = new IntersectionObserver((entries) => {
-            if (entries[0].isIntersecting && !isFetchingPosters && hasMorePosters) { loadPostersFeed(true); }
+            if (entries[0].isIntersecting && !isFetchingPosters && hasMorePosters) {
+                loadPostersFeed(true);
+            }
         }, { root: document.getElementById('appMainScrollArea'), threshold: 0.1 });
         scrollObserver.observe(document.getElementById('infiniteScrollLoader'));
 
 
-        // 👉 ADMIN EDITOR FUNCTIONS (Secured Authorization Checks) 👈
+        // 👉 ADMIN EDITOR FUNCTIONS 👈
         document.getElementById('bgUpload').addEventListener('change', async (e) => {
-            if (!isAdminLoggedIn) { alert("Unauthorized"); return; }
             const file = e.target.files[0];
-            if (!validateFile(file)) return;
-            
+            if (!file) return;
             const bgUploadLabel = document.getElementById('bgUploadLabel');
             const bgUploadText = document.getElementById('bgUploadText');
             const originalHTML = bgUploadText.innerHTML;
-            bgUploadText.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Uploading Securely...';
+            bgUploadText.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Uploading...';
             bgUploadLabel.style.pointerEvents = 'none';
             try {
-                const downloadURL = await uploadViaCloudFunction(file);
+                const downloadURL = await uploadToImgBB(file);
                 fabric.Image.fromURL(downloadURL, (img) => {
                     const scale = Math.max(800 / img.width, 800 / img.height);
                     img.set({ scaleX: scale, scaleY: scale, originX: 'center', originY: 'center', top: 400, left: 400 });
@@ -656,7 +656,7 @@
                     setTimeout(() => { bgUploadText.innerHTML = originalHTML; bgUploadLabel.style.pointerEvents = 'auto'; }, 2000);
                 }, { crossOrigin: 'anonymous' });
             } catch (error) {
-                alert("Failed to upload background securely!");
+                alert("Failed to upload background!");
                 bgUploadText.innerHTML = originalHTML; bgUploadLabel.style.pointerEvents = 'auto';
             }
         });
@@ -664,23 +664,21 @@
         adminCanvas.on('selection:created', updateStylingPanel);
         adminCanvas.on('selection:updated', updateStylingPanel);
         adminCanvas.on('selection:cleared', () => { document.getElementById('stylePanel').classList.add('opacity-50', 'pointer-events-none'); });
-        document.getElementById('colorPicker').oninput = function() { if(!isAdminLoggedIn) return; const obj = adminCanvas.getActiveObject(); if(obj) { obj.set('fill', this.value); adminCanvas.renderAll(); }};
-        document.getElementById('fontSize').oninput = function() { if(!isAdminLoggedIn) return; const obj = adminCanvas.getActiveObject(); if(obj && obj.type === 'i-text') { obj.set('fontSize', parseInt(this.value)); adminCanvas.renderAll(); }};
-        document.getElementById('fontFamily').onchange = function() { if(!isAdminLoggedIn) return; const obj = adminCanvas.getActiveObject(); if(obj && obj.type === 'i-text') { obj.set('fontFamily', this.value); adminCanvas.renderAll(); }};
+        document.getElementById('colorPicker').oninput = function() { const obj = adminCanvas.getActiveObject(); if(obj) { obj.set('fill', this.value); adminCanvas.renderAll(); }};
+        document.getElementById('fontSize').oninput = function() { const obj = adminCanvas.getActiveObject(); if(obj && obj.type === 'i-text') { obj.set('fontSize', parseInt(this.value)); adminCanvas.renderAll(); }};
+        document.getElementById('fontFamily').onchange = function() { const obj = adminCanvas.getActiveObject(); if(obj && obj.type === 'i-text') { obj.set('fontFamily', this.value); adminCanvas.renderAll(); }};
 
         window.addText = (str) => {
-            if (!isAdminLoggedIn) return;
             const text = new fabric.IText(str, { left: 400, top: 400, originX: 'center', originY: 'center', fontFamily: 'Poppins', fontSize: 50, fill: '#1e293b', fontWeight: 'bold', placeholderType: 'TEXT', shadow: new fabric.Shadow({ color: 'rgba(255,255,255,0.8)', blur: 2, offsetX: 1, offsetY: 1 }) });
             adminCanvas.add(text); adminCanvas.setActiveObject(text);
         };
         window.addBox = (type) => {
-            if (!isAdminLoggedIn) return;
             const isPhoto = type === 'PHOTO';
             const rect = new fabric.Rect({ left: 400, top: 400, originX: 'center', originY: 'center', width: isPhoto ? 250 : 150, height: isPhoto ? 300 : 150, fill: isPhoto ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)', stroke: isPhoto ? '#10b981' : '#f59e0b', strokeDashArray: [8,8], strokeWidth: 3, placeholderType: type });
             adminCanvas.add(rect); adminCanvas.setActiveObject(rect);
         };
-        window.deleteObject = () => { if (!isAdminLoggedIn) return; const obj = adminCanvas.getActiveObject(); if(obj) { adminCanvas.remove(obj); document.getElementById('stylePanel').classList.add('opacity-50', 'pointer-events-none'); } };
-        window.setTextAlign = (align) => { if (!isAdminLoggedIn) return; const obj = adminCanvas.getActiveObject(); if(obj && obj.type === 'i-text') { obj.set('textAlign', align); adminCanvas.renderAll(); } };
+        window.deleteObject = () => { const obj = adminCanvas.getActiveObject(); if(obj) { adminCanvas.remove(obj); document.getElementById('stylePanel').classList.add('opacity-50', 'pointer-events-none'); } };
+        window.setTextAlign = (align) => { const obj = adminCanvas.getActiveObject(); if(obj && obj.type === 'i-text') { obj.set('textAlign', align); adminCanvas.renderAll(); } };
 
         function updateStylingPanel() {
             const obj = adminCanvas.getActiveObject();
@@ -691,10 +689,9 @@
         }
 
         window.saveTemplate = async () => {
-            if (!isAdminLoggedIn) { alert("Unauthorized Action"); return; }
             const saveBtn = document.querySelector('button[onclick="window.saveTemplate()"]');
             const originalHTML = saveBtn.innerHTML;
-            saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Securing to Cloud...';
+            saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving to Cloud...';
             try {
                 const json = adminCanvas.toJSON(['placeholderType']);
                 const savedTemplateJSON = JSON.stringify(json);
@@ -706,7 +703,7 @@
                 });
                 
                 adminCanvas.clear(); document.getElementById('bgUpload').value = '';
-                saveBtn.innerHTML = '<i class="fa-solid fa-check"></i> Safely Saved!';
+                saveBtn.innerHTML = '<i class="fa-solid fa-check"></i> Cloud Saved!';
                 saveBtn.classList.replace('bg-emerald-600', 'bg-teal-600');
                 setTimeout(() => { saveBtn.innerHTML = originalHTML; saveBtn.classList.replace('bg-teal-600', 'bg-emerald-600'); }, 2000);
             } catch (error) {
