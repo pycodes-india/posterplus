@@ -298,8 +298,6 @@
         const provider = new GoogleAuthProvider();
         const db = getFirestore(app);
 
-        const IMGBB_API_KEY = "49ae9c7a7f287d75ec6730c026dd6f5e"; 
-
         let adminCanvas;
         let offscreenFabricCanvas;
         let isAdminLoggedIn = false;
@@ -424,293 +422,310 @@
             document.getElementById('profAddress').value = currentClientData.address || '';
         }
 
+        // 👉 सुरक्षित Vercel API के जरिए ImgBB पर इमेज अपलोड करने का फंक्शन 👈
         const uploadToImgBB = async (file) => {
-            const formData = new FormData();
-            formData.append('image', file);
-            formData.append('key', IMGBB_API_KEY);
-            const res = await fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: formData });
-            const data = await res.json();
-            if(data.success) return data.data.url;
-            throw new Error("Upload Failed");
-        };
-
-        window.submitProfile = async () => {
-            const btn = document.getElementById('profSubmitBtn');
-            const originalHTML = btn.innerHTML;
-            btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
-            try {
-                let photoUrl = currentClientData ? currentClientData.photo : null;
-                let logoUrl = currentClientData ? currentClientData.logo : null;
-                const photoFile = document.getElementById('profPhoto').files[0];
-                const logoFile = document.getElementById('profLogo').files[0];
-                
-                if (photoFile) photoUrl = await uploadToImgBB(photoFile);
-                if (logoFile) logoUrl = await uploadToImgBB(logoFile);
-
-                if(!photoUrl || !logoUrl) throw new Error("Images are required for new profile.");
-
-                const profileData = {
-                    email: auth.currentUser.email,
-                    name: document.getElementById('profName').value,
-                    bizName: document.getElementById('profBizName').value,
-                    whatsapp: document.getElementById('profWhatsapp').value,
-                    address: document.getElementById('profAddress').value,
-                    photo: photoUrl,
-                    logo: logoUrl,
-                    updatedAt: new Date().toISOString()
-                };
-
-                await setDoc(doc(db, "clients", auth.currentUser.uid), profileData, { merge: true });
-                currentClientData = profileData;
-                document.getElementById('profileAlertDot').classList.add('hidden');
-                
-                btn.innerHTML = '<i class="fa-solid fa-check"></i> Saved!';
-                btn.classList.replace('bg-emerald-600', 'bg-teal-600');
-                setTimeout(() => { 
-                    btn.innerHTML = originalHTML; btn.classList.replace('bg-teal-600', 'bg-emerald-600'); 
-                    btn.disabled = false; window.switchBottomTab('posters');
-                }, 1500);
-            } catch(e) {
-                alert("Error saving profile: " + e.message);
-                btn.innerHTML = originalHTML; btn.disabled = false;
-            }
-        };
-
-        window.submitRegistration = async () => {
-            const btn = document.getElementById('regSubmitBtn');
-            const status = document.getElementById('regStatus');
-            btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving Profile...';
-            try {
-                const photoFile = document.getElementById('regPhoto').files[0];
-                const logoFile = document.getElementById('regLogo').files[0];
-                const [photoUrl, logoUrl] = await Promise.all([ uploadToImgBB(photoFile), uploadToImgBB(logoFile) ]);
-
-                const newClient = {
-                    email: auth.currentUser.email,
-                    name: document.getElementById('regName').value,
-                    bizName: document.getElementById('regBizName').value,
-                    whatsapp: document.getElementById('regWhatsapp').value,
-                    address: document.getElementById('regAddress').value,
-                    photo: photoUrl,
-                    logo: logoUrl,
-                    joinedAt: new Date().toISOString()
-                };
-
-                await setDoc(doc(db, "clients", auth.currentUser.uid), newClient);
-                currentClientData = newClient;
-                
-                document.getElementById('registrationScreen').classList.replace('flex', 'hidden');
-                document.getElementById('mainApp').classList.replace('hidden', 'flex');
-                window.switchMainTab('app');
-            } catch(e) {
-                status.className = "text-center text-sm font-semibold mt-2 text-red-600 block";
-                status.innerText = "Error saving profile. Try again.";
-                btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-rocket"></i> Save & Continue';
-            }
-        };
-
-        // --- BUTTON UTILITIES (Download & Share) ---
-        window.downloadPosterImage = (dataUrl) => {
-            const link = document.createElement('a'); link.download = `Poster_${Date.now()}.png`; link.href = dataUrl; link.click();
-        };
-
-        window.sharePoster = async (dataUrl) => {
-            try {
-                const res = await fetch(dataUrl); const blob = await res.blob();
-                const file = new File([blob], `Poster_${Date.now()}.png`, { type: "image/png" });
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    await navigator.share({ title: 'My Poster', text: 'Check out my latest update!', files: [file] });
-                } else { alert("Your browser does not support direct image sharing. Please download the poster first."); }
-            } catch (error) { console.log("Error sharing:", error); }
-        };
-
-
-        // 👉 INFINITE SCROLL RENDER LOGIC (Responsive Cards) 👈
-        async function loadPostersFeed(isLoadMore = false) {
-            if(!currentClientData || isFetchingPosters || (!hasMorePosters && isLoadMore)) return;
-
-            const grid = document.getElementById('postersGrid');
-            const loader = document.getElementById('infiniteScrollLoader');
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
             
-            isFetchingPosters = true;
-
-            if (!isLoadMore) {
-                grid.innerHTML = '<div class="col-span-full text-center text-slate-500 py-10 mt-10" id="initialLoader"><i class="fa-solid fa-spinner fa-spin text-3xl mb-3 text-emerald-500"></i><br>Crafting your posters...</div>';
-                lastVisibleTemplate = null;
-                hasMorePosters = true;
-            } else {
-                loader.classList.remove('hidden');
-            }
-
-            try {
-                let q = query(collection(db, "templates"), orderBy("updatedAt", "desc"), limit(4));
-                if (isLoadMore && lastVisibleTemplate) {
-                    q = query(collection(db, "templates"), orderBy("updatedAt", "desc"), startAfter(lastVisibleTemplate), limit(4));
-                }
-
-                const querySnapshot = await getDocs(q);
-                
-                if (querySnapshot.empty) {
-                    hasMorePosters = false;
-                    loader.classList.add('hidden');
-                    if (!isLoadMore) grid.innerHTML = '<div class="col-span-full text-center text-slate-500 py-10 mt-10"><i class="fa-solid fa-folder-open text-4xl mb-3 text-slate-300"></i><br>No posters available yet.</div>';
-                    isFetchingPosters = false;
-                    return;
-                }
-
-                if (!isLoadMore) grid.innerHTML = '';
-                
-                lastVisibleTemplate = querySnapshot.docs[querySnapshot.docs.length - 1];
-
-                for (const documentSnapshot of querySnapshot.docs) {
-                    const templateJSON = documentSnapshot.data().templateData;
-                    
-                    await new Promise((resolveTemplate) => {
-                        offscreenFabricCanvas.loadFromJSON(templateJSON, () => {
-                            const objects = offscreenFabricCanvas.getObjects();
-                            let promises = [];
-
-                            objects.forEach((obj) => {
-                                if (obj.type === 'i-text' || obj.type === 'text') {
-                                    if (obj.text.includes('{{USER_NAME}}')) obj.set('text', obj.text.replace('{{USER_NAME}}', currentClientData.name));
-                                    if (obj.text.includes('{{BIZ_NAME}}')) obj.set('text', obj.text.replace('{{BIZ_NAME}}', currentClientData.bizName));
-                                    obj.initDimensions(); obj.setCoords();
-                                }
-                                
-                                if (obj.placeholderType === 'PHOTO' || obj.placeholderType === 'LOGO') {
-                                    const imgUrl = obj.placeholderType === 'PHOTO' ? currentClientData.photo : currentClientData.logo;
-                                    let p = new Promise((resolveImg) => {
-                                        fabric.Image.fromURL(imgUrl, (realImg) => {
-                                            const sX = (obj.width * obj.scaleX) / realImg.width;
-                                            const sY = (obj.height * obj.scaleY) / realImg.height;
-                                            realImg.set({ left: obj.left, top: obj.top, originX: obj.originX, originY: obj.originY, scaleX: sX, scaleY: sY, angle: obj.angle });
-                                            offscreenFabricCanvas.remove(obj); 
-                                            offscreenFabricCanvas.add(realImg); 
-                                            realImg.moveTo(offscreenFabricCanvas.getObjects().indexOf(obj));
-                                            resolveImg();
-                                        }, { crossOrigin: 'anonymous' });
-                                    });
-                                    promises.push(p);
-                                }
-                            });
-
-                            Promise.all(promises).then(() => {
-                                offscreenFabricCanvas.renderAll();
-                                const finalImageURL = offscreenFabricCanvas.toDataURL({ format: 'png', multiplier: 1.5 });
-                                
-                                const posterDiv = document.createElement('div');
-                                posterDiv.className = "bg-white p-2 md:p-3 rounded-xl md:rounded-2xl shadow-sm border border-slate-100 flex flex-col";
-                                posterDiv.innerHTML = `
-                                    <img src="${finalImageURL}" class="w-full h-auto rounded-lg md:rounded-xl border border-slate-100 mb-2 md:mb-3" />
-                                    <div class="mt-auto flex flex-col gap-1.5 md:gap-2">
-                                        <button onclick="window.sharePoster('${finalImageURL}')" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white px-2 py-1.5 md:px-4 md:py-2 rounded-md md:rounded-lg text-[10px] md:text-sm font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm">
-                                            <i class="fa-brands fa-whatsapp text-sm md:text-lg"></i> <span class="hidden md:inline">Share Story</span><span class="md:hidden">Share</span>
-                                        </button>
-                                        <button onclick="window.downloadPosterImage('${finalImageURL}')" class="w-full bg-slate-50 hover:bg-slate-100 text-slate-600 px-2 py-1.5 md:px-4 md:py-2 rounded-md md:rounded-lg text-[10px] md:text-sm font-bold transition-colors flex items-center justify-center gap-1.5 border border-slate-200">
-                                            <i class="fa-solid fa-download"></i> <span class="hidden md:inline">Download Poster</span><span class="md:hidden">Save</span>
-                                        </button>
-                                    </div>
-                                `;
-                                grid.appendChild(posterDiv);
-                                resolveTemplate();
-                            });
+            return new Promise((resolve, reject) => {
+                reader.onloadend = async () => {
+                    try {
+                        const base64String = reader.result;
+                        const res = await fetch('/api/upload', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ imageBase64: base64String })
                         });
-                    });
-                }
-                
-                if(querySnapshot.docs.length === 4) { loader.classList.remove('hidden'); } 
-                else { loader.classList.add('hidden'); hasMorePosters = false; }
-
-            } catch (error) {
-                console.error(error);
-                if (!isLoadMore) grid.innerHTML = '<div class="col-span-full text-center text-red-500 py-10">Error loading posters.</div>';
-            } finally {
-                isFetchingPosters = false;
-            }
-        }
-
-        const scrollObserver = new IntersectionObserver((entries) => {
-            if (entries[0].isIntersecting && !isFetchingPosters && hasMorePosters) {
-                loadPostersFeed(true);
-            }
-        }, { root: document.getElementById('appMainScrollArea'), threshold: 0.1 });
-        scrollObserver.observe(document.getElementById('infiniteScrollLoader'));
-
-
-        // 👉 ADMIN EDITOR FUNCTIONS 👈
-        document.getElementById('bgUpload').addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            const bgUploadLabel = document.getElementById('bgUploadLabel');
-            const bgUploadText = document.getElementById('bgUploadText');
-            const originalHTML = bgUploadText.innerHTML;
-            bgUploadText.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Uploading...';
-            bgUploadLabel.style.pointerEvents = 'none';
-            try {
-                const downloadURL = await uploadToImgBB(file);
-                fabric.Image.fromURL(downloadURL, (img) => {
-                    const scale = Math.max(800 / img.width, 800 / img.height);
-                    img.set({ scaleX: scale, scaleY: scale, originX: 'center', originY: 'center', top: 400, left: 400 });
-                    adminCanvas.setBackgroundImage(img, adminCanvas.renderAll.bind(adminCanvas));
-                    bgUploadText.innerHTML = '<i class="fa-solid fa-check text-emerald-500 mr-1"></i> Uploaded!';
-                    setTimeout(() => { bgUploadText.innerHTML = originalHTML; bgUploadLabel.style.pointerEvents = 'auto'; }, 2000);
-                }, { crossOrigin: 'anonymous' });
-            } catch (error) {
-                alert("Failed to upload background!");
-                bgUploadText.innerHTML = originalHTML; bgUploadLabel.style.pointerEvents = 'auto';
-            }
-        });
-
-        adminCanvas.on('selection:created', updateStylingPanel);
-        adminCanvas.on('selection:updated', updateStylingPanel);
-        adminCanvas.on('selection:cleared', () => { document.getElementById('stylePanel').classList.add('opacity-50', 'pointer-events-none'); });
-        document.getElementById('colorPicker').oninput = function() { const obj = adminCanvas.getActiveObject(); if(obj) { obj.set('fill', this.value); adminCanvas.renderAll(); }};
-        document.getElementById('fontSize').oninput = function() { const obj = adminCanvas.getActiveObject(); if(obj && obj.type === 'i-text') { obj.set('fontSize', parseInt(this.value)); adminCanvas.renderAll(); }};
-        document.getElementById('fontFamily').onchange = function() { const obj = adminCanvas.getActiveObject(); if(obj && obj.type === 'i-text') { obj.set('fontFamily', this.value); adminCanvas.renderAll(); }};
-
-        window.addText = (str) => {
-            const text = new fabric.IText(str, { left: 400, top: 400, originX: 'center', originY: 'center', fontFamily: 'Poppins', fontSize: 50, fill: '#1e293b', fontWeight: 'bold', placeholderType: 'TEXT', shadow: new fabric.Shadow({ color: 'rgba(255,255,255,0.8)', blur: 2, offsetX: 1, offsetY: 1 }) });
-            adminCanvas.add(text); adminCanvas.setActiveObject(text);
-        };
-        window.addBox = (type) => {
-            const isPhoto = type === 'PHOTO';
-            const rect = new fabric.Rect({ left: 400, top: 400, originX: 'center', originY: 'center', width: isPhoto ? 250 : 150, height: isPhoto ? 300 : 150, fill: isPhoto ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)', stroke: isPhoto ? '#10b981' : '#f59e0b', strokeDashArray: [8,8], strokeWidth: 3, placeholderType: type });
-            adminCanvas.add(rect); adminCanvas.setActiveObject(rect);
-        };
-        window.deleteObject = () => { const obj = adminCanvas.getActiveObject(); if(obj) { adminCanvas.remove(obj); document.getElementById('stylePanel').classList.add('opacity-50', 'pointer-events-none'); } };
-        window.setTextAlign = (align) => { const obj = adminCanvas.getActiveObject(); if(obj && obj.type === 'i-text') { obj.set('textAlign', align); adminCanvas.renderAll(); } };
-
-        function updateStylingPanel() {
-            const obj = adminCanvas.getActiveObject();
-            if(!obj) return;
-            document.getElementById('stylePanel').classList.remove('opacity-50', 'pointer-events-none');
-            document.getElementById('colorPicker').value = obj.fill || '#000000';
-            if(obj.type === 'i-text') { document.getElementById('fontSize').value = obj.fontSize; document.getElementById('fontFamily').value = obj.fontFamily || 'sans-serif'; }
-        }
-
-        window.saveTemplate = async () => {
-            const saveBtn = document.querySelector('button[onclick="window.saveTemplate()"]');
-            const originalHTML = saveBtn.innerHTML;
-            saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving to Cloud...';
-            try {
-                const json = adminCanvas.toJSON(['placeholderType']);
-                const savedTemplateJSON = JSON.stringify(json);
-                const templateId = "poster_" + Date.now();
-                
-                await setDoc(doc(db, "templates", templateId), { 
-                    templateData: savedTemplateJSON, 
+                        const data = await res.json();
+                        if (data.url) {
+                            resolve(data.url);
+                        } else {
+                            reject(new Error(data.error || "Upload Failed"));
+                        }
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
+            });
+        }; 
+ 
+        window.submitProfile = async () => { 
+            const btn = document.getElementById('profSubmitBtn'); 
+            const originalHTML = btn.innerHTML; 
+            btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...'; 
+            try { 
+                let photoUrl = currentClientData ? currentClientData.photo : null; 
+                let logoUrl = currentClientData ? currentClientData.logo : null; 
+                const photoFile = document.getElementById('profPhoto').files[0]; 
+                const logoFile = document.getElementById('profLogo').files[0]; 
+                 
+                if (photoFile) photoUrl = await uploadToImgBB(photoFile); 
+                if (logoFile) logoUrl = await uploadToImgBB(logoFile); 
+ 
+                if(!photoUrl || !logoUrl) throw new Error("Images are required for new profile."); 
+ 
+                const profileData = { 
+                    email: auth.currentUser.email, 
+                    name: document.getElementById('profName').value, 
+                    bizName: document.getElementById('profBizName').value, 
+                    whatsapp: document.getElementById('profWhatsapp').value, 
+                    address: document.getElementById('profAddress').value, 
+                    photo: photoUrl, 
+                    logo: logoUrl, 
                     updatedAt: new Date().toISOString() 
-                });
-                
-                adminCanvas.clear(); document.getElementById('bgUpload').value = '';
-                saveBtn.innerHTML = '<i class="fa-solid fa-check"></i> Cloud Saved!';
-                saveBtn.classList.replace('bg-emerald-600', 'bg-teal-600');
-                setTimeout(() => { saveBtn.innerHTML = originalHTML; saveBtn.classList.replace('bg-teal-600', 'bg-emerald-600'); }, 2000);
-            } catch (error) {
-                alert("Error saving to cloud! Check Firestore rules.");
-                saveBtn.innerHTML = originalHTML;
-            }
-        };
-    </script>
-</body>
+                }; 
+ 
+                await setDoc(doc(db, "clients", auth.currentUser.uid), profileData, { merge: true }); 
+                currentClientData = profileData; 
+                document.getElementById('profileAlertDot').classList.add('hidden'); 
+                 
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Saved!'; 
+                btn.classList.replace('bg-emerald-600', 'bg-teal-600'); 
+                setTimeout(() => {  
+                    btn.innerHTML = originalHTML; btn.classList.replace('bg-teal-600', 'bg-emerald-600');  
+                    btn.disabled = false; window.switchBottomTab('posters'); 
+                }, 1500); 
+            } catch(e) { 
+                alert("Error saving profile: " + e.message); 
+                btn.innerHTML = originalHTML; btn.disabled = false; 
+            } 
+        }; 
+ 
+        window.submitRegistration = async () => { 
+            const btn = document.getElementById('regSubmitBtn'); 
+            const status = document.getElementById('regStatus'); 
+            btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving Profile...'; 
+            try { 
+                const photoFile = document.getElementById('regPhoto').files[0]; 
+                const logoFile = document.getElementById('regLogo').files[0]; 
+                const [photoUrl, logoUrl] = await Promise.all([ uploadToImgBB(photoFile), uploadToImgBB(logoFile) ]); 
+ 
+                const newClient = { 
+                    email: auth.currentUser.email, 
+                    name: document.getElementById('regName').value, 
+                    bizName: document.getElementById('regBizName').value, 
+                    whatsapp: document.getElementById('regWhatsapp').value, 
+                    address: document.getElementById('regAddress').value, 
+                    photo: photoUrl, 
+                    logo: logoUrl, 
+                    joinedAt: new Date().toISOString() 
+                }; 
+ 
+                await setDoc(doc(db, "clients", auth.currentUser.uid), newClient); 
+                currentClientData = newClient; 
+                 
+                document.getElementById('registrationScreen').classList.replace('flex', 'hidden'); 
+                document.getElementById('mainApp').classList.replace('hidden', 'flex'); 
+                window.switchMainTab('app'); 
+            } catch(e) { 
+                status.className = "text-center text-sm font-semibold mt-2 text-red-600 block"; 
+                status.innerText = "Error saving profile. Try again."; 
+                btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-rocket"></i> Save & Continue'; 
+            } 
+        }; 
+ 
+        // --- BUTTON UTILITIES (Download & Share) --- 
+        window.downloadPosterImage = (dataUrl) => { 
+            const link = document.createElement('a'); link.download = `Poster_${Date.now()}.png`; link.href = dataUrl; link.click(); 
+        }; 
+ 
+        window.sharePoster = async (dataUrl) => { 
+            try { 
+                const res = await fetch(dataUrl); const blob = await res.blob(); 
+                const file = new File([blob], `Poster_${Date.now()}.png`, { type: "image/png" }); 
+                if (navigator.canShare && navigator.canShare({ files: [file] })) { 
+                    await navigator.share({ title: 'My Poster', text: 'Check out my latest update!', files: [file] }); 
+                } else { alert("Your browser does not support direct image sharing. Please download the poster first."); } 
+            } catch (error) { console.log("Error sharing:", error); } 
+        }; 
+
+
+        // 👉 INFINITE SCROLL RENDER LOGIC (Responsive Cards) 👈 
+        async function loadPostersFeed(isLoadMore = false) { 
+            if(!currentClientData || isFetchingPosters || (!hasMorePosters && isLoadMore)) return; 
+
+            const grid = document.getElementById('postersGrid'); 
+            const loader = document.getElementById('infiniteScrollLoader'); 
+             
+            isFetchingPosters = true; 
+
+            if (!isLoadMore) { 
+                grid.innerHTML = '<div class="col-span-full text-center text-slate-500 py-10 mt-10" id="initialLoader"><i class="fa-solid fa-spinner fa-spin text-3xl mb-3 text-emerald-500"></i><br>Crafting your posters...</div>'; 
+                lastVisibleTemplate = null; 
+                hasMorePosters = true; 
+            } else { 
+                loader.classList.remove('hidden'); 
+            } 
+
+            try { 
+                let q = query(collection(db, "templates"), orderBy("updatedAt", "desc"), limit(4)); 
+                if (isLoadMore && lastVisibleTemplate) { 
+                    q = query(collection(db, "templates"), orderBy("updatedAt", "desc"), startAfter(lastVisibleTemplate), limit(4)); 
+                } 
+
+                const querySnapshot = await getDocs(q); 
+                 
+                if (querySnapshot.empty) { 
+                    hasMorePosters = false; 
+                    loader.classList.add('hidden'); 
+                    if (!isLoadMore) grid.innerHTML = '<div class="col-span-full text-center text-slate-500 py-10 mt-10"><i class="fa-solid fa-folder-open text-4xl mb-3 text-slate-300"></i><br>No posters available yet.</div>'; 
+                    isFetchingPosters = false; 
+                    return; 
+                } 
+
+                if (!isLoadMore) grid.innerHTML = ''; 
+                 
+                lastVisibleTemplate = querySnapshot.docs[querySnapshot.docs.length - 1]; 
+
+                for (const documentSnapshot of querySnapshot.docs) { 
+                    const templateJSON = documentSnapshot.data().templateData; 
+                     
+                    await new Promise((resolveTemplate) => { 
+                        offscreenFabricCanvas.loadFromJSON(templateJSON, () => { 
+                            const objects = offscreenFabricCanvas.getObjects(); 
+                            let promises = []; 
+
+                            objects.forEach((obj) => { 
+                                if (obj.type === 'i-text' || obj.type === 'text') { 
+                                    if (obj.text.includes('{{USER_NAME}}')) obj.set('text', obj.text.replace('{{USER_NAME}}', currentClientData.name)); 
+                                    if (obj.text.includes('{{BIZ_NAME}}')) obj.set('text', obj.text.replace('{{BIZ_NAME}}', currentClientData.bizName)); 
+                                    obj.initDimensions(); obj.setCoords(); 
+                                } 
+                                 
+                                if (obj.placeholderType === 'PHOTO' || obj.placeholderType === 'LOGO') { 
+                                    const imgUrl = obj.placeholderType === 'PHOTO' ? currentClientData.photo : currentClientData.logo; 
+                                    let p = new Promise((resolveImg) => { 
+                                        fabric.Image.fromURL(imgUrl, (realImg) => { 
+                                            const sX = (obj.width * obj.scaleX) / realImg.width; 
+                                            const sY = (obj.height * obj.scaleY) / realImg.height; 
+                                            realImg.set({ left: obj.left, top: obj.top, originX: obj.originX, originY: obj.originY, scaleX: sX, scaleY: sY, angle: obj.angle }); 
+                                            offscreenFabricCanvas.remove(obj);  
+                                            offscreenFabricCanvas.add(realImg);  
+                                            realImg.moveTo(offscreenFabricCanvas.getObjects().indexOf(obj)); 
+                                            resolveImg(); 
+                                        }, { crossOrigin: 'anonymous' }); 
+                                    }); 
+                                    promises.push(p); 
+                                } 
+                            }); 
+
+                            Promise.all(promises).then(() => { 
+                                offscreenFabricCanvas.renderAll(); 
+                                const finalImageURL = offscreenFabricCanvas.toDataURL({ format: 'png', multiplier: 1.5 }); 
+                                 
+                                const posterDiv = document.createElement('div'); 
+                                posterDiv.className = "bg-white p-2 md:p-3 rounded-xl md:rounded-2xl shadow-sm border border-slate-100 flex flex-col"; 
+                                posterDiv.innerHTML = ` 
+                                    <img src="${finalImageURL}" class="w-full h-auto rounded-lg md:rounded-xl border border-slate-100 mb-2 md:mb-3" /> 
+                                    <div class="mt-auto flex flex-col gap-1.5 md:gap-2"> 
+                                        <button onclick="window.sharePoster('${finalImageURL}')" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white px-2 py-1.5 md:px-4 md:py-2 rounded-md md:rounded-lg text-[10px] md:text-sm font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm"> 
+                                            <i class="fa-brands fa-whatsapp text-sm md:text-lg"></i> <span class="hidden md:inline">Share Story</span><span class="md:hidden">Share</span> 
+                                        </button> 
+                                        <button onclick="window.downloadPosterImage('${finalImageURL}')" class="w-full bg-slate-50 hover:bg-slate-100 text-slate-600 px-2 py-1.5 md:px-4 md:py-2 rounded-md md:rounded-lg text-[10px] md:text-sm font-bold transition-colors flex items-center justify-center gap-1.5 border border-slate-200"> 
+                                            <i class="fa-solid fa-download"></i> <span class="hidden md:inline">Download Poster</span><span class="md:hidden">Save</span> 
+                                        </button> 
+                                    </div> 
+                                `; 
+                                grid.appendChild(posterDiv); 
+                                resolveTemplate(); 
+                            }); 
+                        }); 
+                    }); 
+                } 
+                 
+                if(querySnapshot.docs.length === 4) { loader.classList.remove('hidden'); }  
+                else { loader.classList.add('hidden'); hasMorePosters = false; } 
+
+            } catch (error) { 
+                console.error(error); 
+                if (!isLoadMore) grid.innerHTML = '<div class="col-span-full text-center text-red-500 py-10">Error loading posters.</div>'; 
+            } finally { 
+                isFetchingPosters = false; 
+            } 
+        } 
+
+        const scrollObserver = new IntersectionObserver((entries) => { 
+            if (entries[0].isIntersecting && !isFetchingPosters && hasMorePosters) { 
+                loadPostersFeed(true); 
+            } 
+        }, { root: document.getElementById('appMainScrollArea'), threshold: 0.1 }); 
+        scrollObserver.observe(document.getElementById('infiniteScrollLoader')); 
+
+
+        // 👉 ADMIN EDITOR FUNCTIONS 👈 
+        document.getElementById('bgUpload').addEventListener('change', async (e) => { 
+            const file = e.target.files[0]; 
+            if (!file) return; 
+            const bgUploadLabel = document.getElementById('bgUploadLabel'); 
+            const bgUploadText = document.getElementById('bgUploadText'); 
+            const originalHTML = bgUploadText.innerHTML; 
+            bgUploadText.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Uploading...'; 
+            bgUploadLabel.style.pointerEvents = 'none'; 
+            try { 
+                const downloadURL = await uploadToImgBB(file); 
+                fabric.Image.fromURL(downloadURL, (img) => { 
+                    const scale = Math.max(800 / img.width, 800 / img.height); 
+                    img.set({ scaleX: scale, scaleY: scale, originX: 'center', originY: 'center', top: 400, left: 400 }); 
+                    adminCanvas.setBackgroundImage(img, adminCanvas.renderAll.bind(adminCanvas)); 
+                    bgUploadText.innerHTML = '<i class="fa-solid fa-check text-emerald-500 mr-1"></i> Uploaded!'; 
+                    setTimeout(() => { bgUploadText.innerHTML = originalHTML; bgUploadLabel.style.pointerEvents = 'auto'; }, 2000); 
+                }, { crossOrigin: 'anonymous' }); 
+            } catch (error) { 
+                alert("Failed to upload background!"); 
+                bgUploadText.innerHTML = originalHTML; bgUploadLabel.style.pointerEvents = 'auto'; 
+            } 
+        }); 
+
+        adminCanvas.on('selection:created', updateStylingPanel); 
+        adminCanvas.on('selection:updated', updateStylingPanel); 
+        adminCanvas.on('selection:cleared', () => { document.getElementById('stylePanel').classList.add('opacity-50', 'pointer-events-none'); }); 
+        document.getElementById('colorPicker').oninput = function() { const obj = adminCanvas.getActiveObject(); if(obj) { obj.set('fill', this.value); adminCanvas.renderAll(); }}; 
+        document.getElementById('fontSize').oninput = function() { const obj = adminCanvas.getActiveObject(); if(obj && obj.type === 'i-text') { obj.set('fontSize', parseInt(this.value)); adminCanvas.renderAll(); }}; 
+        document.getElementById('fontFamily').onchange = function() { const obj = adminCanvas.getActiveObject(); if(obj && obj.type === 'i-text') { obj.set('fontFamily', this.value); adminCanvas.renderAll(); }}; 
+
+        window.addText = (str) => { 
+            const text = new fabric.IText(str, { left: 400, top: 400, originX: 'center', originY: 'center', fontFamily: 'Poppins', fontSize: 50, fill: '#1e293b', fontWeight: 'bold', placeholderType: 'TEXT', shadow: new fabric.Shadow({ color: 'rgba(255,255,255,0.8)', blur: 2, offsetX: 1, offsetY: 1 }) }); 
+            adminCanvas.add(text); adminCanvas.setActiveObject(text); 
+        }; 
+        window.addBox = (type) => { 
+            const isPhoto = type === 'PHOTO'; 
+            const rect = new fabric.Rect({ left: 400, top: 400, originX: 'center', originY: 'center', width: isPhoto ? 250 : 150, height: isPhoto ? 300 : 150, fill: isPhoto ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)', stroke: isPhoto ? '#10b981' : '#f59e0b', strokeDashArray: [8,8], strokeWidth: 3, placeholderType: type }); 
+            adminCanvas.add(rect); adminCanvas.setActiveObject(rect); 
+        }; 
+        window.deleteObject = () => { const obj = adminCanvas.getActiveObject(); if(obj) { adminCanvas.remove(obj); document.getElementById('stylePanel').classList.add('opacity-50', 'pointer-events-none'); } }; 
+        window.setTextAlign = (align) => { const obj = adminCanvas.getActiveObject(); if(obj && obj.type === 'i-text') { obj.set('textAlign', align); adminCanvas.renderAll(); } }; 
+
+        function updateStylingPanel() { 
+            const obj = adminCanvas.getActiveObject(); 
+            if(!obj) return; 
+            document.getElementById('stylePanel').classList.remove('opacity-50', 'pointer-events-none'); 
+            document.getElementById('colorPicker').value = obj.fill || '#000000'; 
+            if(obj.type === 'i-text') { document.getElementById('fontSize').value = obj.fontSize; document.getElementById('fontFamily').value = obj.fontFamily || 'sans-serif'; } 
+        } 
+
+        window.saveTemplate = async () => { 
+            const saveBtn = document.querySelector('button[onclick="window.saveTemplate()"]'); 
+            const originalHTML = saveBtn.innerHTML; 
+            saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving to Cloud...'; 
+            try { 
+                const json = adminCanvas.toJSON(['placeholderType']); 
+                const savedTemplateJSON = JSON.stringify(json); 
+                const templateId = "poster_" + Date.now(); 
+                 
+                await setDoc(doc(db, "templates", templateId), {  
+                    templateData: savedTemplateJSON,  
+                    updatedAt: new Date().toISOString()  
+                }); 
+                 
+                adminCanvas.clear(); document.getElementById('bgUpload').value = ''; 
+                saveBtn.innerHTML = '<i class="fa-solid fa-check"></i> Cloud Saved!'; 
+                saveBtn.classList.replace('bg-emerald-600', 'bg-teal-600'); 
+                setTimeout(() => { saveBtn.innerHTML = originalHTML; saveBtn.classList.replace('bg-teal-600', 'bg-emerald-600'); }, 2000); 
+            } catch (error) { 
+                alert("Error saving to cloud! Check Firestore rules."); 
+                saveBtn.innerHTML = originalHTML; 
+            } 
+        }; 
+    </script> 
+</body> 
 </html>
