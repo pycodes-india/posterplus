@@ -167,14 +167,116 @@
                 </div>
 
                 <div id="appTabPayments" class="hidden p-4 h-full flex items-center justify-center">
-                    <div class="text-center bg-white p-8 rounded-3xl shadow-sm border border-slate-100 w-full max-w-md">
-                        <div class="w-16 h-16 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center text-2xl mx-auto mb-4">
-                            <i class="fa-solid fa-wallet"></i>
-                        </div>
-                        <h2 class="text-xl font-bold text-slate-800 mb-2">Payments & Subscription</h2>
-                        <p class="text-slate-500 mb-6 text-sm">Your active plans and payment history will appear here.</p>
-                        <button class="bg-slate-100 text-slate-700 font-bold py-2 px-6 rounded-xl cursor-not-allowed">Coming Soon</button>
-                    </div>
+                    <!-- ========================================== -->
+<!-- POSTERPLUS CASHFREE PAYMENT SECTION START  -->
+<!-- ========================================== -->
+
+<!-- Cashfree SDK (अगर आपने पहले से head में नहीं लगाया है, तो इसे रहने दें) -->
+<script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+
+<style>
+    /* CSS Classes को यूनीक नाम दिए गए हैं */
+    .posterPlus_checkout_card {
+        background: #fff;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        text-align: center;
+        max-width: 350px;
+        width: 100%;
+        margin: 20px auto; /* बीच में लाने के लिए */
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .posterPlus_price_text {
+        font-size: 32px;
+        color: #2c3e50;
+        font-weight: bold;
+        margin: 15px 0;
+    }
+    .posterPlus_pay_button {
+        background-color: #6c5ce7;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        font-size: 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        width: 100%;
+        transition: background 0.3s;
+        font-weight: bold;
+    }
+    .posterPlus_pay_button:hover {
+        background-color: #5b4bc4;
+    }
+    .posterPlus_pay_button:disabled {
+        background-color: #a29bfe;
+        cursor: not-allowed;
+    }
+</style>
+
+<div class="posterPlus_checkout_card">
+    <h2>PosterPlus Premium</h2>
+    <p>Get unlimited access to premium digital posters and designs.</p>
+    <div class="posterPlus_price_text">₹99.00</div>
+    <button id="posterPlus_actionBtn" class="posterPlus_pay_button">Pay Now & Subscribe</button>
+</div>
+
+<script>
+    // Variables को यूनीक बनाने के लिए 'posterPlus_' प्रीफिक्स जोड़ा गया है
+    const posterPlus_CashfreeInstance = Cashfree({
+        mode: "sandbox" 
+    });
+
+    const posterPlus_BtnElement = document.getElementById('posterPlus_actionBtn');
+
+    posterPlus_BtnElement.addEventListener('click', async () => {
+        // बटन को लोडिंग स्टेट में डालें
+        posterPlus_BtnElement.innerText = "Processing...";
+        posterPlus_BtnElement.disabled = true;
+
+        try {
+            // ⚠️ यहां अपना Vercel API URL डालें
+            const posterPlus_ApiEndpoint = 'https://YOUR-VERCEL-PROJECT-NAME.vercel.app/api/create-order';
+            
+            const posterPlus_FetchResponse = await fetch(posterPlus_ApiEndpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    amount: 99.00, 
+                    customerId: 'USER_' + Math.floor(Math.random() * 100000), 
+                    phone: '9999999999',
+                    email: 'user@example.com',
+                    name: 'Test User'
+                })
+            });
+            
+            const posterPlus_OrderPayload = await posterPlus_FetchResponse.json();
+
+            if (posterPlus_OrderPayload.payment_session_id) {
+                let posterPlus_CheckoutConfig = {
+                    paymentSessionId: posterPlus_OrderPayload.payment_session_id,
+                    redirectTarget: "_modal" 
+                };
+                // Cashfree पेमेंट गेटवे खोलें
+                posterPlus_CashfreeInstance.checkout(posterPlus_CheckoutConfig);
+            } else {
+                alert("Error creating payment session. Check console.");
+                console.error("API Error:", posterPlus_OrderPayload);
+            }
+        } catch (posterPlus_ErrorObj) {
+            console.error("Fetch error:", posterPlus_ErrorObj);
+            alert("Something went wrong!");
+        } finally {
+            // बटन को वापस नॉर्मल करें
+            posterPlus_BtnElement.innerText = "Pay Now & Subscribe";
+            posterPlus_BtnElement.disabled = false;
+        }
+    });
+</script>
+
+<!-- ========================================== -->
+<!-- POSTERPLUS CASHFREE PAYMENT SECTION END    -->
+<!-- ========================================== -->
                 </div>
 
                 <div id="appTabProfile" class="hidden p-4 max-w-lg mx-auto w-full">
