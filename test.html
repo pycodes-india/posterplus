@@ -7,16 +7,30 @@
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Fabric.js (SRI hash removed to prevent breaking) -->
+    <!-- Fabric.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <!-- FontAwesome with Valid SRI Hash -->
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Oswald:wght@400;700&family=Lobster&family=Poppins:wght@400;700;800&display=swap" rel="stylesheet">
+    <!-- Cashfree SDK -->
+    <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
     
     <style>
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        
+        /* Cashfree Payment Card Styles */
+        .posterPlus_checkout_card {
+            background: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 1px solid #f1f5f9;
+            text-align: center;
+            max-width: 350px;
+            width: 100%;
+        }
     </style>
 </head>
 <body class="bg-slate-50 font-sans h-screen flex flex-col overflow-hidden text-slate-800 relative">
@@ -158,7 +172,23 @@
         <!-- CLIENT APP VIEW -->
         <div id="clientApp" class="flex-1 flex flex-col relative bg-slate-50 overflow-hidden">
             <main id="appMainScrollArea" class="flex-1 overflow-y-auto pb-20">
+                
+                <!-- 1. POSTERS TAB -->
                 <div id="appTabPosters" class="p-3 md:p-6 max-w-6xl mx-auto w-full">
+                    
+                    <!-- 🔒 PAYWALL SCREEN (Hidden if Subscribed) -->
+                    <div id="paywallScreen" class="hidden flex-col items-center justify-center py-20 px-6 text-center bg-white rounded-3xl shadow-sm border border-slate-100 mt-4">
+                        <div class="text-5xl mb-4 bg-red-50 w-20 h-20 flex items-center justify-center rounded-full text-red-500 mx-auto border border-red-100">
+                            <i class="fa-solid fa-lock"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold text-slate-800 mb-2">Premium Content Locked</h2>
+                        <p class="text-slate-500 mb-6 text-sm max-w-xs mx-auto">Your subscription has expired or is not active. Please subscribe to unlock all premium digital posters.</p>
+                        <button onclick="window.switchBottomTab('payments')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3.5 rounded-xl font-bold shadow-md transition-all flex items-center gap-2">
+                            <i class="fa-solid fa-wallet"></i> Go to Payments
+                        </button>
+                    </div>
+
+                    <!-- POSTERS GRID (Hidden if NOT Subscribed) -->
                     <div id="postersGrid" class="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6 mt-2"></div>
                     <div id="infiniteScrollLoader" class="text-center py-6 hidden">
                         <i class="fa-solid fa-spinner fa-spin text-xl text-emerald-500"></i>
@@ -166,124 +196,28 @@
                     </div>
                 </div>
 
-                <div id="appTabPayments" class="hidden p-4 h-full flex items-center justify-center">
-                    <!-- ========================================== -->
-<!-- POSTERPLUS CASHFREE PAYMENT SECTION START  -->
-<!-- ========================================== -->
-
-<!-- Cashfree SDK (अगर आपने पहले से head में नहीं लगाया है, तो इसे रहने दें) -->
-<script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
-
-<style>
-    /* CSS Classes को यूनीक नाम दिए गए हैं */
-    .posterPlus_checkout_card {
-        background: #fff;
-        padding: 30px;
-        border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        text-align: center;
-        max-width: 350px;
-        width: 100%;
-        margin: 20px auto; /* बीच में लाने के लिए */
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    .posterPlus_price_text {
-        font-size: 32px;
-        color: #2c3e50;
-        font-weight: bold;
-        margin: 15px 0;
-    }
-    .posterPlus_pay_button {
-        background-color: #6c5ce7;
-        color: white;
-        border: none;
-        padding: 12px 24px;
-        font-size: 16px;
-        border-radius: 8px;
-        cursor: pointer;
-        width: 100%;
-        transition: background 0.3s;
-        font-weight: bold;
-    }
-    .posterPlus_pay_button:hover {
-        background-color: #5b4bc4;
-    }
-    .posterPlus_pay_button:disabled {
-        background-color: #a29bfe;
-        cursor: not-allowed;
-    }
-</style>
-
-<div class="posterPlus_checkout_card">
-    <h2>PosterPlus Premium</h2>
-    <p>Get unlimited access to premium digital posters and designs.</p>
-    <div class="posterPlus_price_text">₹99.00</div>
-    <button id="posterPlus_actionBtn" class="posterPlus_pay_button">Pay Now & Subscribe</button>
-</div>
-
-<script>
-    // Variables को यूनीक बनाने के लिए 'posterPlus_' प्रीफिक्स जोड़ा गया है
-    const posterPlus_CashfreeInstance = Cashfree({
-        mode: "sandbox" 
-    });
-
-    const posterPlus_BtnElement = document.getElementById('posterPlus_actionBtn');
-
-    posterPlus_BtnElement.addEventListener('click', async () => {
-        // बटन को लोडिंग स्टेट में डालें
-        posterPlus_BtnElement.innerText = "Processing...";
-        posterPlus_BtnElement.disabled = true;
-
-        try {
-            // ⚠️ यहां अपना Vercel API URL डालें
-            const posterPlus_ApiEndpoint = 'https://YOUR-VERCEL-PROJECT-NAME.vercel.app/api/create-order';
-            
-            const posterPlus_FetchResponse = await fetch(posterPlus_ApiEndpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    amount: 99.00, 
-                    customerId: 'USER_' + Math.floor(Math.random() * 100000), 
-                    phone: '9999999999',
-                    email: 'user@example.com',
-                    name: 'Test User'
-                })
-            });
-            
-            const posterPlus_OrderPayload = await posterPlus_FetchResponse.json();
-
-            if (posterPlus_OrderPayload.payment_session_id) {
-                let posterPlus_CheckoutConfig = {
-                    paymentSessionId: posterPlus_OrderPayload.payment_session_id,
-                    redirectTarget: "_modal" 
-                };
-                // Cashfree पेमेंट गेटवे खोलें
-                posterPlus_CashfreeInstance.checkout(posterPlus_CheckoutConfig);
-            } else {
-                alert("Error creating payment session. Check console.");
-                console.error("API Error:", posterPlus_OrderPayload);
-            }
-        } catch (posterPlus_ErrorObj) {
-            console.error("Fetch error:", posterPlus_ErrorObj);
-            alert("Something went wrong!");
-        } finally {
-            // बटन को वापस नॉर्मल करें
-            posterPlus_BtnElement.innerText = "Pay Now & Subscribe";
-            posterPlus_BtnElement.disabled = false;
-        }
-    });
-</script>
-
-<!-- ========================================== -->
-<!-- POSTERPLUS CASHFREE PAYMENT SECTION END    -->
-<!-- ========================================== -->
+                <!-- 2. PAYMENTS TAB -->
+                <div id="appTabPayments" class="hidden p-4 h-full flex flex-col items-center justify-center">
+                    <div class="posterPlus_checkout_card">
+                        <div class="w-16 h-16 mx-auto bg-amber-100 text-amber-500 rounded-full flex items-center justify-center text-3xl mb-4">
+                            <i class="fa-solid fa-crown"></i>
+                        </div>
+                        <h2 class="text-xl font-bold text-slate-800">PosterPlus Premium</h2>
+                        <p class="text-sm text-slate-500 mt-2 mb-6">Get 30 days of unlimited access to premium digital posters.</p>
+                        <div class="text-4xl font-extrabold text-emerald-600 mb-6">₹99<span class="text-sm text-slate-400 font-medium">/mo</span></div>
+                        <button id="posterPlus_actionBtn" onclick="window.startPayment()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 px-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-bolt text-yellow-400"></i> Pay Now & Subscribe
+                        </button>
+                        <p class="text-[10px] text-slate-400 mt-4"><i class="fa-solid fa-shield-halved"></i> Secured by Cashfree</p>
+                    </div>
                 </div>
 
+                <!-- 3. PROFILE TAB -->
                 <div id="appTabProfile" class="hidden p-4 max-w-lg mx-auto w-full">
                     <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mt-2">
                         <div class="flex justify-between items-center mb-6">
                             <h2 class="text-xl font-bold text-slate-800">Business Profile</h2>
-                            <button onclick="window.logoutUser()" class="text-red-500 bg-red-50 px-3 py-1.5 rounded-lg text-xs font-bold"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</button>
+                            <button onclick="window.logoutUser()" class="text-red-500 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</button>
                         </div>
                         
                         <form id="profileForm" onsubmit="event.preventDefault(); window.submitProfile();" class="space-y-4">
@@ -326,6 +260,7 @@
                 </div>
             </main>
 
+            <!-- BOTTOM NAVIGATION -->
             <nav class="absolute bottom-0 w-full bg-white border-t border-slate-200 flex justify-around items-center h-16 px-2 pb-safe z-50 shadow-[0_-4px_10px_-1px_rgba(0,0,0,0.05)]">
                 <button onclick="window.switchBottomTab('posters')" id="navPosters" class="flex flex-col items-center justify-center w-full h-full text-emerald-600 transition-colors">
                     <i class="fa-solid fa-images text-xl mb-1"></i>
@@ -346,6 +281,7 @@
 
     <canvas id="offscreenCanvas" style="display:none;"></canvas>
 
+    <!-- FIREBASE AND APP LOGIC -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
@@ -419,6 +355,57 @@
             }
         });
 
+        // ==========================================
+        // CASHFREE PAYMENT LOGIC (SECURE)
+        // ==========================================
+        window.startPayment = async () => {
+            if (!auth.currentUser || !currentClientData) {
+                alert("Please log in and complete profile first.");
+                return;
+            }
+
+            const btn = document.getElementById('posterPlus_actionBtn');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+            btn.disabled = true;
+
+            try {
+                // ⚠️ यहां अपना Vercel API URL डालें
+                const API_URL = 'https://YOUR-VERCEL-PROJECT-NAME.vercel.app/api/create-order';
+                
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        amount: 99.00, 
+                        customerId: auth.currentUser.uid, // Firebase User ID
+                        phone: currentClientData.whatsapp || '9999999999',
+                        email: auth.currentUser.email,
+                        name: currentClientData.name || 'User'
+                    })
+                });
+                
+                const orderData = await response.json();
+
+                if (orderData.payment_session_id) {
+                    const cashfree = Cashfree({ mode: "sandbox" });
+                    cashfree.checkout({
+                        paymentSessionId: orderData.payment_session_id,
+                        redirectTarget: "_modal"
+                    });
+                } else {
+                    alert("Error starting payment. Check console.");
+                    console.error("API Error:", orderData);
+                }
+            } catch (error) {
+                console.error("Payment error:", error);
+                alert("Something went wrong while connecting to payment gateway.");
+            } finally {
+                btn.innerHTML = '<i class="fa-solid fa-bolt text-yellow-400"></i> Pay Now & Subscribe';
+                btn.disabled = false;
+            }
+        };
+
+
         window.loginWithGoogle = async () => {
             document.getElementById("authStatus").className = "mt-4 text-sm font-semibold text-emerald-600 block";
             document.getElementById("authStatus").innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Connecting...';
@@ -469,7 +456,7 @@
             } 
             else if(tab === 'payments') {
                 if(!currentClientData) { alert("Please complete your profile first."); window.switchBottomTab('profile'); return; }
-                document.getElementById('appTabPayments').classList.remove('hidden');
+                document.getElementById('appTabPayments').classList.replace('hidden', 'flex');
                 document.getElementById('navPayments').classList.replace('text-slate-400', 'text-emerald-600');
             } 
             else if(tab === 'profile') {
@@ -530,7 +517,7 @@
                 };
             });
         }; 
- 
+
         window.submitProfile = async () => { 
             const btn = document.getElementById('profSubmitBtn'); 
             const originalHTML = btn.innerHTML; 
@@ -543,9 +530,9 @@
                  
                 if (photoFile) photoUrl = await uploadToImgBB(photoFile); 
                 if (logoFile) logoUrl = await uploadToImgBB(logoFile); 
- 
+
                 if(!photoUrl || !logoUrl) throw new Error("Images are required."); 
- 
+
                 const profileData = { 
                     email: auth.currentUser.email, 
                     name: document.getElementById('profName').value, 
@@ -556,9 +543,11 @@
                     logo: logoUrl, 
                     updatedAt: new Date().toISOString() 
                 }; 
- 
+
                 await setDoc(doc(db, "clients", auth.currentUser.uid), profileData, { merge: true }); 
-                currentClientData = profileData; 
+                
+                // Update local data, preserving subscription data if it exists
+                currentClientData = { ...currentClientData, ...profileData }; 
                 document.getElementById('profileAlertDot').classList.add('hidden'); 
                  
                 btn.innerHTML = '<i class="fa-solid fa-check"></i> Saved!'; 
@@ -572,7 +561,7 @@
                 btn.innerHTML = originalHTML; btn.disabled = false; 
             } 
         }; 
- 
+
         window.submitRegistration = async () => { 
             const btn = document.getElementById('regSubmitBtn'); 
             const status = document.getElementById('regStatus'); 
@@ -581,7 +570,7 @@
                 const photoFile = document.getElementById('regPhoto').files[0]; 
                 const logoFile = document.getElementById('regLogo').files[0]; 
                 const [photoUrl, logoUrl] = await Promise.all([ uploadToImgBB(photoFile), uploadToImgBB(logoFile) ]); 
- 
+
                 const newClient = { 
                     email: auth.currentUser.email, 
                     name: document.getElementById('regName').value, 
@@ -592,7 +581,7 @@
                     logo: logoUrl, 
                     joinedAt: new Date().toISOString() 
                 }; 
- 
+
                 await setDoc(doc(db, "clients", auth.currentUser.uid), newClient); 
                 currentClientData = newClient; 
                  
@@ -605,11 +594,11 @@
                 btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-rocket"></i> Save & Continue'; 
             } 
         }; 
- 
+
         window.downloadPosterImage = (dataUrl) => { 
             const link = document.createElement('a'); link.download = `Poster_${Date.now()}.png`; link.href = dataUrl; link.click(); 
         }; 
- 
+
         window.sharePoster = async (dataUrl) => { 
             try { 
                 const res = await fetch(dataUrl); const blob = await res.blob(); 
@@ -625,6 +614,23 @@
 
             const grid = document.getElementById('postersGrid'); 
             const loader = document.getElementById('infiniteScrollLoader'); 
+            const paywall = document.getElementById('paywallScreen');
+
+            // ⚠️ SUBSCRIPTION CHECK LOGIC ⚠️
+            const currentTime = Date.now();
+            const hasActiveSub = currentClientData.subscriptionExpiry && currentClientData.subscriptionExpiry > currentTime;
+
+            if (!hasActiveSub) {
+                grid.classList.add('hidden');
+                loader.classList.add('hidden');
+                paywall.classList.remove('hidden');
+                paywall.classList.add('flex');
+                return; // Stop loading posters, user is locked out
+            } else {
+                grid.classList.remove('hidden');
+                paywall.classList.add('hidden');
+                paywall.classList.remove('flex');
+            }
              
             isFetchingPosters = true; 
 
