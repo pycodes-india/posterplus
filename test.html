@@ -1,886 +1,3942 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PosterPlus - Pro Edition</title>
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Fabric.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Oswald:wght@400;700&family=Lobster&family=Poppins:wght@400;700;800&display=swap" rel="stylesheet">
-    <!-- Cashfree SDK -->
-    <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
-    
-    <style>
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        
-        /* Cashfree Payment Card Styles */
-        .posterPlus_checkout_card {
-            background: #fff;
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            border: 1px solid #f1f5f9;
-            text-align: center;
-            max-width: 350px;
-            width: 100%;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
-<style id="posterplus-pro-theme">
-:root{--pp-primary:#16a34a;--pp-primary2:#059669;--pp-dark:#0b1220;--pp-bg:#f4f7f6}
-body{background:radial-gradient(circle at 20% 0%,#ecfdf5 0,transparent 30%),linear-gradient(135deg,#f8fafc,#eef7f3)!important}
-#mainApp{background:transparent}
-header{background:rgba(255,255,255,.9)!important;backdrop-filter:blur(16px);border-bottom:1px solid rgba(15,23,42,.08)!important;box-shadow:0 8px 30px rgba(15,23,42,.06)!important}
-#clientApp{background:transparent!important}
-#postersGrid>div{border-radius:20px!important;box-shadow:0 10px 30px rgba(15,23,42,.07)!important;transition:transform .2s ease,box-shadow .2s ease!important;overflow:hidden}
-#postersGrid>div:hover{transform:translateY(-3px);box-shadow:0 16px 38px rgba(15,23,42,.11)!important}
-#postersGrid img{display:block;background:#f1f5f9}
-nav{background:rgba(255,255,255,.94)!important;backdrop-filter:blur(18px);border-top:1px solid rgba(15,23,42,.08)!important}
-button,input,select{transition:all .18s ease}
-button:active{transform:scale(.97)}
-@media(max-width:640px){header{padding:10px 14px!important}#postersGrid{gap:10px!important}.posterPlus_checkout_card{border-radius:22px!important;padding:24px!important}.pb-safe{padding-bottom:env(safe-area-inset-bottom)}}
+<title>PosterPlus - Professional Poster App</title>
+
+<meta name="theme-color" content="#0f9f62">
+<meta name="color-scheme" content="light">
+<meta name="description" content="PosterPlus professional digital poster application">
+
+<!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Fabric.js -->
+<script
+src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"
+crossorigin="anonymous"
+referrerpolicy="no-referrer"></script>
+
+<!-- Font Awesome -->
+<link
+rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+integrity="sha512-iecdLmaskkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+crossorigin="anonymous"
+referrerpolicy="no-referrer">
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&family=Oswald:wght@400;500;700&family=Lobster&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!-- Cashfree -->
+<script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+
+<style>
+
+:root{
+    --primary:#16a34a;
+    --primary-dark:#087f45;
+    --primary-light:#ecfdf5;
+    --dark:#101828;
+    --muted:#667085;
+    --bg:#f5f7f9;
+    --border:#e5e7eb;
+}
+
+*{
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
+}
+
+html,
+body{
+    width:100%;
+    height:100%;
+    margin:0;
+}
+
+body{
+    font-family:'Poppins',sans-serif;
+    background:
+        radial-gradient(circle at 20% 0%,#e9fff3 0%,transparent 30%),
+        linear-gradient(135deg,#f8fafc,#f1f8f4);
+    color:#172033;
+    overflow:hidden;
+}
+
+button,
+input,
+select{
+    font-family:inherit;
+}
+
+button{
+    cursor:pointer;
+}
+
+::-webkit-scrollbar{
+    width:5px;
+    height:5px;
+}
+
+::-webkit-scrollbar-thumb{
+    background:#cbd5e1;
+    border-radius:20px;
+}
+
+::-webkit-scrollbar-track{
+    background:transparent;
+}
+
+/* =========================================================
+   APP HEADER
+========================================================= */
+
+.app-header{
+    height:68px;
+    min-height:68px;
+    background:rgba(255,255,255,.92);
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+    border-bottom:1px solid rgba(15,23,42,.07);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 18px;
+    position:relative;
+    z-index:100;
+}
+
+.brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.brand-logo{
+    width:40px;
+    height:40px;
+    border-radius:12px;
+    object-fit:contain;
+    background:white;
+    box-shadow:0 5px 15px rgba(16,185,129,.16);
+}
+
+.brand-name{
+    font-size:21px;
+    font-weight:800;
+    letter-spacing:-.7px;
+    color:#172033;
+}
+
+.brand-name span{
+    color:#16a34a;
+}
+
+.header-actions{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.mode-btn{
+    border:1px solid #e5e7eb;
+    background:#f8fafc;
+    color:#344054;
+    padding:9px 13px;
+    border-radius:11px;
+    font-size:12px;
+    font-weight:700;
+    display:flex;
+    align-items:center;
+    gap:7px;
+    transition:.2s;
+}
+
+.mode-btn:hover{
+    border-color:#16a34a;
+    color:#16a34a;
+}
+
+.mode-btn.app{
+    background:#ecfdf5;
+    border-color:#bbf7d0;
+    color:#087f45;
+}
+
+/* =========================================================
+   LOGIN
+========================================================= */
+
+.login-screen{
+    position:fixed;
+    inset:0;
+    z-index:1000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    background:
+        radial-gradient(circle at 20% 10%,rgba(34,197,94,.25),transparent 30%),
+        linear-gradient(135deg,#07130d,#0d1f16 50%,#07130d);
+}
+
+.login-card{
+    width:100%;
+    max-width:410px;
+    padding:36px 28px;
+    background:rgba(255,255,255,.97);
+    border:1px solid rgba(255,255,255,.5);
+    border-radius:28px;
+    box-shadow:0 30px 80px rgba(0,0,0,.25);
+    text-align:center;
+}
+
+.login-logo{
+    width:82px;
+    height:82px;
+    border-radius:23px;
+    object-fit:contain;
+    margin:auto;
+    background:white;
+    padding:8px;
+    box-shadow:
+        0 12px 35px rgba(22,163,74,.22),
+        0 0 0 7px #ecfdf5;
+}
+
+.login-title{
+    margin-top:20px;
+    font-size:30px;
+    font-weight:900;
+    letter-spacing:-1.2px;
+}
+
+.login-title span{
+    color:#16a34a;
+}
+
+.login-subtitle{
+    margin-top:7px;
+    margin-bottom:28px;
+    color:#667085;
+    font-size:13px;
+    font-weight:500;
+}
+
+.google-btn{
+    width:100%;
+    height:53px;
+    border:1px solid #d0d5dd;
+    border-radius:14px;
+    background:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    color:#344054;
+    font-size:14px;
+    font-weight:700;
+    box-shadow:0 4px 12px rgba(16,24,40,.05);
+    transition:.2s;
+}
+
+.google-btn:hover{
+    border-color:#16a34a;
+    background:#f8fffb;
+    transform:translateY(-1px);
+}
+
+/* =========================================================
+   REGISTRATION
+========================================================= */
+
+.registration-screen{
+    position:fixed;
+    inset:0;
+    z-index:900;
+    background:#f3f6f5;
+    overflow-y:auto;
+    padding:20px;
+}
+
+.registration-card{
+    width:100%;
+    max-width:560px;
+    margin:auto;
+    background:white;
+    border:1px solid #e5e7eb;
+    border-radius:26px;
+    padding:28px;
+    box-shadow:0 20px 60px rgba(15,23,42,.08);
+}
+
+.form-input{
+    width:100%;
+    height:45px;
+    border:1px solid #d0d5dd;
+    border-radius:11px;
+    padding:0 13px;
+    outline:none;
+    background:#fff;
+    color:#1d2939;
+    font-size:13px;
+    font-weight:500;
+    transition:.2s;
+}
+
+.form-input:focus{
+    border-color:#16a34a;
+    box-shadow:0 0 0 3px rgba(22,163,74,.10);
+}
+
+.file-box{
+    background:#f0fdf4;
+    border:1px solid #bbf7d0;
+    border-radius:14px;
+    padding:12px;
+}
+
+/* =========================================================
+   MAIN APP
+========================================================= */
+
+#mainApp{
+    width:100%;
+    height:100dvh;
+    min-height:100vh;
+}
+
+.client-app{
+    height:calc(100dvh - 68px);
+    min-height:0;
+    position:relative;
+}
+
+.app-scroll{
+    height:100%;
+    overflow-y:auto;
+    overflow-x:hidden;
+
+    /* IMPORTANT:
+       Extra bottom space so cards never hide behind navigation */
+    padding-bottom:110px;
+
+    scroll-behavior:smooth;
+}
+
+/* =========================================================
+   APP CONTENT
+========================================================= */
+
+.app-container{
+    width:100%;
+    max-width:1180px;
+    margin:auto;
+    padding:18px 15px 0;
+}
+
+.page-heading{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:16px;
+}
+
+.page-title{
+    font-size:21px;
+    font-weight:800;
+    letter-spacing:-.6px;
+    color:#101828;
+}
+
+.page-subtitle{
+    font-size:11px;
+    color:#98a2b3;
+    margin-top:2px;
+}
+
+/* =========================================================
+   POSTER GRID
+========================================================= */
+
+#postersGrid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:12px;
+}
+
+.poster-card{
+    background:white;
+    border:1px solid #eaecf0;
+    border-radius:18px;
+    padding:7px;
+    box-shadow:0 6px 20px rgba(16,24,40,.055);
+    overflow:hidden;
+    transition:
+        transform .2s ease,
+        box-shadow .2s ease;
+}
+
+.poster-card:hover{
+    transform:translateY(-3px);
+    box-shadow:0 15px 35px rgba(16,24,40,.10);
+}
+
+.poster-image{
+    width:100%;
+    display:block;
+    aspect-ratio:1/1;
+    object-fit:cover;
+    border-radius:13px;
+    background:#f2f4f7;
+}
+
+/* =========================================================
+   ICON ACTION BUTTONS
+========================================================= */
+
+.poster-actions{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:6px;
+    padding:7px 1px 1px;
+}
+
+.poster-action{
+    height:38px;
+    border-radius:10px;
+    border:1px solid transparent;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:15px;
+    transition:.18s;
+}
+
+.poster-action:active{
+    transform:scale(.94);
+}
+
+.poster-action.whatsapp{
+    background:#dcfce7;
+    color:#16a34a;
+    border-color:#bbf7d0;
+}
+
+.poster-action.facebook{
+    background:#eff6ff;
+    color:#2563eb;
+    border-color:#bfdbfe;
+}
+
+.poster-action.save{
+    background:#f8fafc;
+    color:#475467;
+    border-color:#e4e7ec;
+}
+
+.poster-action:hover{
+    filter:brightness(.97);
+    transform:translateY(-1px);
+}
+
+/* =========================================================
+   LOADER
+========================================================= */
+
+.loading-box{
+    grid-column:1/-1;
+    padding:65px 20px;
+    text-align:center;
+    color:#667085;
+}
+
+.loading-icon{
+    font-size:28px;
+    color:#16a34a;
+    margin-bottom:12px;
+}
+
+.loading-text{
+    font-size:12px;
+    font-weight:600;
+}
+
+/* =========================================================
+   PAYWALL
+========================================================= */
+
+.paywall{
+    background:white;
+    border:1px solid #eaecf0;
+    border-radius:24px;
+    padding:45px 24px;
+    text-align:center;
+    box-shadow:0 8px 25px rgba(16,24,40,.05);
+}
+
+.paywall-icon{
+    width:74px;
+    height:74px;
+    margin:0 auto 18px;
+    border-radius:50%;
+    background:#fff1f2;
+    color:#ef4444;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:28px;
+}
+
+/* =========================================================
+   PAYMENT
+========================================================= */
+
+.payment-wrap{
+    min-height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:30px 10px 110px;
+}
+
+.checkout-card{
+    width:100%;
+    max-width:390px;
+    background:white;
+    border:1px solid #eaecf0;
+    border-radius:27px;
+    padding:30px 25px;
+    text-align:center;
+    box-shadow:0 18px 50px rgba(16,24,40,.09);
+}
+
+.crown{
+    width:70px;
+    height:70px;
+    margin:auto;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:21px;
+    background:linear-gradient(135deg,#fef3c7,#fde68a);
+    color:#d97706;
+    font-size:28px;
+    box-shadow:0 10px 25px rgba(245,158,11,.18);
+}
+
+/* =========================================================
+   PROFILE
+========================================================= */
+
+.profile-card{
+    background:white;
+    border:1px solid #eaecf0;
+    border-radius:24px;
+    padding:22px;
+    box-shadow:0 8px 25px rgba(16,24,40,.05);
+    margin-bottom:30px;
+}
+
+/* =========================================================
+   BOTTOM NAVIGATION
+========================================================= */
+
+.bottom-nav{
+    position:fixed;
+    left:0;
+    right:0;
+    bottom:0;
+
+    /* Important */
+    z-index:500;
+
+    height:76px;
+    padding:
+        7px 10px
+        calc(7px + env(safe-area-inset-bottom))
+        10px;
+
+    background:rgba(255,255,255,.96);
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+
+    border-top:1px solid rgba(15,23,42,.08);
+
+    box-shadow:
+        0 -8px 30px rgba(15,23,42,.08);
+}
+
+.bottom-nav-inner{
+    height:100%;
+    max-width:600px;
+    margin:auto;
+
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:4px;
+}
+
+.nav-btn{
+    position:relative;
+    border:0;
+    background:transparent;
+    color:#98a2b3;
+
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+
+    gap:4px;
+    border-radius:14px;
+
+    font-size:10px;
+    font-weight:700;
+
+    transition:.2s;
+}
+
+.nav-btn i{
+    font-size:19px;
+}
+
+.nav-btn.active{
+    color:#16a34a;
+    background:#ecfdf5;
+}
+
+.nav-btn:active{
+    transform:scale(.94);
+}
+
+.nav-indicator{
+    position:absolute;
+    top:4px;
+    width:5px;
+    height:5px;
+    border-radius:50%;
+    background:#16a34a;
+}
+
+/* =========================================================
+   ADMIN
+========================================================= */
+
+.admin-panel{
+    height:calc(100dvh - 68px);
+    display:flex;
+    overflow:hidden;
+}
+
+.admin-sidebar{
+    width:315px;
+    min-width:315px;
+    background:white;
+    border-right:1px solid #e5e7eb;
+    display:flex;
+    flex-direction:column;
+    z-index:20;
+}
+
+.admin-scroll{
+    flex:1;
+    overflow-y:auto;
+    padding:18px;
+}
+
+.admin-workspace{
+    flex:1;
+    background:
+        linear-gradient(45deg,#e8eaed 25%,transparent 25%),
+        linear-gradient(-45deg,#e8eaed 25%,transparent 25%),
+        linear-gradient(45deg,transparent 75%,#e8eaed 75%),
+        linear-gradient(-45deg,transparent 75%,#e8eaed 75%);
+    background-size:20px 20px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:auto;
+    padding:40px;
+}
+
+.editor-canvas-wrap{
+    width:800px;
+    height:800px;
+    min-width:800px;
+    min-height:800px;
+    background:white;
+    box-shadow:0 20px 60px rgba(0,0,0,.20);
+    border-radius:4px;
+    overflow:hidden;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media(min-width:700px){
+
+    #postersGrid{
+        grid-template-columns:repeat(3,minmax(0,1fr));
+        gap:18px;
+    }
+
+    .app-container{
+        padding:24px 24px 0;
+    }
+
+    .poster-card{
+        padding:9px;
+        border-radius:20px;
+    }
+
+    .poster-image{
+        border-radius:15px;
+    }
+
+    .poster-action{
+        height:40px;
+    }
+}
+
+@media(max-width:700px){
+
+    .app-header{
+        height:62px;
+        min-height:62px;
+        padding:0 13px;
+    }
+
+    .brand-logo{
+        width:36px;
+        height:36px;
+    }
+
+    .brand-name{
+        font-size:19px;
+    }
+
+    .client-app{
+        height:calc(100dvh - 62px);
+    }
+
+    .app-container{
+        padding-top:15px;
+    }
+
+    .page-title{
+        font-size:19px;
+    }
+
+    .mode-btn{
+        width:39px;
+        height:39px;
+        padding:0;
+        justify-content:center;
+        border-radius:11px;
+    }
+
+    .mode-btn span{
+        display:none;
+    }
+
+    .bottom-nav{
+        height:76px;
+    }
+
+    .admin-panel{
+        flex-direction:column;
+    }
+
+    .admin-sidebar{
+        width:100%;
+        min-width:100%;
+        height:42%;
+    }
+
+    .admin-workspace{
+        height:58%;
+        padding:20px;
+    }
+
+    .editor-canvas-wrap{
+        transform:scale(.55);
+        transform-origin:center;
+        margin:-180px;
+    }
+}
+
+@media(max-width:380px){
+
+    #postersGrid{
+        gap:8px;
+    }
+
+    .poster-card{
+        padding:5px;
+        border-radius:15px;
+    }
+
+    .poster-action{
+        height:34px;
+        font-size:14px;
+    }
+
+    .app-container{
+        padding-left:9px;
+        padding-right:9px;
+    }
+}
+
+/* =========================================================
+   UTILITIES
+========================================================= */
+
+.hidden{
+    display:none!important;
+}
+
+.flex{
+    display:flex;
+}
+
+.no-select{
+    user-select:none;
+}
+
+.safe-bottom{
+    padding-bottom:env(safe-area-inset-bottom);
+}
+
 </style>
 </head>
-<body class="bg-slate-50 font-sans h-screen flex flex-col overflow-hidden text-slate-800 relative">
 
-    <!-- FULLSCREEN LOGIN SCREEN -->
-    <div id="loginScreen" class="absolute inset-0 bg-slate-900 z-50 flex items-center justify-center">
-        <div class="bg-white rounded-3xl p-10 w-full max-w-md text-center shadow-2xl transition-all duration-300">
-            <div class="w-20 h-20 mx-auto bg-gradient-to-br from-emerald-400 to-emerald-600 text-white rounded-2xl flex items-center justify-center text-4xl shadow-lg shadow-emerald-200 mb-6">
-                <i class="fa-solid fa-plus font-bold"></i>
+<body>
+
+<!-- =========================================================
+     LOGIN
+========================================================= -->
+
+<div id="loginScreen" class="login-screen">
+
+    <div class="login-card">
+
+        <img
+            src="logo.png"
+            class="login-logo"
+            alt="PosterPlus">
+
+        <div class="login-title">
+            Poster<span>Plus</span>
+        </div>
+
+        <div class="login-subtitle">
+            Create professional digital posters for your business
+        </div>
+
+        <button
+            id="googleLoginBtn"
+            class="google-btn"
+            onclick="window.loginWithGoogle()">
+
+            <svg width="21" height="21" viewBox="0 0 24 24">
+                <path fill="#4285F4"
+                d="M21.35 12.27c0-.73-.06-1.43-.18-2.09H12v3.95h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.69 2.91-4.18 2.91-7.25z"/>
+                <path fill="#34A853"
+                d="M12 21.82c2.63 0 4.84-.87 6.45-2.35l-3.14-2.45c-.87.58-1.98.92-3.31.92-2.54 0-4.69-1.72-5.46-4.03H3.3v2.53A9.75 9.75 0 0 0 12 21.82z"/>
+                <path fill="#FBBC05"
+                d="M6.54 13.91A5.86 5.86 0 0 1 6.23 12c0-.66.11-1.3.31-1.91V7.56H3.3A9.75 9.75 0 0 0 2.25 12c0 1.57.38 3.05 1.05 4.44l3.24-2.53z"/>
+                <path fill="#EA4335"
+                d="M12 6.06c1.43 0 2.71.49 3.72 1.45l2.79-2.79C16.84 3.14 14.63 2.18 12 2.18a9.75 9.75 0 0 0-8.7 5.38l3.24 2.53C7.31 7.78 9.46 6.06 12 6.06z"/>
+            </svg>
+
+            Continue with Google
+
+        </button>
+
+        <p id="authStatus"
+           class="mt-4 text-sm font-semibold hidden"></p>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     REGISTRATION
+========================================================= -->
+
+<div id="registrationScreen"
+     class="registration-screen hidden">
+
+    <div class="registration-card">
+
+        <div class="flex items-center gap-3 mb-7">
+
+            <img
+                src="logo.png"
+                class="w-12 h-12 rounded-xl object-contain border border-slate-100"
+                alt="PosterPlus">
+
+            <div>
+                <h2 class="text-xl font-extrabold text-slate-800">
+                    Complete Your Profile
+                </h2>
+
+                <p class="text-xs text-slate-500">
+                    Add your business details once
+                </p>
             </div>
-            <h1 class="text-3xl font-extrabold text-slate-800 mb-2 tracking-tight">Poster<span class="text-emerald-500">Plus</span></h1>
-            <p class="text-slate-500 mb-8 font-medium">Sign in to access your workspace</p>
 
-            <button id="googleLoginBtn" onclick="window.loginWithGoogle()" class="w-full flex items-center justify-center gap-3 bg-white border-2 border-slate-200 text-slate-700 font-bold py-3.5 px-4 rounded-xl hover:bg-slate-50 hover:border-emerald-500 hover:text-emerald-600 transition-all shadow-sm">
-                <svg class="w-6 h-6" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path fill="#4285F4" d="M21.35 12.27c0-.73-.06-1.43-.18-2.09H12v3.95h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.69 2.91-4.18 2.91-7.25z"/>
-                    <path fill="#34A853" d="M12 21.82c2.63 0 4.84-.87 6.45-2.35l-3.14-2.45c-.87.58-1.98.92-3.31.92-2.54 0-4.69-1.72-5.46-4.03H3.3v2.53A9.75 9.75 0 0 0 12 21.82z"/>
-                    <path fill="#FBBC05" d="M6.54 13.91A5.86 5.86 0 0 1 6.23 12c0-.66.11-1.3.31-1.91V7.56H3.3A9.75 9.75 0 0 0 2.25 12c0 1.57.38 3.05 1.05 4.44l3.24-2.53z"/>
-                    <path fill="#EA4335" d="M12 6.06c1.43 0 2.71.49 3.72 1.45l2.79-2.79C16.84 3.14 14.63 2.18 12 2.18a9.75 9.75 0 0 0-8.7 5.38l3.24 2.53C7.31 7.78 9.46 6.06 12 6.06z"/>
-                </svg>
-                Continue with Google
+        </div>
+
+
+        <form
+            id="regForm"
+            onsubmit="event.preventDefault();window.submitRegistration();"
+            class="space-y-4">
+
+            <div>
+
+                <label class="block text-xs font-bold text-slate-600 mb-1.5">
+                    Your Full Name
+                </label>
+
+                <input
+                    id="regName"
+                    required
+                    class="form-input"
+                    placeholder="Enter your name">
+
+            </div>
+
+
+            <div>
+
+                <label class="block text-xs font-bold text-slate-600 mb-1.5">
+                    Business / Shop Name
+                </label>
+
+                <input
+                    id="regBizName"
+                    required
+                    class="form-input"
+                    placeholder="Enter business name">
+
+            </div>
+
+
+            <div class="grid grid-cols-2 gap-3">
+
+                <div>
+
+                    <label class="block text-xs font-bold text-slate-600 mb-1.5">
+                        WhatsApp No.
+                    </label>
+
+                    <input
+                        type="tel"
+                        id="regWhatsapp"
+                        required
+                        pattern="[0-9]{10}"
+                        maxlength="10"
+                        class="form-input"
+                        placeholder="10 digit">
+
+                </div>
+
+
+                <div>
+
+                    <label class="block text-xs font-bold text-slate-600 mb-1.5">
+                        City / Address
+                    </label>
+
+                    <input
+                        id="regAddress"
+                        required
+                        class="form-input"
+                        placeholder="City">
+
+                </div>
+
+            </div>
+
+
+            <div class="grid grid-cols-2 gap-3">
+
+                <div class="file-box">
+
+                    <label class="block text-xs font-bold text-emerald-800 mb-2">
+                        <i class="fa-solid fa-user mr-1"></i>
+                        Your Photo
+                    </label>
+
+                    <input
+                        type="file"
+                        id="regPhoto"
+                        accept=".jpg,.jpeg,.png,.webp"
+                        required
+                        class="text-[10px] w-full">
+
+                </div>
+
+
+                <div class="file-box">
+
+                    <label class="block text-xs font-bold text-emerald-800 mb-2">
+                        <i class="fa-solid fa-store mr-1"></i>
+                        Business Logo
+                    </label>
+
+                    <input
+                        type="file"
+                        id="regLogo"
+                        accept=".jpg,.jpeg,.png,.webp"
+                        required
+                        class="text-[10px] w-full">
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="submit"
+                id="regSubmitBtn"
+                class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl mt-3 shadow-lg shadow-emerald-100 transition-all">
+
+                <i class="fa-solid fa-rocket mr-2"></i>
+                Create My Workspace
+
             </button>
-            <p id="authStatus" class="mt-4 text-sm font-semibold hidden"></p>
-        </div>
+
+            <p
+                id="regStatus"
+                class="text-center text-xs font-semibold hidden">
+            </p>
+
+        </form>
+
     </div>
 
-    <!-- REGISTRATION SCREEN -->
-    <div id="registrationScreen" class="absolute inset-0 bg-slate-100 z-40 hidden items-center justify-center overflow-y-auto p-4">
-        <div class="bg-white rounded-3xl p-8 w-full max-w-lg shadow-xl my-auto">
-            <h2 class="text-2xl font-bold mb-2 text-slate-800">Complete Your Profile</h2>
-            <p class="text-slate-500 mb-6 text-sm">Please provide your business details to generate your posters.</p>
-            
-            <form id="regForm" onsubmit="event.preventDefault(); window.submitRegistration();" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-1">Your Full Name</label>
-                    <input type="text" id="regName" required class="w-full border border-slate-300 rounded-lg px-4 py-2 outline-none focus:border-emerald-500">
-                </div>
-                <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-1">Business/Shop Name</label>
-                    <input type="text" id="regBizName" required class="w-full border border-slate-300 rounded-lg px-4 py-2 outline-none focus:border-emerald-500">
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-bold text-slate-700 mb-1">WhatsApp No.</label>
-                        <input type="tel" id="regWhatsapp" required pattern="[0-9]{10}" placeholder="10-digit number" class="w-full border border-slate-300 rounded-lg px-4 py-2 outline-none focus:border-emerald-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-slate-700 mb-1">City/Address</label>
-                        <input type="text" id="regAddress" required class="w-full border border-slate-300 rounded-lg px-4 py-2 outline-none focus:border-emerald-500">
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-4 mt-2">
-                    <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100">
-                        <label class="block text-xs font-bold text-emerald-800 mb-1">Upload Your Photo</label>
-                        <input type="file" id="regPhoto" accept=".jpg,.jpeg,.png,.webp" required class="text-xs w-full text-emerald-700">
-                    </div>
-                    <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100">
-                        <label class="block text-xs font-bold text-emerald-800 mb-1">Upload Business Logo</label>
-                        <input type="file" id="regLogo" accept=".jpg,.jpeg,.png,.webp" required class="text-xs w-full text-emerald-700">
-                    </div>
-                </div>
-                
-                <button type="submit" id="regSubmitBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl mt-4 shadow-md transition-all flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-rocket"></i> Save & Continue
-                </button>
-                <p id="regStatus" class="text-center text-sm font-semibold mt-2 hidden"></p>
-            </form>
+</div>
+
+
+<!-- =========================================================
+     MAIN APP
+========================================================= -->
+
+<div id="mainApp" class="hidden">
+
+    <!-- HEADER -->
+
+    <header class="app-header">
+
+        <div class="brand">
+
+            <img
+                src="logo.png"
+                class="brand-logo"
+                alt="PosterPlus">
+
+            <div class="brand-name">
+                Poster<span>Plus</span>
+            </div>
+
         </div>
+
+
+        <div class="header-actions">
+
+            <button
+                id="btnAdmin"
+                onclick="window.switchMainTab('admin')"
+                class="mode-btn hidden">
+
+                <i class="fa-solid fa-pen-ruler"></i>
+                <span>Editor</span>
+
+            </button>
+
+
+            <button
+                id="btnApp"
+                onclick="window.switchMainTab('app')"
+                class="mode-btn app hidden">
+
+                <i class="fa-solid fa-mobile-screen"></i>
+                <span>App</span>
+
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <!-- =====================================================
+         ADMIN PANEL
+    ====================================================== -->
+
+    <div
+        id="adminPanel"
+        class="admin-panel hidden">
+
+        <aside class="admin-sidebar">
+
+            <div class="admin-scroll">
+
+                <!-- BACKGROUND -->
+
+                <div class="bg-slate-50 border border-slate-100 rounded-2xl p-4 mb-5">
+
+                    <label class="font-bold text-slate-700 text-sm flex items-center gap-2 mb-3">
+
+                        <i class="fa-regular fa-image text-emerald-500"></i>
+
+                        Background
+
+                    </label>
+
+
+                    <label
+                        id="bgUploadLabel"
+                        class="cursor-pointer bg-white border border-slate-200 hover:border-emerald-500 text-slate-700 text-xs text-center py-3 px-4 rounded-xl block shadow-sm">
+
+                        <span id="bgUploadText">
+
+                            <i class="fa-solid fa-cloud-arrow-up mr-1"></i>
+
+                            Upload Poster Background
+
+                        </span>
+
+                        <input
+                            type="file"
+                            id="bgUpload"
+                            accept=".jpg,.jpeg,.png,.webp"
+                            class="hidden">
+
+                    </label>
+
+                </div>
+
+
+                <!-- ELEMENTS -->
+
+                <label class="font-bold text-slate-700 text-sm flex items-center gap-2 mb-3">
+
+                    <i class="fa-solid fa-layer-group text-emerald-500"></i>
+
+                    Add Elements
+
+                </label>
+
+
+                <div class="grid grid-cols-2 gap-2 mb-5">
+
+                    <button
+                        onclick="window.addText('{{USER_NAME}}')"
+                        class="bg-white border border-slate-200 p-3 text-xs font-semibold rounded-xl hover:border-emerald-500">
+
+                        <i class="fa-solid fa-user text-lg block mb-1 text-slate-500"></i>
+
+                        User Name
+
+                    </button>
+
+
+                    <button
+                        onclick="window.addText('{{BIZ_NAME}}')"
+                        class="bg-white border border-slate-200 p-3 text-xs font-semibold rounded-xl hover:border-emerald-500">
+
+                        <i class="fa-solid fa-shop text-lg block mb-1 text-slate-500"></i>
+
+                        Business
+
+                    </button>
+
+
+                    <button
+                        onclick="window.addBox('PHOTO')"
+                        class="bg-blue-50 border border-blue-200 p-3 text-xs font-semibold rounded-xl text-blue-700">
+
+                        <i class="fa-solid fa-camera text-lg block mb-1"></i>
+
+                        Photo
+
+                    </button>
+
+
+                    <button
+                        onclick="window.addBox('LOGO')"
+                        class="bg-amber-50 border border-amber-200 p-3 text-xs font-semibold rounded-xl text-amber-700">
+
+                        <i class="fa-solid fa-store text-lg block mb-1"></i>
+
+                        Logo
+
+                    </button>
+
+                </div>
+
+
+                <!-- STYLE -->
+
+                <div
+                    id="stylePanel"
+                    class="opacity-50 pointer-events-none">
+
+                    <label class="font-bold text-slate-700 text-sm flex items-center gap-2 mb-3">
+
+                        <i class="fa-solid fa-palette text-emerald-500"></i>
+
+                        Style Object
+
+                    </label>
+
+
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+
+                        <div class="flex gap-2">
+
+                            <select
+                                id="fontFamily"
+                                class="w-2/3 border border-slate-300 rounded-lg px-2 py-2 text-xs outline-none">
+
+                                <option value="sans-serif">Default</option>
+                                <option value="Roboto">Roboto</option>
+                                <option value="Poppins">Poppins</option>
+                                <option value="Oswald">Oswald</option>
+
+                            </select>
+
+
+                            <input
+                                type="number"
+                                id="fontSize"
+                                placeholder="Size"
+                                class="w-1/3 border border-slate-300 rounded-lg px-2 py-2 text-xs outline-none">
+
+                        </div>
+
+
+                        <div class="flex items-center gap-2">
+
+                            <input
+                                type="color"
+                                id="colorPicker"
+                                class="w-10 h-9 rounded-lg border cursor-pointer">
+
+                            <div class="flex-1 flex bg-slate-100 rounded-lg p-1">
+
+                                <button
+                                    onclick="window.setTextAlign('left')"
+                                    class="flex-1 rounded py-1.5 text-sm hover:bg-white">
+
+                                    <i class="fa-solid fa-align-left"></i>
+
+                                </button>
+
+                                <button
+                                    onclick="window.setTextAlign('center')"
+                                    class="flex-1 rounded py-1.5 text-sm hover:bg-white">
+
+                                    <i class="fa-solid fa-align-center"></i>
+
+                                </button>
+
+                                <button
+                                    onclick="window.setTextAlign('right')"
+                                    class="flex-1 rounded py-1.5 text-sm hover:bg-white">
+
+                                    <i class="fa-solid fa-align-right"></i>
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+
+                        <button
+                            onclick="window.deleteObject()"
+                            class="w-full bg-red-50 text-red-600 border border-red-200 py-2.5 text-xs font-bold rounded-xl">
+
+                            <i class="fa-solid fa-trash-can mr-1"></i>
+
+                            Delete Selected
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="p-4 border-t border-slate-200">
+
+                <button
+                    onclick="window.saveTemplate()"
+                    class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-lg">
+
+                    <i class="fa-solid fa-cloud-arrow-up mr-2"></i>
+
+                    Save Template
+
+                </button>
+
+            </div>
+
+        </aside>
+
+
+        <main class="admin-workspace">
+
+            <div class="editor-canvas-wrap">
+
+                <canvas
+                    id="adminCanvas"
+                    width="800"
+                    height="800">
+                </canvas>
+
+            </div>
+
+        </main>
+
     </div>
 
-    <!-- MAIN APP CONTAINER -->
-    <div id="mainApp" class="hidden flex-col h-screen w-full">
-        <header class="bg-white px-5 md:px-8 py-3.5 flex justify-between items-center z-20 shadow-sm border-b border-slate-200">
-            <div class="flex items-center gap-2.5">
-                <div class="w-10 h-10 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center text-white shadow-md shadow-emerald-200">
-                    <i class="fa-solid fa-plus text-xl font-bold"></i>
-                </div>
-                <h1 class="text-2xl font-extrabold tracking-tight text-slate-800">Poster<span class="text-emerald-500">Plus</span></h1>
-            </div>
-            
-            <div class="flex items-center gap-4">
-                <button onclick="window.switchMainTab('admin')" id="btnAdmin" class="hidden bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg text-sm font-bold transition-all items-center gap-2 border border-slate-200">
-                    <i class="fa-solid fa-pen-ruler"></i> <span class="hidden md:inline">Editor Mode</span>
-                </button>
-                <button onclick="window.switchMainTab('app')" id="btnApp" class="hidden bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-4 py-2 rounded-lg text-sm font-bold transition-all items-center gap-2 border border-emerald-200">
-                    <i class="fa-solid fa-mobile-screen"></i> <span class="hidden md:inline">App Mode</span>
-                </button>
-            </div>
-        </header>
 
-        <!-- ADMIN PANEL -->
-        <div id="adminPanel" class="flex-1 hidden overflow-hidden">
-            <aside class="w-80 bg-white shadow-xl flex flex-col h-full z-10 border-r border-slate-200">
-                <div class="p-5 flex-1 overflow-y-auto space-y-6">
-                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                        <label class="font-bold text-slate-700 text-sm mb-3 flex items-center gap-2"><i class="fa-regular fa-image text-emerald-500"></i> 1. Background</label>
-                        <label id="bgUploadLabel" class="cursor-pointer bg-white border border-slate-300 hover:border-emerald-500 text-slate-700 text-sm text-center py-2 px-4 rounded block shadow-sm relative overflow-hidden">
-                            <span id="bgUploadText"><i class="fa-solid fa-upload mr-1"></i> Upload Image</span>
-                            <input type="file" id="bgUpload" accept=".jpg,.jpeg,.png,.webp" class="hidden">
-                        </label>
-                    </div>
+    <!-- =====================================================
+         CLIENT APP
+    ====================================================== -->
+
+    <div
+        id="clientApp"
+        class="client-app hidden">
+
+        <main
+            id="appMainScrollArea"
+            class="app-scroll">
+
+            <!-- POSTERS -->
+
+            <section
+                id="appTabPosters"
+                class="app-container">
+
+                <div class="page-heading">
+
                     <div>
-                        <label class="font-bold text-slate-700 text-sm mb-3 flex items-center gap-2"><i class="fa-solid fa-layer-group text-emerald-500"></i> 2. Add Elements</label>
+
+                        <div class="page-title">
+                            Latest Posters
+                        </div>
+
+                        <div class="page-subtitle">
+                            Ready-to-use business creatives
+                        </div>
+
+                    </div>
+
+                    <div class="text-emerald-600 text-lg">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    </div>
+
+                </div>
+
+
+                <!-- PAYWALL -->
+
+                <div
+                    id="paywallScreen"
+                    class="paywall hidden">
+
+                    <div class="paywall-icon">
+
+                        <i class="fa-solid fa-lock"></i>
+
+                    </div>
+
+                    <h2 class="text-xl font-extrabold text-slate-800">
+                        Premium Content Locked
+                    </h2>
+
+                    <p class="text-xs text-slate-500 max-w-sm mx-auto mt-2 mb-6">
+                        Your subscription is not active. Subscribe to unlock premium posters.
+                    </p>
+
+                    <button
+                        onclick="window.switchBottomTab('payments')"
+                        class="bg-emerald-600 hover:bg-emerald-700 text-white px-7 py-3 rounded-xl text-sm font-bold shadow-lg">
+
+                        <i class="fa-solid fa-crown mr-2"></i>
+
+                        Unlock Premium
+
+                    </button>
+
+                </div>
+
+
+                <!-- POSTERS -->
+
+                <div id="postersGrid"></div>
+
+
+                <div
+                    id="infiniteScrollLoader"
+                    class="text-center py-7 hidden">
+
+                    <i class="fa-solid fa-spinner fa-spin text-xl text-emerald-500"></i>
+
+                    <p class="text-[10px] text-slate-400 mt-2">
+                        Loading more posters...
+                    </p>
+
+                </div>
+
+            </section>
+
+
+            <!-- PAYMENTS -->
+
+            <section
+                id="appTabPayments"
+                class="hidden payment-wrap">
+
+                <div class="checkout-card">
+
+                    <div class="crown">
+
+                        <i class="fa-solid fa-crown"></i>
+
+                    </div>
+
+                    <h2 class="text-xl font-extrabold text-slate-800 mt-5">
+                        PosterPlus Premium
+                    </h2>
+
+                    <p class="text-xs text-slate-500 mt-2">
+                        Get 30 days of unlimited access to premium digital posters.
+                    </p>
+
+                    <div class="text-4xl font-black text-emerald-600 my-6">
+
+                        ₹99
+
+                        <span class="text-xs text-slate-400 font-medium">
+                            / month
+                        </span>
+
+                    </div>
+
+
+                    <button
+                        id="posterPlus_actionBtn"
+                        onclick="window.startPayment()"
+                        class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-xl shadow-lg">
+
+                        <i class="fa-solid fa-bolt text-yellow-400 mr-2"></i>
+
+                        Pay Now & Subscribe
+
+                    </button>
+
+
+                    <div class="text-[10px] text-slate-400 mt-4">
+
+                        <i class="fa-solid fa-shield-halved mr-1"></i>
+
+                        Secure payment powered by Cashfree
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- PROFILE -->
+
+            <section
+                id="appTabProfile"
+                class="hidden app-container">
+
+                <div class="profile-card">
+
+                    <div class="flex items-center justify-between mb-6">
+
+                        <div>
+
+                            <h2 class="text-xl font-extrabold text-slate-800">
+                                Business Profile
+                            </h2>
+
+                            <p class="text-[10px] text-slate-400 mt-1">
+                                Manage your poster information
+                            </p>
+
+                        </div>
+
+
+                        <button
+                            onclick="window.logoutUser()"
+                            class="text-red-500 bg-red-50 hover:bg-red-100 px-3 py-2 rounded-xl text-xs font-bold">
+
+                            <i class="fa-solid fa-right-from-bracket"></i>
+
+                        </button>
+
+                    </div>
+
+
+                    <form
+                        id="profileForm"
+                        onsubmit="event.preventDefault();window.submitProfile();"
+                        class="space-y-4">
+
+                        <div>
+
+                            <label class="block text-xs font-bold text-slate-500 mb-1">
+                                Your Full Name
+                            </label>
+
+                            <input
+                                id="profName"
+                                required
+                                class="form-input">
+
+                        </div>
+
+
+                        <div>
+
+                            <label class="block text-xs font-bold text-slate-500 mb-1">
+                                Business / Shop Name
+                            </label>
+
+                            <input
+                                id="profBizName"
+                                required
+                                class="form-input">
+
+                        </div>
+
+
                         <div class="grid grid-cols-2 gap-3">
-                            <button onclick="window.addText('{{USER_NAME}}')" class="bg-white border border-slate-200 p-3 text-xs font-semibold rounded-lg hover:border-emerald-500 flex flex-col items-center gap-1"><i class="fa-solid fa-user text-lg"></i> User Name</button>
-                            <button onclick="window.addText('{{BIZ_NAME}}')" class="bg-white border border-slate-200 p-3 text-xs font-semibold rounded-lg hover:border-emerald-500 flex flex-col items-center gap-1"><i class="fa-solid fa-shop text-lg"></i> Biz Name</button>
-                            <button onclick="window.addBox('PHOTO')" class="bg-blue-50 border border-blue-200 p-3 text-xs font-semibold rounded-lg text-blue-700 hover:bg-blue-100 flex flex-col items-center gap-1"><i class="fa-solid fa-camera-retro text-lg"></i> Photo Box</button>
-                            <button onclick="window.addBox('LOGO')" class="bg-amber-50 border border-amber-200 p-3 text-xs font-semibold rounded-lg text-amber-700 hover:bg-amber-100 flex flex-col items-center gap-1"><i class="fa-solid fa-circle-check text-lg"></i> Logo Box</button>
-                        </div>
-                    </div>
-                    <div id="stylePanel" class="opacity-50 pointer-events-none transition-opacity">
-                        <label class="font-bold text-slate-700 text-sm mb-3 flex items-center gap-2"><i class="fa-solid fa-palette text-emerald-500"></i> 3. Style Object</label>
-                        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-3">
-                            <div class="flex gap-2">
-                                <select id="fontFamily" class="w-2/3 border border-slate-300 rounded-md px-2 py-1.5 text-sm outline-none"><option value="sans-serif">Default</option><option value="Roboto">Roboto</option><option value="Poppins">Poppins</option><option value="Oswald">Oswald</option></select>
-                                <input type="number" id="fontSize" placeholder="Size" class="w-1/3 border border-slate-300 rounded-md px-2 py-1.5 text-sm outline-none">
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <input type="color" id="colorPicker" class="w-10 h-8 rounded border cursor-pointer">
-                                <div class="flex-1 flex bg-slate-100 rounded-md p-1">
-                                    <button onclick="window.setTextAlign('left')" class="flex-1 text-slate-600 hover:bg-white rounded py-1 text-sm"><i class="fa-solid fa-align-left"></i></button>
-                                    <button onclick="window.setTextAlign('center')" class="flex-1 text-slate-600 hover:bg-white rounded py-1 text-sm"><i class="fa-solid fa-align-center"></i></button>
-                                    <button onclick="window.setTextAlign('right')" class="flex-1 text-slate-600 hover:bg-white rounded py-1 text-sm"><i class="fa-solid fa-align-right"></i></button>
-                                </div>
-                            </div>
-                            <button onclick="window.deleteObject()" class="w-full bg-red-50 text-red-600 border border-red-200 py-2 text-sm font-semibold rounded mt-2 flex justify-center items-center gap-2"><i class="fa-solid fa-trash-can"></i> Delete</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="p-5 bg-white border-t border-slate-200"><button onclick="window.saveTemplate()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-md flex justify-center items-center gap-2"><i class="fa-solid fa-floppy-disk"></i> Save Template</button></div>
-            </aside>
-            <main class="flex-1 bg-slate-200 flex items-center justify-center relative overflow-auto p-8">
-                <div class="bg-white shadow-2xl relative border" style="width: 800px; height: 800px; background-image: linear-gradient(45deg, #f0f0f0 25%, transparent 25%), linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #f0f0f0 75%), linear-gradient(-45deg, transparent 75%, #f0f0f0 75%); background-size: 20px 20px;">
-                    <canvas id="adminCanvas"></canvas>
-                </div>
-            </main>
-        </div>
 
-        <!-- CLIENT APP VIEW -->
-        <div id="clientApp" class="flex-1 flex flex-col relative bg-slate-50 overflow-hidden">
-            <main id="appMainScrollArea" class="flex-1 overflow-y-auto pb-20">
-                
-                <!-- 1. POSTERS TAB -->
-                <div id="appTabPosters" class="p-3 md:p-6 max-w-6xl mx-auto w-full">
-                    
-                    <!-- 🔒 PAYWALL SCREEN (Hidden if Subscribed) -->
-                    <div id="paywallScreen" class="hidden flex-col items-center justify-center py-20 px-6 text-center bg-white rounded-3xl shadow-sm border border-slate-100 mt-4">
-                        <div class="text-5xl mb-4 bg-red-50 w-20 h-20 flex items-center justify-center rounded-full text-red-500 mx-auto border border-red-100">
-                            <i class="fa-solid fa-lock"></i>
-                        </div>
-                        <h2 class="text-2xl font-bold text-slate-800 mb-2">Premium Content Locked</h2>
-                        <p class="text-slate-500 mb-6 text-sm max-w-xs mx-auto">Your subscription has expired or is not active. Please subscribe to unlock all premium digital posters.</p>
-                        <button onclick="window.switchBottomTab('payments')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3.5 rounded-xl font-bold shadow-md transition-all flex items-center gap-2">
-                            <i class="fa-solid fa-wallet"></i> Go to Payments
-                        </button>
-                    </div>
-
-                    <!-- POSTERS GRID (Hidden if NOT Subscribed) -->
-                    <div id="postersGrid" class="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6 mt-2"></div>
-                    <div id="infiniteScrollLoader" class="text-center py-6 hidden">
-                        <i class="fa-solid fa-spinner fa-spin text-xl text-emerald-500"></i>
-                        <p class="text-xs text-slate-400 mt-2">Loading more posters...</p>
-                    </div>
-                </div>
-
-                <!-- 2. PAYMENTS TAB -->
-                <div id="appTabPayments" class="hidden p-4 h-full flex flex-col items-center justify-center">
-                    <div class="posterPlus_checkout_card">
-                        <div class="w-16 h-16 mx-auto bg-amber-100 text-amber-500 rounded-full flex items-center justify-center text-3xl mb-4">
-                            <i class="fa-solid fa-crown"></i>
-                        </div>
-                        <h2 class="text-xl font-bold text-slate-800">PosterPlus Premium</h2>
-                        <p class="text-sm text-slate-500 mt-2 mb-6">Get 30 days of unlimited access to premium digital posters.</p>
-                        <div class="text-4xl font-extrabold text-emerald-600 mb-6">₹99<span class="text-sm text-slate-400 font-medium">/mo</span></div>
-                        <button id="posterPlus_actionBtn" onclick="window.startPayment()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 px-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-bolt text-yellow-400"></i> Pay Now & Subscribe
-                        </button>
-                        <p class="text-[10px] text-slate-400 mt-4"><i class="fa-solid fa-shield-halved"></i> Secured by Cashfree</p>
-                    </div>
-                </div>
-
-                <!-- 3. PROFILE TAB -->
-                <div id="appTabProfile" class="hidden p-4 max-w-lg mx-auto w-full">
-                    <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mt-2">
-                        <div class="flex justify-between items-center mb-6">
-                            <h2 class="text-xl font-bold text-slate-800">Business Profile</h2>
-                            <button onclick="window.logoutUser()" class="text-red-500 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</button>
-                        </div>
-                        
-                        <form id="profileForm" onsubmit="event.preventDefault(); window.submitProfile();" class="space-y-4">
                             <div>
-                                <label class="block text-xs font-bold text-slate-500 mb-1">Your Full Name</label>
-                                <input type="text" id="profName" required class="w-full border border-slate-300 rounded-xl px-4 py-2.5 outline-none focus:border-emerald-500 font-semibold text-slate-700">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-500 mb-1">Business/Shop Name</label>
-                                <input type="text" id="profBizName" required class="w-full border border-slate-300 rounded-xl px-4 py-2.5 outline-none focus:border-emerald-500 font-semibold text-slate-700">
-                            </div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-500 mb-1">WhatsApp No.</label>
-                                    <input type="tel" id="profWhatsapp" required pattern="[0-9]{10}" class="w-full border border-slate-300 rounded-xl px-4 py-2.5 outline-none focus:border-emerald-500 font-semibold text-slate-700">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-500 mb-1">City/Address</label>
-                                    <input type="text" id="profAddress" required class="w-full border border-slate-300 rounded-xl px-4 py-2.5 outline-none focus:border-emerald-500 font-semibold text-slate-700">
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-2 gap-4 mt-2">
-                                <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100">
-                                    <label class="block text-xs font-bold text-emerald-800 mb-1">Update Photo</label>
-                                    <input type="file" id="profPhoto" accept=".jpg,.jpeg,.png,.webp" class="text-xs w-full text-emerald-600">
-                                    <p class="text-[10px] text-emerald-500 mt-1">Leave empty to keep current</p>
-                                </div>
-                                <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100">
-                                    <label class="block text-xs font-bold text-emerald-800 mb-1">Update Logo</label>
-                                    <input type="file" id="profLogo" accept=".jpg,.jpeg,.png,.webp" class="text-xs w-full text-emerald-600">
-                                    <p class="text-[10px] text-emerald-500 mt-1">Leave empty to keep current</p>
-                                </div>
-                            </div>
-                            
-                            <button type="submit" id="profSubmitBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl mt-6 shadow-md transition-all flex items-center justify-center gap-2">
-                                <i class="fa-solid fa-floppy-disk"></i> Save Details
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </main>
 
-            <!-- BOTTOM NAVIGATION -->
-            <nav class="absolute bottom-0 w-full bg-white border-t border-slate-200 flex justify-around items-center h-16 px-2 pb-safe z-50 shadow-[0_-4px_10px_-1px_rgba(0,0,0,0.05)]">
-                <button onclick="window.switchBottomTab('posters')" id="navPosters" class="flex flex-col items-center justify-center w-full h-full text-emerald-600 transition-colors">
-                    <i class="fa-solid fa-images text-xl mb-1"></i>
-                    <span class="text-[10px] font-bold">Posters</span>
+                                <label class="block text-xs font-bold text-slate-500 mb-1">
+                                    WhatsApp No.
+                                </label>
+
+                                <input
+                                    type="tel"
+                                    id="profWhatsapp"
+                                    required
+                                    pattern="[0-9]{10}"
+                                    maxlength="10"
+                                    class="form-input">
+
+                            </div>
+
+
+                            <div>
+
+                                <label class="block text-xs font-bold text-slate-500 mb-1">
+                                    City / Address
+                                </label>
+
+                                <input
+                                    id="profAddress"
+                                    required
+                                    class="form-input">
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="grid grid-cols-2 gap-3">
+
+                            <div class="file-box">
+
+                                <label class="block text-xs font-bold text-emerald-800 mb-2">
+                                    Update Photo
+                                </label>
+
+                                <input
+                                    type="file"
+                                    id="profPhoto"
+                                    accept=".jpg,.jpeg,.png,.webp"
+                                    class="text-[10px] w-full">
+
+                            </div>
+
+
+                            <div class="file-box">
+
+                                <label class="block text-xs font-bold text-emerald-800 mb-2">
+                                    Update Logo
+                                </label>
+
+                                <input
+                                    type="file"
+                                    id="profLogo"
+                                    accept=".jpg,.jpeg,.png,.webp"
+                                    class="text-[10px] w-full">
+
+                            </div>
+
+                        </div>
+
+
+                        <button
+                            type="submit"
+                            id="profSubmitBtn"
+                            class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl mt-4 shadow-lg">
+
+                            <i class="fa-solid fa-floppy-disk mr-2"></i>
+
+                            Save Details
+
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </section>
+
+        </main>
+
+
+        <!-- =================================================
+             FIXED BOTTOM NAVIGATION
+        ================================================== -->
+
+        <nav class="bottom-nav">
+
+            <div class="bottom-nav-inner">
+
+                <button
+                    onclick="window.switchBottomTab('posters')"
+                    id="navPosters"
+                    class="nav-btn active">
+
+                    <i class="fa-solid fa-images"></i>
+
+                    <span>Posters</span>
+
                 </button>
-                <button onclick="window.switchBottomTab('payments')" id="navPayments" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-600 transition-colors">
-                    <i class="fa-solid fa-wallet text-xl mb-1"></i>
-                    <span class="text-[10px] font-bold">Payments</span>
+
+
+                <button
+                    onclick="window.switchBottomTab('payments')"
+                    id="navPayments"
+                    class="nav-btn">
+
+                    <i class="fa-solid fa-crown"></i>
+
+                    <span>Premium</span>
+
                 </button>
-                <button onclick="window.switchBottomTab('profile')" id="navProfile" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-600 transition-colors relative">
-                    <i class="fa-solid fa-user-gear text-xl mb-1"></i>
-                    <span class="text-[10px] font-bold">Profile</span>
-                    <span id="profileAlertDot" class="hidden absolute top-2 right-8 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+
+
+                <button
+                    onclick="window.switchBottomTab('profile')"
+                    id="navProfile"
+                    class="nav-btn">
+
+                    <i class="fa-solid fa-user"></i>
+
+                    <span>Profile</span>
+
+                    <span
+                        id="profileAlertDot"
+                        class="hidden nav-indicator">
+                    </span>
+
                 </button>
-            </nav>
-        </div>
+
+            </div>
+
+        </nav>
+
     </div>
 
-    <canvas id="offscreenCanvas" style="display:none;"></canvas>
+</div>
 
-    <!-- FIREBASE AND APP LOGIC -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, getDocs, collection, query, orderBy, limit, startAfter } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAkBV0VxVU3Mn0paHqxU0Dgm-TuNRS6hEg",
-            authDomain: "posterplus-84021.firebaseapp.com",
-            projectId: "posterplus-84021",
-            storageBucket: "posterplus-84021.firebasestorage.app",
-            messagingSenderId: "556835154127",
-            appId: "1:556835154127:web:a5c921e21d83ad8e1cafba",
-            measurementId: "G-KJ3C5YVQ0S"
-        };
-        
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
-        const db = getFirestore(app);
+<!-- OFFSCREEN CANVAS -->
 
-        let adminCanvas;
-        let offscreenFabricCanvas;
-        let isAdminLoggedIn = false;
-        let currentClientData = null; 
+<canvas
+    id="offscreenCanvas"
+    style="display:none">
+</canvas>
 
-        let lastVisibleTemplate = null;
-        let isFetchingPosters = false;
-        let hasMorePosters = true;
 
-        const allowedAdminEmails = ["jkhdpix@gmail.com"];
+<!-- =========================================================
+     FIREBASE + APP LOGIC
+========================================================= -->
 
-        adminCanvas = new fabric.Canvas('adminCanvas', { width: 800, height: 800, preserveObjectStacking: true });
-        offscreenFabricCanvas = new fabric.StaticCanvas('offscreenCanvas', { width: 800, height: 800 });
+<script type="module">
 
-        // --- AUTHENTICATION & ROUTING ---
-        onAuthStateChanged(auth, async (user) => {
-            const loginScreen = document.getElementById('loginScreen');
-            const mainApp = document.getElementById('mainApp');
-            const btnAdmin = document.getElementById('btnAdmin');
-            
-            if (user) {
-                if (allowedAdminEmails.includes(user.email)) {
-                    isAdminLoggedIn = true;
-                    btnAdmin.classList.replace('hidden', 'flex'); 
-                } else {
-                    isAdminLoggedIn = false;
-                    btnAdmin.classList.replace('flex', 'hidden');
+import {
+    initializeApp
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+
+import {
+    getAuth,
+    GoogleAuthProvider,
+    signInWithPopup,
+    signOut,
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+
+import {
+    getFirestore,
+    doc,
+    setDoc,
+    getDoc,
+    getDocs,
+    collection,
+    query,
+    orderBy,
+    limit,
+    startAfter
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+
+/* =========================================================
+   FIREBASE
+========================================================= */
+
+const firebaseConfig = {
+
+    apiKey:"AIzaSyAkBV0VxVU3Mn0paHqxU0Dgm-TuNRS6hEg",
+
+    authDomain:"posterplus-84021.firebaseapp.com",
+
+    projectId:"posterplus-84021",
+
+    storageBucket:"posterplus-84021.firebasestorage.app",
+
+    messagingSenderId:"556835154127",
+
+    appId:"1:556835154127:web:a5c921e21d83ad8e1cafba",
+
+    measurementId:"G-KJ3C5YVQ0S"
+
+};
+
+
+const app = initializeApp(firebaseConfig);
+
+const auth = getAuth(app);
+
+const provider = new GoogleAuthProvider();
+
+const db = getFirestore(app);
+
+
+/* =========================================================
+   VARIABLES
+========================================================= */
+
+let adminCanvas;
+
+let offscreenFabricCanvas;
+
+let isAdminLoggedIn=false;
+
+let currentClientData=null;
+
+let lastVisibleTemplate=null;
+
+let isFetchingPosters=false;
+
+let hasMorePosters=true;
+
+
+const allowedAdminEmails=[
+    "jkhdpix@gmail.com"
+];
+
+
+/* =========================================================
+   FABRIC
+========================================================= */
+
+adminCanvas=new fabric.Canvas(
+    "adminCanvas",
+    {
+        width:800,
+        height:800,
+        preserveObjectStacking:true
+    }
+);
+
+offscreenFabricCanvas=new fabric.StaticCanvas(
+    "offscreenCanvas",
+    {
+        width:800,
+        height:800
+    }
+);
+
+
+/* =========================================================
+   AUTH STATE
+========================================================= */
+
+onAuthStateChanged(auth,async(user)=>{
+
+    const loginScreen=
+        document.getElementById("loginScreen");
+
+    const mainApp=
+        document.getElementById("mainApp");
+
+    const btnAdmin=
+        document.getElementById("btnAdmin");
+
+    if(user){
+
+        isAdminLoggedIn=
+            allowedAdminEmails.includes(user.email);
+
+        if(isAdminLoggedIn){
+
+            btnAdmin.classList.remove("hidden");
+
+        }else{
+
+            btnAdmin.classList.add("hidden");
+
+        }
+
+
+        loginScreen.classList.add("hidden");
+
+        mainApp.classList.remove("hidden");
+
+
+        const docSnap=
+            await getDoc(
+                doc(db,"clients",user.uid)
+            );
+
+
+        if(docSnap.exists()){
+
+            currentClientData=docSnap.data();
+
+            populateProfileForm();
+
+            window.switchMainTab("app");
+
+            window.switchBottomTab("posters");
+
+            document
+                .getElementById("profileAlertDot")
+                .classList.add("hidden");
+
+        }else{
+
+            currentClientData=null;
+
+            document
+                .getElementById("profileAlertDot")
+                .classList.remove("hidden");
+
+            window.switchMainTab("app");
+
+            window.switchBottomTab("profile");
+
+        }
+
+    }else{
+
+        isAdminLoggedIn=false;
+
+        currentClientData=null;
+
+        loginScreen.classList.remove("hidden");
+
+        mainApp.classList.add("hidden");
+
+    }
+
+});
+
+
+/* =========================================================
+   GOOGLE LOGIN
+========================================================= */
+
+window.loginWithGoogle=async()=>{
+
+    const status=
+        document.getElementById("authStatus");
+
+    status.className=
+        "mt-4 text-sm font-semibold text-emerald-600 block";
+
+    status.innerHTML=
+        '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Connecting...';
+
+    try{
+
+        await signInWithPopup(
+            auth,
+            provider
+        );
+
+    }catch(error){
+
+        console.error(error);
+
+        status.className=
+            "mt-4 text-sm font-bold text-red-600 block";
+
+        status.innerText=
+            "Login failed. Please try again.";
+
+    }
+
+};
+
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+window.logoutUser=async()=>{
+
+    await signOut(auth);
+
+};
+
+
+/* =========================================================
+   MAIN MODE
+========================================================= */
+
+window.switchMainTab=(mode)=>{
+
+    const adminPanel=
+        document.getElementById("adminPanel");
+
+    const clientApp=
+        document.getElementById("clientApp");
+
+    const btnAdmin=
+        document.getElementById("btnAdmin");
+
+    const btnApp=
+        document.getElementById("btnApp");
+
+
+    if(mode==="admin" && isAdminLoggedIn){
+
+        adminPanel.classList.remove("hidden");
+
+        clientApp.classList.add("hidden");
+
+        btnAdmin.classList.add("hidden");
+
+        btnApp.classList.remove("hidden");
+
+    }else{
+
+        adminPanel.classList.add("hidden");
+
+        clientApp.classList.remove("hidden");
+
+        btnApp.classList.add("hidden");
+
+        if(isAdminLoggedIn){
+
+            btnAdmin.classList.remove("hidden");
+
+        }
+
+    }
+
+};
+
+
+/* =========================================================
+   BOTTOM NAV
+========================================================= */
+
+window.switchBottomTab=(tab)=>{
+
+    const posters=
+        document.getElementById("appTabPosters");
+
+    const payments=
+        document.getElementById("appTabPayments");
+
+    const profile=
+        document.getElementById("appTabProfile");
+
+    const navPosters=
+        document.getElementById("navPosters");
+
+    const navPayments=
+        document.getElementById("navPayments");
+
+    const navProfile=
+        document.getElementById("navProfile");
+
+
+    posters.classList.add("hidden");
+
+    payments.classList.add("hidden");
+
+    profile.classList.add("hidden");
+
+
+    navPosters.classList.remove("active");
+
+    navPayments.classList.remove("active");
+
+    navProfile.classList.remove("active");
+
+
+    if(tab==="posters"){
+
+        if(!currentClientData){
+
+            alert("Please complete your profile first.");
+
+            window.switchBottomTab("profile");
+
+            return;
+
+        }
+
+
+        posters.classList.remove("hidden");
+
+        navPosters.classList.add("active");
+
+
+        if(!gridHasContent()){
+
+            loadPostersFeed(false);
+
+        }
+
+    }
+
+
+    else if(tab==="payments"){
+
+        if(!currentClientData){
+
+            alert("Please complete your profile first.");
+
+            window.switchBottomTab("profile");
+
+            return;
+
+        }
+
+
+        payments.classList.remove("hidden");
+
+        navPayments.classList.add("active");
+
+    }
+
+
+    else if(tab==="profile"){
+
+        profile.classList.remove("hidden");
+
+        navProfile.classList.add("active");
+
+    }
+
+
+    const scrollArea=
+        document.getElementById("appMainScrollArea");
+
+    if(scrollArea){
+
+        scrollArea.scrollTop=0;
+
+    }
+
+};
+
+
+/* =========================================================
+   PROFILE FORM
+========================================================= */
+
+function populateProfileForm(){
+
+    if(!currentClientData) return;
+
+
+    document.getElementById("profName").value=
+        currentClientData.name || "";
+
+    document.getElementById("profBizName").value=
+        currentClientData.bizName || "";
+
+    document.getElementById("profWhatsapp").value=
+        currentClientData.whatsapp || "";
+
+    document.getElementById("profAddress").value=
+        currentClientData.address || "";
+
+}
+
+
+/* =========================================================
+   FILE VALIDATION
+========================================================= */
+
+const MAX_FILE_SIZE=
+    2*1024*1024;
+
+
+const validateFile=(file)=>{
+
+    if(!file)
+        return "No file selected.";
+
+    if(file.size>MAX_FILE_SIZE)
+        return "File size exceeds 2MB.";
+
+    const validTypes=[
+        "image/jpeg",
+        "image/png",
+        "image/webp",
+        "image/jpg"
+    ];
+
+    if(!validTypes.includes(file.type))
+        return "Only JPG, PNG and WEBP allowed.";
+
+    return null;
+
+};
+
+
+/* =========================================================
+   IMGBB UPLOAD
+========================================================= */
+
+const uploadToImgBB=async(file)=>{
+
+    const validationError=
+        validateFile(file);
+
+    if(validationError)
+        throw new Error(validationError);
+
+
+    const reader=
+        new FileReader();
+
+    reader.readAsDataURL(file);
+
+
+    return new Promise((resolve,reject)=>{
+
+        reader.onloadend=async()=>{
+
+            try{
+
+                const base64String=
+                    reader.result;
+
+                const token=
+                    await auth.currentUser.getIdToken();
+
+
+                const res=
+                    await fetch(
+                        "/api/upload",
+                        {
+                            method:"POST",
+
+                            headers:{
+                                "Content-Type":
+                                    "application/json",
+
+                                "Authorization":
+                                    `Bearer ${token}`
+                            },
+
+                            body:
+                                JSON.stringify({
+                                    imageBase64:
+                                        base64String
+                                })
+                        }
+                    );
+
+
+                const data=
+                    await res.json();
+
+
+                if(data.url){
+
+                    resolve(data.url);
+
+                }else{
+
+                    reject(
+                        new Error(
+                            data.error ||
+                            "Upload failed"
+                        )
+                    );
+
                 }
 
-                loginScreen.classList.add('hidden');
-                mainApp.classList.replace('hidden', 'flex');
+            }catch(error){
 
-                const docSnap = await getDoc(doc(db, "clients", user.uid));
-                if (docSnap.exists()) {
-                    currentClientData = docSnap.data();
-                    populateProfileForm();
-                    window.switchMainTab('app'); 
-                    window.switchBottomTab('posters');
-                    document.getElementById('profileAlertDot').classList.add('hidden');
-                } else {
-                    currentClientData = null;
-                    window.switchMainTab('app');
-                    window.switchBottomTab('profile');
-                    document.getElementById('profileAlertDot').classList.remove('hidden');
-                }
-            } else {
-                isAdminLoggedIn = false;
-                currentClientData = null;
-                loginScreen.classList.remove('hidden');
-                mainApp.classList.replace('flex', 'hidden');
+                reject(error);
+
             }
+
+        };
+
+    });
+
+};
+
+
+/* =========================================================
+   PROFILE SAVE
+========================================================= */
+
+window.submitProfile=async()=>{
+
+    const btn=
+        document.getElementById("profSubmitBtn");
+
+    const originalHTML=
+        btn.innerHTML;
+
+    btn.disabled=true;
+
+    btn.innerHTML=
+        '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Saving...';
+
+
+    try{
+
+        let photoUrl=
+            currentClientData ?
+            currentClientData.photo :
+            null;
+
+        let logoUrl=
+            currentClientData ?
+            currentClientData.logo :
+            null;
+
+
+        const photoFile=
+            document.getElementById("profPhoto")
+            .files[0];
+
+        const logoFile=
+            document.getElementById("profLogo")
+            .files[0];
+
+
+        if(photoFile)
+            photoUrl=
+                await uploadToImgBB(photoFile);
+
+        if(logoFile)
+            logoUrl=
+                await uploadToImgBB(logoFile);
+
+
+        if(!photoUrl || !logoUrl)
+            throw new Error(
+                "Photo and logo are required."
+            );
+
+
+        const profileData={
+
+            email:
+                auth.currentUser.email,
+
+            name:
+                document.getElementById("profName").value.trim(),
+
+            bizName:
+                document.getElementById("profBizName").value.trim(),
+
+            whatsapp:
+                document.getElementById("profWhatsapp").value.trim(),
+
+            address:
+                document.getElementById("profAddress").value.trim(),
+
+            photo:photoUrl,
+
+            logo:logoUrl,
+
+            updatedAt:
+                new Date().toISOString()
+
+        };
+
+
+        await setDoc(
+            doc(
+                db,
+                "clients",
+                auth.currentUser.uid
+            ),
+            profileData,
+            {merge:true}
+        );
+
+
+        currentClientData={
+            ...currentClientData,
+            ...profileData
+        };
+
+
+        document
+            .getElementById("profileAlertDot")
+            .classList.add("hidden");
+
+
+        btn.innerHTML=
+            '<i class="fa-solid fa-check mr-2"></i> Saved Successfully';
+
+        btn.classList.remove("bg-emerald-600");
+
+        btn.classList.add("bg-teal-600");
+
+
+        setTimeout(()=>{
+
+            btn.innerHTML=originalHTML;
+
+            btn.classList.remove("bg-teal-600");
+
+            btn.classList.add("bg-emerald-600");
+
+            btn.disabled=false;
+
+            window.switchBottomTab("posters");
+
+        },1400);
+
+
+    }catch(error){
+
+        alert(
+            "Error saving profile: "+
+            error.message
+        );
+
+        btn.innerHTML=originalHTML;
+
+        btn.disabled=false;
+
+    }
+
+};
+
+
+/* =========================================================
+   REGISTRATION
+========================================================= */
+
+window.submitRegistration=async()=>{
+
+    const btn=
+        document.getElementById("regSubmitBtn");
+
+    const status=
+        document.getElementById("regStatus");
+
+
+    btn.disabled=true;
+
+    btn.innerHTML=
+        '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Creating Profile...';
+
+
+    try{
+
+        const photoFile=
+            document.getElementById("regPhoto")
+            .files[0];
+
+        const logoFile=
+            document.getElementById("regLogo")
+            .files[0];
+
+
+        const [
+            photoUrl,
+            logoUrl
+        ]=await Promise.all([
+
+            uploadToImgBB(photoFile),
+
+            uploadToImgBB(logoFile)
+
+        ]);
+
+
+        const newClient={
+
+            email:
+                auth.currentUser.email,
+
+            name:
+                document.getElementById("regName")
+                .value.trim(),
+
+            bizName:
+                document.getElementById("regBizName")
+                .value.trim(),
+
+            whatsapp:
+                document.getElementById("regWhatsapp")
+                .value.trim(),
+
+            address:
+                document.getElementById("regAddress")
+                .value.trim(),
+
+            photo:photoUrl,
+
+            logo:logoUrl,
+
+            joinedAt:
+                new Date().toISOString()
+
+        };
+
+
+        await setDoc(
+            doc(
+                db,
+                "clients",
+                auth.currentUser.uid
+            ),
+            newClient
+        );
+
+
+        currentClientData=newClient;
+
+
+        document
+            .getElementById("registrationScreen")
+            .classList.add("hidden");
+
+
+        document
+            .getElementById("mainApp")
+            .classList.remove("hidden");
+
+
+        window.switchMainTab("app");
+
+        window.switchBottomTab("posters");
+
+
+    }catch(error){
+
+        status.className=
+            "text-center text-xs font-semibold text-red-600 block";
+
+        status.innerText=
+            error.message ||
+            "Error saving profile.";
+
+
+        btn.disabled=false;
+
+        btn.innerHTML=
+            '<i class="fa-solid fa-rocket mr-2"></i> Create My Workspace';
+
+    }
+
+};
+
+
+/* =========================================================
+   PAYMENT
+========================================================= */
+
+window.startPayment=async()=>{
+
+    if(!auth.currentUser || !currentClientData){
+
+        alert(
+            "Please login and complete your profile first."
+        );
+
+        return;
+
+    }
+
+
+    const btn=
+        document.getElementById(
+            "posterPlus_actionBtn"
+        );
+
+
+    btn.disabled=true;
+
+    btn.innerHTML=
+        '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Processing...';
+
+
+    try{
+
+        const API_URL=
+            "https://posterplus-api.vercel.app/api/create-order";
+
+
+        const response=
+            await fetch(
+                API_URL,
+                {
+                    method:"POST",
+
+                    headers:{
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify({
+
+                            amount:99.00,
+
+                            customerId:
+                                auth.currentUser.uid,
+
+                            phone:
+                                currentClientData.whatsapp ||
+                                "9999999999",
+
+                            email:
+                                auth.currentUser.email,
+
+                            name:
+                                currentClientData.name ||
+                                "User"
+
+                        })
+                }
+            );
+
+
+        const orderData=
+            await response.json();
+
+
+        if(orderData.payment_session_id){
+
+            const cashfree=
+                Cashfree({
+                    mode:"sandbox"
+                });
+
+
+            cashfree.checkout({
+
+                paymentSessionId:
+                    orderData.payment_session_id,
+
+                redirectTarget:
+                    "_modal"
+
+            });
+
+        }else{
+
+            console.error(
+                "API Error:",
+                orderData
+            );
+
+            alert(
+                "Unable to start payment."
+            );
+
+        }
+
+
+    }catch(error){
+
+        console.error(
+            "Payment error:",
+            error
+        );
+
+        alert(
+            "Payment gateway connection failed."
+        );
+
+    }finally{
+
+        btn.disabled=false;
+
+        btn.innerHTML=
+            '<i class="fa-solid fa-bolt text-yellow-400 mr-2"></i> Pay Now & Subscribe';
+
+    }
+
+};
+
+
+/* =========================================================
+   DOWNLOAD
+========================================================= */
+
+window.downloadPosterImage=(dataUrl)=>{
+
+    const link=
+        document.createElement("a");
+
+    link.download=
+        `PosterPlus_${Date.now()}.png`;
+
+    link.href=dataUrl;
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    link.remove();
+
+};
+
+
+/* =========================================================
+   GENERAL SHARE
+========================================================= */
+
+window.sharePoster=async(dataUrl)=>{
+
+    try{
+
+        const res=
+            await fetch(dataUrl);
+
+        const blob=
+            await res.blob();
+
+
+        const file=
+            new File(
+                [blob],
+                `PosterPlus_${Date.now()}.png`,
+                {type:"image/png"}
+            );
+
+
+        if(
+            navigator.canShare &&
+            navigator.canShare({
+                files:[file]
+            })
+        ){
+
+            await navigator.share({
+
+                title:"PosterPlus",
+
+                text:
+                    "My latest business poster",
+
+                files:[file]
+
+            });
+
+            return;
+
+        }
+
+
+        window.downloadPosterImage(dataUrl);
+
+
+    }catch(error){
+
+        console.log(error);
+
+    }
+
+};
+
+
+/* =========================================================
+   WHATSAPP
+========================================================= */
+
+window.shareWhatsApp=async(dataUrl)=>{
+
+    try{
+
+        const res=
+            await fetch(dataUrl);
+
+        const blob=
+            await res.blob();
+
+
+        const file=
+            new File(
+                [blob],
+                `PosterPlus_${Date.now()}.png`,
+                {type:"image/png"}
+            );
+
+
+        if(
+            navigator.canShare &&
+            navigator.canShare({
+                files:[file]
+            })
+        ){
+
+            await navigator.share({
+
+                title:"PosterPlus",
+
+                text:"My latest poster",
+
+                files:[file]
+
+            });
+
+            return;
+
+        }
+
+
+        window.downloadPosterImage(dataUrl);
+
+
+        const msg=
+            encodeURIComponent(
+                "My latest poster — PosterPlus"
+            );
+
+
+        window.open(
+            "https://wa.me/?text="+msg,
+            "_blank",
+            "noopener,noreferrer"
+        );
+
+
+    }catch(error){
+
+        console.log(error);
+
+    }
+
+};
+
+
+/* =========================================================
+   FACEBOOK
+========================================================= */
+
+window.shareFacebook=(dataUrl)=>{
+
+    window.downloadPosterImage(dataUrl);
+
+
+    const shareUrl=
+        "https://www.facebook.com/sharer/sharer.php?u="+
+        encodeURIComponent(
+            location.href
+        );
+
+
+    window.open(
+        shareUrl,
+        "_blank",
+        "noopener,noreferrer,width=700,height=650"
+    );
+
+};
+
+
+/* =========================================================
+   GRID CONTENT CHECK
+========================================================= */
+
+function gridHasContent(){
+
+    const grid=
+        document.getElementById(
+            "postersGrid"
+        );
+
+    return(
+        grid &&
+        grid.children.length>0
+    );
+
+}
+
+
+/* =========================================================
+   LOAD POSTERS
+========================================================= */
+
+async function loadPostersFeed(
+    isLoadMore=false
+){
+
+    if(
+        !currentClientData ||
+        isFetchingPosters ||
+        (!hasMorePosters && isLoadMore)
+    )
+        return;
+
+
+    const grid=
+        document.getElementById(
+            "postersGrid"
+        );
+
+    const loader=
+        document.getElementById(
+            "infiniteScrollLoader"
+        );
+
+    const paywall=
+        document.getElementById(
+            "paywallScreen"
+        );
+
+
+    const currentTime=
+        Date.now();
+
+
+    const hasActiveSub=
+        currentClientData.subscriptionExpiry &&
+        currentClientData.subscriptionExpiry>
+        currentTime;
+
+
+    if(!hasActiveSub){
+
+        grid.classList.add("hidden");
+
+        loader.classList.add("hidden");
+
+        paywall.classList.remove("hidden");
+
+        return;
+
+    }
+
+
+    grid.classList.remove("hidden");
+
+    paywall.classList.add("hidden");
+
+
+    isFetchingPosters=true;
+
+
+    if(!isLoadMore){
+
+        grid.innerHTML=`
+
+            <div class="loading-box">
+
+                <div class="loading-icon">
+
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+
+                </div>
+
+                <div class="loading-text">
+                    Crafting your posters...
+                </div>
+
+            </div>
+
+        `;
+
+        lastVisibleTemplate=null;
+
+        hasMorePosters=true;
+
+    }else{
+
+        loader.classList.remove("hidden");
+
+    }
+
+
+    try{
+
+        let q=
+            query(
+                collection(db,"templates"),
+                orderBy("updatedAt","desc"),
+                limit(4)
+            );
+
+
+        if(
+            isLoadMore &&
+            lastVisibleTemplate
+        ){
+
+            q=
+                query(
+                    collection(db,"templates"),
+                    orderBy("updatedAt","desc"),
+                    startAfter(lastVisibleTemplate),
+                    limit(4)
+                );
+
+        }
+
+
+        const querySnapshot=
+            await getDocs(q);
+
+
+        if(querySnapshot.empty){
+
+            hasMorePosters=false;
+
+            loader.classList.add("hidden");
+
+
+            if(!isLoadMore){
+
+                grid.innerHTML=`
+
+                    <div class="loading-box">
+
+                        <i class="fa-solid fa-folder-open text-4xl text-slate-300 mb-3"></i>
+
+                        <div>
+                            No posters available yet.
+                        </div>
+
+                    </div>
+
+                `;
+
+            }
+
+            return;
+
+        }
+
+
+        if(!isLoadMore){
+
+            grid.innerHTML="";
+
+        }
+
+
+        lastVisibleTemplate=
+            querySnapshot.docs[
+                querySnapshot.docs.length-1
+            ];
+
+
+        for(
+            const documentSnapshot
+            of querySnapshot.docs
+        ){
+
+            const templateJSON=
+                documentSnapshot.data()
+                .templateData;
+
+
+            await new Promise(
+                (resolveTemplate)=>{
+
+                    offscreenFabricCanvas.loadFromJSON(
+                        templateJSON,
+                        ()=>{
+
+                            const objects=
+                                offscreenFabricCanvas
+                                .getObjects();
+
+
+                            const promises=[];
+
+
+                            objects.forEach(obj=>{
+
+                                if(
+                                    obj.type==="i-text" ||
+                                    obj.type==="text"
+                                ){
+
+                                    if(
+                                        obj.text &&
+                                        obj.text.includes(
+                                            "{{USER_NAME}}"
+                                        )
+                                    ){
+
+                                        obj.set(
+                                            "text",
+                                            obj.text.replace(
+                                                "{{USER_NAME}}",
+                                                currentClientData.name
+                                            )
+                                        );
+
+                                    }
+
+
+                                    if(
+                                        obj.text &&
+                                        obj.text.includes(
+                                            "{{BIZ_NAME}}"
+                                        )
+                                    ){
+
+                                        obj.set(
+                                            "text",
+                                            obj.text.replace(
+                                                "{{BIZ_NAME}}",
+                                                currentClientData.bizName
+                                            )
+                                        );
+
+                                    }
+
+
+                                    obj.initDimensions();
+
+                                    obj.setCoords();
+
+                                }
+
+
+                                if(
+                                    obj.placeholderType==="PHOTO" ||
+                                    obj.placeholderType==="LOGO"
+                                ){
+
+                                    const imgUrl=
+                                        obj.placeholderType==="PHOTO"
+                                        ? currentClientData.photo
+                                        : currentClientData.logo;
+
+
+                                    const promise=
+                                        new Promise(
+                                            (resolveImg)=>{
+
+                                                fabric.Image.fromURL(
+                                                    imgUrl,
+                                                    (realImg)=>{
+
+                                                        if(!realImg){
+
+                                                            resolveImg();
+
+                                                            return;
+
+                                                        }
+
+
+                                                        const originalIndex=
+                                                            offscreenFabricCanvas
+                                                            .getObjects()
+                                                            .indexOf(obj);
+
+
+                                                        const sX=
+                                                            (obj.width*obj.scaleX)/
+                                                            realImg.width;
+
+
+                                                        const sY=
+                                                            (obj.height*obj.scaleY)/
+                                                            realImg.height;
+
+
+                                                        realImg.set({
+
+                                                            left:obj.left,
+
+                                                            top:obj.top,
+
+                                                            originX:
+                                                                obj.originX,
+
+                                                            originY:
+                                                                obj.originY,
+
+                                                            scaleX:sX,
+
+                                                            scaleY:sY,
+
+                                                            angle:obj.angle
+
+                                                        });
+
+
+                                                        offscreenFabricCanvas
+                                                            .remove(obj);
+
+
+                                                        offscreenFabricCanvas
+                                                            .insertAt(
+                                                                realImg,
+                                                                originalIndex,
+                                                                false
+                                                            );
+
+
+                                                        resolveImg();
+
+                                                    },
+                                                    {
+                                                        crossOrigin:
+                                                            "anonymous"
+                                                    }
+                                                );
+
+                                            }
+                                        );
+
+
+                                    promises.push(promise);
+
+                                }
+
+                            });
+
+
+                            Promise.all(promises)
+                            .then(()=>{
+
+                                offscreenFabricCanvas.renderAll();
+
+
+                                const finalImageURL=
+                                    offscreenFabricCanvas.toDataURL({
+
+                                        format:"png",
+
+                                        multiplier:1.5
+
+                                    });
+
+
+                                const posterDiv=
+                                    document.createElement("div");
+
+
+                                posterDiv.className=
+                                    "poster-card";
+
+
+                                posterDiv.innerHTML=`
+
+                                    <img
+                                        src="${finalImageURL}"
+                                        class="poster-image"
+                                        alt="PosterPlus poster"
+                                        loading="lazy">
+
+                                    <div class="poster-actions">
+
+                                        <button
+                                            class="poster-action whatsapp"
+                                            title="WhatsApp"
+                                            aria-label="WhatsApp"
+                                            onclick="window.shareWhatsApp('${finalImageURL}')">
+
+                                            <i class="fa-brands fa-whatsapp"></i>
+
+                                        </button>
+
+
+                                        <button
+                                            class="poster-action facebook"
+                                            title="Facebook"
+                                            aria-label="Facebook"
+                                            onclick="window.shareFacebook('${finalImageURL}')">
+
+                                            <i class="fa-brands fa-facebook-f"></i>
+
+                                        </button>
+
+
+                                        <button
+                                            class="poster-action save"
+                                            title="Save Poster"
+                                            aria-label="Save Poster"
+                                            onclick="window.downloadPosterImage('${finalImageURL}')">
+
+                                            <i class="fa-solid fa-download"></i>
+
+                                        </button>
+
+                                    </div>
+
+                                `;
+
+
+                                grid.appendChild(
+                                    posterDiv
+                                );
+
+
+                                resolveTemplate();
+
+                            });
+
+                        }
+                    );
+
+                }
+            );
+
+        }
+
+
+        if(
+            querySnapshot.docs.length===4
+        ){
+
+            loader.classList.remove(
+                "hidden"
+            );
+
+        }else{
+
+            loader.classList.add(
+                "hidden"
+            );
+
+            hasMorePosters=false;
+
+        }
+
+
+    }catch(error){
+
+        console.error(error);
+
+
+        if(!isLoadMore){
+
+            grid.innerHTML=`
+
+                <div class="loading-box text-red-500">
+
+                    <i class="fa-solid fa-triangle-exclamation text-3xl mb-3"></i>
+
+                    <div>
+                        Error loading posters.
+                    </div>
+
+                    <button
+                        onclick="location.reload()"
+                        class="mt-4 bg-emerald-600 text-white px-5 py-2 rounded-lg text-xs font-bold">
+
+                        Try Again
+
+                    </button>
+
+                </div>
+
+            `;
+
+        }
+
+    }finally{
+
+        isFetchingPosters=false;
+
+    }
+
+}
+
+
+/* =========================================================
+   INFINITE SCROLL
+========================================================= */
+
+const scrollObserver=
+    new IntersectionObserver(
+
+        entries=>{
+
+            if(
+                entries[0].isIntersecting &&
+                !isFetchingPosters &&
+                hasMorePosters
+            ){
+
+                loadPostersFeed(true);
+
+            }
+
+        },
+
+        {
+            root:
+                document.getElementById(
+                    "appMainScrollArea"
+                ),
+
+            threshold:.1
+
+        }
+
+    );
+
+
+scrollObserver.observe(
+    document.getElementById(
+        "infiniteScrollLoader"
+    )
+);
+
+
+/* =========================================================
+   ADMIN BACKGROUND
+========================================================= */
+
+document
+.getElementById("bgUpload")
+.addEventListener(
+    "change",
+    async(e)=>{
+
+        if(!isAdminLoggedIn)
+            return;
+
+
+        const file=
+            e.target.files[0];
+
+        if(!file)
+            return;
+
+
+        const validationError=
+            validateFile(file);
+
+        if(validationError){
+
+            alert(validationError);
+
+            return;
+
+        }
+
+
+        const label=
+            document.getElementById(
+                "bgUploadLabel"
+            );
+
+        const text=
+            document.getElementById(
+                "bgUploadText"
+            );
+
+
+        const originalHTML=
+            text.innerHTML;
+
+
+        text.innerHTML=
+            '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Uploading...';
+
+        label.style.pointerEvents="none";
+
+
+        try{
+
+            const downloadURL=
+                await uploadToImgBB(file);
+
+
+            fabric.Image.fromURL(
+                downloadURL,
+                (img)=>{
+
+                    if(!img)
+                        return;
+
+
+                    const scale=
+                        Math.max(
+                            800/img.width,
+                            800/img.height
+                        );
+
+
+                    img.set({
+
+                        scaleX:scale,
+
+                        scaleY:scale,
+
+                        originX:"center",
+
+                        originY:"center",
+
+                        top:400,
+
+                        left:400
+
+                    });
+
+
+                    adminCanvas.setBackgroundImage(
+                        img,
+                        adminCanvas.renderAll.bind(
+                            adminCanvas
+                        )
+                    );
+
+
+                    text.innerHTML=
+                        '<i class="fa-solid fa-check text-emerald-500 mr-1"></i> Uploaded';
+
+
+                    setTimeout(()=>{
+
+                        text.innerHTML=
+                            originalHTML;
+
+                        label.style.pointerEvents=
+                            "auto";
+
+                    },1800);
+
+                },
+                {
+                    crossOrigin:"anonymous"
+                }
+            );
+
+
+        }catch(error){
+
+            alert(
+                "Upload failed: "+
+                error.message
+            );
+
+
+            text.innerHTML=
+                originalHTML;
+
+            label.style.pointerEvents=
+                "auto";
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   ADMIN STYLE
+========================================================= */
+
+adminCanvas.on(
+    "selection:created",
+    updateStylingPanel
+);
+
+adminCanvas.on(
+    "selection:updated",
+    updateStylingPanel
+);
+
+
+adminCanvas.on(
+    "selection:cleared",
+    ()=>{
+
+        document
+            .getElementById("stylePanel")
+            .classList.add(
+                "opacity-50",
+                "pointer-events-none"
+            );
+
+    }
+);
+
+
+document
+.getElementById("colorPicker")
+.oninput=function(){
+
+    const obj=
+        adminCanvas.getActiveObject();
+
+    if(obj){
+
+        obj.set(
+            "fill",
+            this.value
+        );
+
+        adminCanvas.renderAll();
+
+    }
+
+};
+
+
+document
+.getElementById("fontSize")
+.oninput=function(){
+
+    const obj=
+        adminCanvas.getActiveObject();
+
+    if(
+        obj &&
+        obj.type==="i-text"
+    ){
+
+        obj.set(
+            "fontSize",
+            parseInt(this.value)||20
+        );
+
+        adminCanvas.renderAll();
+
+    }
+
+};
+
+
+document
+.getElementById("fontFamily")
+.onchange=function(){
+
+    const obj=
+        adminCanvas.getActiveObject();
+
+    if(
+        obj &&
+        obj.type==="i-text"
+    ){
+
+        obj.set(
+            "fontFamily",
+            this.value
+        );
+
+        adminCanvas.renderAll();
+
+    }
+
+};
+
+
+/* =========================================================
+   ADD TEXT
+========================================================= */
+
+window.addText=(str)=>{
+
+    if(!isAdminLoggedIn)
+        return;
+
+
+    const text=
+        new fabric.IText(
+            str,
+            {
+
+                left:400,
+
+                top:400,
+
+                originX:"center",
+
+                originY:"center",
+
+                fontFamily:"Poppins",
+
+                fontSize:50,
+
+                fill:"#1e293b",
+
+                fontWeight:"bold",
+
+                placeholderType:"TEXT",
+
+                shadow:
+                    new fabric.Shadow({
+                        color:
+                            "rgba(255,255,255,.8)",
+                        blur:2,
+                        offsetX:1,
+                        offsetY:1
+                    })
+
+            }
+        );
+
+
+    adminCanvas.add(text);
+
+    adminCanvas.setActiveObject(text);
+
+    adminCanvas.renderAll();
+
+};
+
+
+/* =========================================================
+   ADD BOX
+========================================================= */
+
+window.addBox=(type)=>{
+
+    if(!isAdminLoggedIn)
+        return;
+
+
+    const isPhoto=
+        type==="PHOTO";
+
+
+    const rect=
+        new fabric.Rect({
+
+            left:400,
+
+            top:400,
+
+            originX:"center",
+
+            originY:"center",
+
+            width:
+                isPhoto ? 250 : 150,
+
+            height:
+                isPhoto ? 300 : 150,
+
+            fill:
+                isPhoto
+                ? "rgba(16,185,129,.2)"
+                : "rgba(245,158,11,.2)",
+
+            stroke:
+                isPhoto
+                ? "#10b981"
+                : "#f59e0b",
+
+            strokeDashArray:[
+                8,
+                8
+            ],
+
+            strokeWidth:3,
+
+            placeholderType:type
+
         });
 
-        // ==========================================
-        // CASHFREE PAYMENT LOGIC (SECURE)
-        // ==========================================
-        window.startPayment = async () => {
-            if (!auth.currentUser || !currentClientData) {
-                alert("Please log in and complete profile first.");
-                return;
+
+    adminCanvas.add(rect);
+
+    adminCanvas.setActiveObject(rect);
+
+    adminCanvas.renderAll();
+
+};
+
+
+/* =========================================================
+   DELETE
+========================================================= */
+
+window.deleteObject=()=>{
+
+    if(!isAdminLoggedIn)
+        return;
+
+
+    const obj=
+        adminCanvas.getActiveObject();
+
+
+    if(obj){
+
+        adminCanvas.remove(obj);
+
+        adminCanvas.discardActiveObject();
+
+        adminCanvas.renderAll();
+
+    }
+
+};
+
+
+/* =========================================================
+   TEXT ALIGN
+========================================================= */
+
+window.setTextAlign=(align)=>{
+
+    if(!isAdminLoggedIn)
+        return;
+
+
+    const obj=
+        adminCanvas.getActiveObject();
+
+
+    if(
+        obj &&
+        obj.type==="i-text"
+    ){
+
+        obj.set(
+            "textAlign",
+            align
+        );
+
+        adminCanvas.renderAll();
+
+    }
+
+};
+
+
+/* =========================================================
+   STYLE PANEL
+========================================================= */
+
+function updateStylingPanel(){
+
+    if(!isAdminLoggedIn)
+        return;
+
+
+    const obj=
+        adminCanvas.getActiveObject();
+
+
+    if(!obj)
+        return;
+
+
+    const panel=
+        document.getElementById(
+            "stylePanel"
+        );
+
+
+    panel.classList.remove(
+        "opacity-50",
+        "pointer-events-none"
+    );
+
+
+    document.getElementById(
+        "colorPicker"
+    ).value=
+        obj.fill ||
+        "#000000";
+
+
+    if(obj.type==="i-text"){
+
+        document.getElementById(
+            "fontSize"
+        ).value=
+            obj.fontSize || 20;
+
+
+        document.getElementById(
+            "fontFamily"
+        ).value=
+            obj.fontFamily ||
+            "sans-serif";
+
+    }
+
+}
+
+
+/* =========================================================
+   SAVE TEMPLATE
+========================================================= */
+
+window.saveTemplate=async()=>{
+
+    if(!isAdminLoggedIn){
+
+        alert("Unauthorized");
+
+        return;
+
+    }
+
+
+    const saveBtn=
+        document.querySelector(
+            'button[onclick="window.saveTemplate()"]'
+        );
+
+
+    const originalHTML=
+        saveBtn.innerHTML;
+
+
+    saveBtn.disabled=true;
+
+    saveBtn.innerHTML=
+        '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Saving...';
+
+
+    try{
+
+        const json=
+            adminCanvas.toJSON([
+                "placeholderType"
+            ]);
+
+
+        const savedTemplateJSON=
+            JSON.stringify(json);
+
+
+        const templateId=
+            "poster_"+Date.now();
+
+
+        await setDoc(
+            doc(
+                db,
+                "templates",
+                templateId
+            ),
+            {
+
+                templateData:
+                    savedTemplateJSON,
+
+                updatedAt:
+                    new Date().toISOString()
+
             }
-
-            const btn = document.getElementById('posterPlus_actionBtn');
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
-            btn.disabled = true;
-
-            try {
-                // ⚠️ यहां अपना Vercel API URL डालें
-                const API_URL = 'https://posterplus-api.vercel.app/api/create-order';
-                
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        amount: 99.00, 
-                        customerId: auth.currentUser.uid, // Firebase User ID
-                        phone: currentClientData.whatsapp || '9999999999',
-                        email: auth.currentUser.email,
-                        name: currentClientData.name || 'User'
-                    })
-                });
-                
-                const orderData = await response.json();
-
-                if (orderData.payment_session_id) {
-                    const cashfree = Cashfree({ mode: "sandbox" });
-                    cashfree.checkout({
-                        paymentSessionId: orderData.payment_session_id,
-                        redirectTarget: "_modal"
-                    });
-                } else {
-                    alert("Error starting payment. Check console.");
-                    console.error("API Error:", orderData);
-                }
-            } catch (error) {
-                console.error("Payment error:", error);
-                alert("Something went wrong while connecting to payment gateway.");
-            } finally {
-                btn.innerHTML = '<i class="fa-solid fa-bolt text-yellow-400"></i> Pay Now & Subscribe';
-                btn.disabled = false;
-            }
-        };
+        );
 
 
-        window.loginWithGoogle = async () => {
-            document.getElementById("authStatus").className = "mt-4 text-sm font-semibold text-emerald-600 block";
-            document.getElementById("authStatus").innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Connecting...';
-            try { await signInWithPopup(auth, provider); } catch (e) {
-                document.getElementById("authStatus").className = "mt-4 text-sm font-bold text-red-600 block";
-                document.getElementById("authStatus").innerText = 'Login failed.';
-            }
-        };
+        adminCanvas.clear();
 
-        window.logoutUser = async () => { await signOut(auth); };
+        adminCanvas.backgroundImage=null;
 
-        window.switchMainTab = (mode) => {
-            const adminPnl = document.getElementById('adminPanel');
-            const clientApp = document.getElementById('clientApp');
-            const btnAdmin = document.getElementById('btnAdmin');
-            const btnApp = document.getElementById('btnApp');
+        document
+            .getElementById("bgUpload")
+            .value="";
 
-            if (mode === 'admin' && isAdminLoggedIn) {
-                adminPnl.classList.replace('hidden', 'flex');
-                clientApp.classList.replace('flex', 'hidden');
-                btnAdmin.classList.replace('flex', 'hidden');
-                btnApp.classList.replace('hidden', 'flex');
-            } else {
-                adminPnl.classList.replace('flex', 'hidden');
-                clientApp.classList.replace('hidden', 'flex');
-                btnApp.classList.replace('flex', 'hidden');
-                if(isAdminLoggedIn) {
-                    btnAdmin.classList.replace('hidden', 'flex');
-                }
-            }
-        };
 
-        window.switchBottomTab = (tab) => {
-            document.getElementById('appTabPosters').classList.add('hidden');
-            document.getElementById('appTabPayments').classList.add('hidden');
-            document.getElementById('appTabProfile').classList.add('hidden');
-            
-            document.getElementById('navPosters').className = "flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-600 transition-colors";
-            document.getElementById('navPayments').className = "flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-600 transition-colors";
-            document.getElementById('navProfile').className = "flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-600 transition-colors relative";
+        saveBtn.innerHTML=
+            '<i class="fa-solid fa-check mr-2"></i> Cloud Saved';
 
-            if(tab === 'posters') {
-                if(!currentClientData) { alert("Please complete your profile first."); window.switchBottomTab('profile'); return; }
-                document.getElementById('appTabPosters').classList.remove('hidden');
-                document.getElementById('navPosters').classList.replace('text-slate-400', 'text-emerald-600');
-                if (gridHasContent() === false) loadPostersFeed(false);
-            } 
-            else if(tab === 'payments') {
-                if(!currentClientData) { alert("Please complete your profile first."); window.switchBottomTab('profile'); return; }
-                document.getElementById('appTabPayments').classList.replace('hidden', 'flex');
-                document.getElementById('navPayments').classList.replace('text-slate-400', 'text-emerald-600');
-            } 
-            else if(tab === 'profile') {
-                document.getElementById('appTabProfile').classList.remove('hidden');
-                document.getElementById('navProfile').classList.replace('text-slate-400', 'text-emerald-600');
-            }
-        };
 
-        function populateProfileForm() {
-            if(!currentClientData) return;
-            document.getElementById('profName').value = currentClientData.name || '';
-            document.getElementById('profBizName').value = currentClientData.bizName || '';
-            document.getElementById('profWhatsapp').value = currentClientData.whatsapp || '';
-            document.getElementById('profAddress').value = currentClientData.address || '';
-        }
+        saveBtn.classList.remove(
+            "bg-emerald-600"
+        );
 
-        // --- CLIENT-SIDE FILE VALIDATION ---
-        const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
-        const validateFile = (file) => {
-            if (!file) return "No file selected.";
-            if (file.size > MAX_FILE_SIZE) return "File size exceeds 2MB limit.";
-            const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
-            if (!validTypes.includes(file.type)) return "Invalid file type. Only JPG, PNG, WEBP allowed.";
-            return null;
-        };
+        saveBtn.classList.add(
+            "bg-teal-600"
+        );
 
-        // --- SECURE UPLOAD WITH FIREBASE AUTH TOKEN ---
-        const uploadToImgBB = async (file) => {
-            const validationError = validateFile(file);
-            if (validationError) throw new Error(validationError);
 
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            
-            return new Promise((resolve, reject) => {
-                reader.onloadend = async () => {
-                    try {
-                        const base64String = reader.result;
-                        const token = await auth.currentUser.getIdToken();
-                        
-                        const res = await fetch('/api/upload', {
-                            method: 'POST',
-                            headers: { 
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${token}`
-                            },
-                            body: JSON.stringify({ imageBase64: base64String })
-                        });
-                        const data = await res.json();
-                        if (data.url) {
-                            resolve(data.url);
-                        } else {
-                            reject(new Error(data.error || "Upload Failed"));
-                        }
-                    } catch (error) {
-                        reject(error);
-                    }
-                };
-            });
-        }; 
+        setTimeout(()=>{
 
-        window.submitProfile = async () => { 
-            const btn = document.getElementById('profSubmitBtn'); 
-            const originalHTML = btn.innerHTML; 
-            btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...'; 
-            try { 
-                let photoUrl = currentClientData ? currentClientData.photo : null; 
-                let logoUrl = currentClientData ? currentClientData.logo : null; 
-                const photoFile = document.getElementById('profPhoto').files[0]; 
-                const logoFile = document.getElementById('profLogo').files[0]; 
-                 
-                if (photoFile) photoUrl = await uploadToImgBB(photoFile); 
-                if (logoFile) logoUrl = await uploadToImgBB(logoFile); 
+            saveBtn.innerHTML=
+                originalHTML;
 
-                if(!photoUrl || !logoUrl) throw new Error("Images are required."); 
+            saveBtn.classList.remove(
+                "bg-teal-600"
+            );
 
-                const profileData = { 
-                    email: auth.currentUser.email, 
-                    name: document.getElementById('profName').value, 
-                    bizName: document.getElementById('profBizName').value, 
-                    whatsapp: document.getElementById('profWhatsapp').value, 
-                    address: document.getElementById('profAddress').value, 
-                    photo: photoUrl, 
-                    logo: logoUrl, 
-                    updatedAt: new Date().toISOString() 
-                }; 
+            saveBtn.classList.add(
+                "bg-emerald-600"
+            );
 
-                await setDoc(doc(db, "clients", auth.currentUser.uid), profileData, { merge: true }); 
-                
-                // Update local data, preserving subscription data if it exists
-                currentClientData = { ...currentClientData, ...profileData }; 
-                document.getElementById('profileAlertDot').classList.add('hidden'); 
-                 
-                btn.innerHTML = '<i class="fa-solid fa-check"></i> Saved!'; 
-                btn.classList.replace('bg-emerald-600', 'bg-teal-600'); 
-                setTimeout(() => {  
-                    btn.innerHTML = originalHTML; btn.classList.replace('bg-teal-600', 'bg-emerald-600');  
-                    btn.disabled = false; window.switchBottomTab('posters'); 
-                }, 1500); 
-            } catch(e) { 
-                alert("Error saving profile: " + e.message); 
-                btn.innerHTML = originalHTML; btn.disabled = false; 
-            } 
-        }; 
+            saveBtn.disabled=false;
 
-        window.submitRegistration = async () => { 
-            const btn = document.getElementById('regSubmitBtn'); 
-            const status = document.getElementById('regStatus'); 
-            btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving Profile...'; 
-            try { 
-                const photoFile = document.getElementById('regPhoto').files[0]; 
-                const logoFile = document.getElementById('regLogo').files[0]; 
-                const [photoUrl, logoUrl] = await Promise.all([ uploadToImgBB(photoFile), uploadToImgBB(logoFile) ]); 
+        },1800);
 
-                const newClient = { 
-                    email: auth.currentUser.email, 
-                    name: document.getElementById('regName').value, 
-                    bizName: document.getElementById('regBizName').value, 
-                    whatsapp: document.getElementById('regWhatsapp').value, 
-                    address: document.getElementById('regAddress').value, 
-                    photo: photoUrl, 
-                    logo: logoUrl, 
-                    joinedAt: new Date().toISOString() 
-                }; 
 
-                await setDoc(doc(db, "clients", auth.currentUser.uid), newClient); 
-                currentClientData = newClient; 
-                 
-                document.getElementById('registrationScreen').classList.replace('flex', 'hidden'); 
-                document.getElementById('mainApp').classList.replace('hidden', 'flex'); 
-                window.switchMainTab('app'); 
-            } catch(e) { 
-                status.className = "text-center text-sm font-semibold mt-2 text-red-600 block"; 
-                status.innerText = e.message || "Error saving profile. Try again."; 
-                btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-rocket"></i> Save & Continue'; 
-            } 
-        }; 
+    }catch(error){
 
-        window.downloadPosterImage = (dataUrl) => { 
-            const link = document.createElement('a'); link.download = `Poster_${Date.now()}.png`; link.href = dataUrl; link.click(); 
-        }; 
+        console.error(error);
 
-        window.sharePoster = async (dataUrl) => {
-            try {
-                const res = await fetch(dataUrl);
-                const blob = await res.blob();
-                const file = new File([blob], `Poster_${Date.now()}.png`, { type: "image/png" });
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    await navigator.share({ title: 'PosterPlus', text: 'Check out my latest poster!', files: [file] });
-                    return;
-                }
-                window.downloadPosterImage(dataUrl);
-                alert('Image sharing is not supported in this browser. The poster was saved; you can attach it in WhatsApp/Facebook.');
-            } catch (error) { console.log('Share cancelled/error:', error); }
-        };
+        alert(
+            "Error saving template. Check Firestore rules."
+        );
 
-        window.shareWhatsApp = async (dataUrl) => {
-            try {
-                const res = await fetch(dataUrl);
-                const blob = await res.blob();
-                const file = new File([blob], `Poster_${Date.now()}.png`, { type: 'image/png' });
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    await navigator.share({ title: 'PosterPlus', text: 'My latest poster', files: [file] });
-                    return;
-                }
-                window.downloadPosterImage(dataUrl);
-                const msg = encodeURIComponent('My latest poster — PosterPlus');
-                window.open('https://wa.me/?text=' + msg, '_blank', 'noopener,noreferrer');
-            } catch (e) { console.log(e); }
-        };
+        saveBtn.innerHTML=
+            originalHTML;
 
-        window.shareFacebook = (dataUrl) => {
-            // Facebook's web share cannot accept a local data/blob image directly.
-            // Save first, then open Facebook's share dialog so the user can attach the image.
-            window.downloadPosterImage(dataUrl);
-            const shareUrl = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(location.href);
-            window.open(shareUrl, '_blank', 'noopener,noreferrer,width=700,height=650');
-        };
+        saveBtn.disabled=false;
 
-        function gridHasContent() {
-            const grid = document.getElementById('postersGrid');
-            return !!grid && grid.children.length > 0 && !document.getElementById('initialLoader');
-        }
+    }
 
-        async function loadPostersFeed(isLoadMore = false) { 
-            if(!currentClientData || isFetchingPosters || (!hasMorePosters && isLoadMore)) return; 
+};
 
-            const grid = document.getElementById('postersGrid'); 
-            const loader = document.getElementById('infiniteScrollLoader'); 
-            const paywall = document.getElementById('paywallScreen');
+</script>
 
-            // ⚠️ SUBSCRIPTION CHECK LOGIC ⚠️
-            const currentTime = Date.now();
-            const hasActiveSub = currentClientData.subscriptionExpiry && currentClientData.subscriptionExpiry > currentTime;
-
-            if (!hasActiveSub) {
-                grid.classList.add('hidden');
-                loader.classList.add('hidden');
-                paywall.classList.remove('hidden');
-                paywall.classList.add('flex');
-                return; // Stop loading posters, user is locked out
-            } else {
-                grid.classList.remove('hidden');
-                paywall.classList.add('hidden');
-                paywall.classList.remove('flex');
-            }
-             
-            isFetchingPosters = true; 
-
-            if (!isLoadMore) { 
-                grid.innerHTML = '<div class="col-span-full text-center text-slate-500 py-10 mt-10" id="initialLoader"><i class="fa-solid fa-spinner fa-spin text-3xl mb-3 text-emerald-500"></i><br>Crafting your posters...</div>'; 
-                lastVisibleTemplate = null; 
-                hasMorePosters = true; 
-            } else { 
-                loader.classList.remove('hidden'); 
-            } 
-
-            try { 
-                let q = query(collection(db, "templates"), orderBy("updatedAt", "desc"), limit(4)); 
-                if (isLoadMore && lastVisibleTemplate) { 
-                    q = query(collection(db, "templates"), orderBy("updatedAt", "desc"), startAfter(lastVisibleTemplate), limit(4)); 
-                } 
-
-                const querySnapshot = await getDocs(q); 
-                 
-                if (querySnapshot.empty) { 
-                    hasMorePosters = false; 
-                    loader.classList.add('hidden'); 
-                    if (!isLoadMore) grid.innerHTML = '<div class="col-span-full text-center text-slate-500 py-10 mt-10"><i class="fa-solid fa-folder-open text-4xl mb-3 text-slate-300"></i><br>No posters available yet.</div>'; 
-                    isFetchingPosters = false; 
-                    return; 
-                } 
-
-                if (!isLoadMore) grid.innerHTML = ''; 
-                 
-                lastVisibleTemplate = querySnapshot.docs[querySnapshot.docs.length - 1]; 
-
-                for (const documentSnapshot of querySnapshot.docs) { 
-                    const templateJSON = documentSnapshot.data().templateData; 
-                     
-                    await new Promise((resolveTemplate) => { 
-                        offscreenFabricCanvas.loadFromJSON(templateJSON, () => { 
-                            const objects = offscreenFabricCanvas.getObjects(); 
-                            let promises = []; 
-
-                            objects.forEach((obj) => { 
-                                if (obj.type === 'i-text' || obj.type === 'text') { 
-                                    if (obj.text.includes('{{USER_NAME}}')) obj.set('text', obj.text.replace('{{USER_NAME}}', currentClientData.name)); 
-                                    if (obj.text.includes('{{BIZ_NAME}}')) obj.set('text', obj.text.replace('{{BIZ_NAME}}', currentClientData.bizName)); 
-                                    obj.initDimensions(); obj.setCoords(); 
-                                } 
-                                 
-                                if (obj.placeholderType === 'PHOTO' || obj.placeholderType === 'LOGO') { 
-                                    const imgUrl = obj.placeholderType === 'PHOTO' ? currentClientData.photo : currentClientData.logo; 
-                                    let p = new Promise((resolveImg) => { 
-                                        fabric.Image.fromURL(imgUrl, (realImg) => { 
-                                            const sX = (obj.width * obj.scaleX) / realImg.width; 
-                                            const sY = (obj.height * obj.scaleY) / realImg.height; 
-                                            realImg.set({ left: obj.left, top: obj.top, originX: obj.originX, originY: obj.originY, scaleX: sX, scaleY: sY, angle: obj.angle }); 
-                                            offscreenFabricCanvas.remove(obj);  
-                                            offscreenFabricCanvas.add(realImg);  
-                                            realImg.moveTo(offscreenFabricCanvas.getObjects().indexOf(obj)); 
-                                            resolveImg(); 
-                                        }, { crossOrigin: 'anonymous' }); 
-                                    }); 
-                                    promises.push(p); 
-                                } 
-                            }); 
-
-                            Promise.all(promises).then(() => { 
-                                offscreenFabricCanvas.renderAll(); 
-                                const finalImageURL = offscreenFabricCanvas.toDataURL({ format: 'png', multiplier: 1.5 }); 
-                                 
-                                const posterDiv = document.createElement('div'); 
-                                posterDiv.className = "bg-white p-2 md:p-3 rounded-xl md:rounded-2xl shadow-sm border border-slate-100 flex flex-col"; 
-                                posterDiv.innerHTML = ` 
-                                    <img src="${finalImageURL}" class="w-full h-auto rounded-lg md:rounded-xl border border-slate-100 mb-2 md:mb-3" /> 
-                                    <div class="mt-auto flex flex-col gap-1.5 md:gap-2"> 
-                                        <div class="grid grid-cols-3 gap-1.5 md:gap-2">
-                                        <button onclick="window.shareWhatsApp('${finalImageURL}')" class="bg-emerald-500 hover:bg-emerald-600 text-white px-1.5 py-2 rounded-lg text-[9px] md:text-xs font-bold flex items-center justify-center gap-1 shadow-sm" title="Share on WhatsApp">
-                                            <i class="fa-brands fa-whatsapp"></i><span>WhatsApp</span>
-                                        </button>
-                                        <button onclick="window.shareFacebook('${finalImageURL}')" class="bg-blue-600 hover:bg-blue-700 text-white px-1.5 py-2 rounded-lg text-[9px] md:text-xs font-bold flex items-center justify-center gap-1 shadow-sm" title="Share on Facebook">
-                                            <i class="fa-brands fa-facebook-f"></i><span>Facebook</span>
-                                        </button>
-                                        <button onclick="window.downloadPosterImage('${finalImageURL}')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-1.5 py-2 rounded-lg text-[9px] md:text-xs font-bold flex items-center justify-center gap-1 border border-slate-200" title="Save poster">
-                                            <i class="fa-solid fa-download"></i><span>Save</span>
-                                        </button>
-                                    </div> 
-                                    </div> 
-                                `; 
-                                grid.appendChild(posterDiv); 
-                                resolveTemplate(); 
-                            }); 
-                        }); 
-                    }); 
-                } 
-                 
-                if(querySnapshot.docs.length === 4) { loader.classList.remove('hidden'); }  
-                else { loader.classList.add('hidden'); hasMorePosters = false; } 
-
-            } catch (error) { 
-                console.error(error); 
-                if (!isLoadMore) grid.innerHTML = '<div class="col-span-full text-center text-red-500 py-10">Error loading posters.</div>'; 
-            } finally { 
-                isFetchingPosters = false; 
-            } 
-        } 
-
-        const scrollObserver = new IntersectionObserver((entries) => { 
-            if (entries[0].isIntersecting && !isFetchingPosters && hasMorePosters) { 
-                loadPostersFeed(true); 
-            } 
-        }, { root: document.getElementById('appMainScrollArea'), threshold: 0.1 }); 
-        scrollObserver.observe(document.getElementById('infiniteScrollLoader')); 
-
-        // --- ADMIN EDITOR FUNCTIONS WITH GUARDS (`isAdminLoggedIn`) --- 
-        document.getElementById('bgUpload').addEventListener('change', async (e) => { 
-            if (!isAdminLoggedIn) return; // Guard
-            const file = e.target.files[0]; 
-            if (!file) return; 
-
-            const validationError = validateFile(file);
-            if (validationError) { alert(validationError); return; }
-
-            const bgUploadLabel = document.getElementById('bgUploadLabel'); 
-            const bgUploadText = document.getElementById('bgUploadText'); 
-            const originalHTML = bgUploadText.innerHTML; 
-            bgUploadText.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Uploading...'; 
-            bgUploadLabel.style.pointerEvents = 'none'; 
-            try { 
-                const downloadURL = await uploadToImgBB(file); 
-                fabric.Image.fromURL(downloadURL, (img) => { 
-                    const scale = Math.max(800 / img.width, 800 / img.height); 
-                    img.set({ scaleX: scale, scaleY: scale, originX: 'center', originY: 'center', top: 400, left: 400 }); 
-                    adminCanvas.setBackgroundImage(img, adminCanvas.renderAll.bind(adminCanvas)); 
-                    bgUploadText.innerHTML = '<i class="fa-solid fa-check text-emerald-500 mr-1"></i> Uploaded!'; 
-                    setTimeout(() => { bgUploadText.innerHTML = originalHTML; bgUploadLabel.style.pointerEvents = 'auto'; }, 2000); 
-                }, { crossOrigin: 'anonymous' }); 
-            } catch (error) { 
-                alert("Failed to upload background: " + error.message); 
-                bgUploadText.innerHTML = originalHTML; bgUploadLabel.style.pointerEvents = 'auto'; 
-            } 
-        }); 
-
-        adminCanvas.on('selection:created', updateStylingPanel); 
-        adminCanvas.on('selection:updated', updateStylingPanel); 
-        adminCanvas.on('selection:cleared', () => { document.getElementById('stylePanel').classList.add('opacity-50', 'pointer-events-none'); }); 
-        document.getElementById('colorPicker').oninput = function() { const obj = adminCanvas.getActiveObject(); if(obj) { obj.set('fill', this.value); adminCanvas.renderAll(); }}; 
-        document.getElementById('fontSize').oninput = function() { const obj = adminCanvas.getActiveObject(); if(obj && obj.type === 'i-text') { obj.set('fontSize', parseInt(this.value)); adminCanvas.renderAll(); }}; 
-        document.getElementById('fontFamily').onchange = function() { const obj = adminCanvas.getActiveObject(); if(obj && obj.type === 'i-text') { obj.set('fontFamily', this.value); adminCanvas.renderAll(); }}; 
-
-        window.addText = (str) => { 
-            if (!isAdminLoggedIn) return; // Guard
-            const text = new fabric.IText(str, { left: 400, top: 400, originX: 'center', originY: 'center', fontFamily: 'Poppins', fontSize: 50, fill: '#1e293b', fontWeight: 'bold', placeholderType: 'TEXT', shadow: new fabric.Shadow({ color: 'rgba(255,255,255,0.8)', blur: 2, offsetX: 1, offsetY: 1 }) }); 
-            adminCanvas.add(text); adminCanvas.setActiveObject(text); 
-        }; 
-
-        window.addBox = (type) => { 
-            if (!isAdminLoggedIn) return; // Guard
-            const isPhoto = type === 'PHOTO'; 
-            const rect = new fabric.Rect({ left: 400, top: 400, originX: 'center', originY: 'center', width: isPhoto ? 250 : 150, height: isPhoto ? 300 : 150, fill: isPhoto ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)', stroke: isPhoto ? '#10b981' : '#f59e0b', strokeDashArray: [8,8], strokeWidth: 3, placeholderType: type }); 
-            adminCanvas.add(rect); adminCanvas.setActiveObject(rect); 
-        }; 
-
-        window.deleteObject = () => { 
-            if (!isAdminLoggedIn) return; // Guard
-            const obj = adminCanvas.getActiveObject(); 
-            if(obj) { adminCanvas.remove(obj); document.getElementById('stylePanel').classList.add('opacity-50', 'pointer-events-none'); } 
-        }; 
-
-        window.setTextAlign = (align) => { 
-            if (!isAdminLoggedIn) return; // Guard
-            const obj = adminCanvas.getActiveObject(); 
-            if(obj && obj.type === 'i-text') { obj.set('textAlign', align); adminCanvas.renderAll(); } 
-        }; 
-
-        function updateStylingPanel() { 
-            if (!isAdminLoggedIn) return;
-            const obj = adminCanvas.getActiveObject(); 
-            if(!obj) return; 
-            document.getElementById('stylePanel').classList.remove('opacity-50', 'pointer-events-none'); 
-            document.getElementById('colorPicker').value = obj.fill || '#000000'; 
-            if(obj.type === 'i-text') { document.getElementById('fontSize').value = obj.fontSize; document.getElementById('fontFamily').value = obj.fontFamily || 'sans-serif'; } 
-        } 
-
-        window.saveTemplate = async () => { 
-            if (!isAdminLoggedIn) { alert("Unauthorized"); return; } // Guard
-            const saveBtn = document.querySelector('button[onclick="window.saveTemplate()"]'); 
-            const originalHTML = saveBtn.innerHTML; 
-            saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving to Cloud...'; 
-            try { 
-                const json = adminCanvas.toJSON(['placeholderType']); 
-                const savedTemplateJSON = JSON.stringify(json); 
-                const templateId = "poster_" + Date.now(); 
-                 
-                await setDoc(doc(db, "templates", templateId), {  
-                    templateData: savedTemplateJSON,  
-                    updatedAt: new Date().toISOString()  
-                }); 
-                 
-                adminCanvas.clear(); document.getElementById('bgUpload').value = ''; 
-                saveBtn.innerHTML = '<i class="fa-solid fa-check"></i> Cloud Saved!'; 
-                saveBtn.classList.replace('bg-emerald-600', 'bg-teal-600'); 
-                setTimeout(() => { saveBtn.innerHTML = originalHTML; saveBtn.classList.replace('bg-teal-600', 'bg-emerald-600'); }, 2000); 
-            } catch (error) { 
-                alert("Error saving to cloud! Check Firestore rules."); 
-                saveBtn.innerHTML = originalHTML; 
-            } 
-        }; 
-    </script> 
-</body> 
+</body>
 </html>
