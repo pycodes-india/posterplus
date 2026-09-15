@@ -32,6 +32,21 @@
             width: 100%;
         }
     </style>
+
+<style id="posterplus-pro-theme">
+:root{--pp-primary:#16a34a;--pp-primary2:#059669;--pp-dark:#0b1220;--pp-bg:#f4f7f6}
+body{background:radial-gradient(circle at 20% 0%,#ecfdf5 0,transparent 30%),linear-gradient(135deg,#f8fafc,#eef7f3)!important}
+#mainApp{background:transparent}
+header{background:rgba(255,255,255,.9)!important;backdrop-filter:blur(16px);border-bottom:1px solid rgba(15,23,42,.08)!important;box-shadow:0 8px 30px rgba(15,23,42,.06)!important}
+#clientApp{background:transparent!important}
+#postersGrid>div{border-radius:20px!important;box-shadow:0 10px 30px rgba(15,23,42,.07)!important;transition:transform .2s ease,box-shadow .2s ease!important;overflow:hidden}
+#postersGrid>div:hover{transform:translateY(-3px);box-shadow:0 16px 38px rgba(15,23,42,.11)!important}
+#postersGrid img{display:block;background:#f1f5f9}
+nav{background:rgba(255,255,255,.94)!important;backdrop-filter:blur(18px);border-top:1px solid rgba(15,23,42,.08)!important}
+button,input,select{transition:all .18s ease}
+button:active{transform:scale(.97)}
+@media(max-width:640px){header{padding:10px 14px!important}#postersGrid{gap:10px!important}.posterPlus_checkout_card{border-radius:22px!important;padding:24px!important}.pb-safe{padding-bottom:env(safe-area-inset-bottom)}}
+</style>
 </head>
 <body class="bg-slate-50 font-sans h-screen flex flex-col overflow-hidden text-slate-800 relative">
 
@@ -435,7 +450,6 @@
                 if(isAdminLoggedIn) {
                     btnAdmin.classList.replace('hidden', 'flex');
                 }
-                if(currentClientData) loadPostersFeed(false);
             }
         };
 
@@ -452,7 +466,7 @@
                 if(!currentClientData) { alert("Please complete your profile first."); window.switchBottomTab('profile'); return; }
                 document.getElementById('appTabPosters').classList.remove('hidden');
                 document.getElementById('navPosters').classList.replace('text-slate-400', 'text-emerald-600');
-                loadPostersFeed(false);
+                if (gridHasContent() === false) loadPostersFeed(false);
             } 
             else if(tab === 'payments') {
                 if(!currentClientData) { alert("Please complete your profile first."); window.switchBottomTab('profile'); return; }
@@ -599,15 +613,47 @@
             const link = document.createElement('a'); link.download = `Poster_${Date.now()}.png`; link.href = dataUrl; link.click(); 
         }; 
 
-        window.sharePoster = async (dataUrl) => { 
-            try { 
-                const res = await fetch(dataUrl); const blob = await res.blob(); 
-                const file = new File([blob], `Poster_${Date.now()}.png`, { type: "image/png" }); 
-                if (navigator.canShare && navigator.canShare({ files: [file] })) { 
-                    await navigator.share({ title: 'My Poster', text: 'Check out my latest update!', files: [file] }); 
-                } else { alert("Your browser does not support direct image sharing. Please download the poster first."); } 
-            } catch (error) { console.log("Error sharing:", error); } 
-        }; 
+        window.sharePoster = async (dataUrl) => {
+            try {
+                const res = await fetch(dataUrl);
+                const blob = await res.blob();
+                const file = new File([blob], `Poster_${Date.now()}.png`, { type: "image/png" });
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({ title: 'PosterPlus', text: 'Check out my latest poster!', files: [file] });
+                    return;
+                }
+                window.downloadPosterImage(dataUrl);
+                alert('Image sharing is not supported in this browser. The poster was saved; you can attach it in WhatsApp/Facebook.');
+            } catch (error) { console.log('Share cancelled/error:', error); }
+        };
+
+        window.shareWhatsApp = async (dataUrl) => {
+            try {
+                const res = await fetch(dataUrl);
+                const blob = await res.blob();
+                const file = new File([blob], `Poster_${Date.now()}.png`, { type: 'image/png' });
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({ title: 'PosterPlus', text: 'My latest poster', files: [file] });
+                    return;
+                }
+                window.downloadPosterImage(dataUrl);
+                const msg = encodeURIComponent('My latest poster — PosterPlus');
+                window.open('https://wa.me/?text=' + msg, '_blank', 'noopener,noreferrer');
+            } catch (e) { console.log(e); }
+        };
+
+        window.shareFacebook = (dataUrl) => {
+            // Facebook's web share cannot accept a local data/blob image directly.
+            // Save first, then open Facebook's share dialog so the user can attach the image.
+            window.downloadPosterImage(dataUrl);
+            const shareUrl = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(location.href);
+            window.open(shareUrl, '_blank', 'noopener,noreferrer,width=700,height=650');
+        };
+
+        function gridHasContent() {
+            const grid = document.getElementById('postersGrid');
+            return !!grid && grid.children.length > 0 && !document.getElementById('initialLoader');
+        }
 
         async function loadPostersFeed(isLoadMore = false) { 
             if(!currentClientData || isFetchingPosters || (!hasMorePosters && isLoadMore)) return; 
@@ -703,12 +749,17 @@
                                 posterDiv.innerHTML = ` 
                                     <img src="${finalImageURL}" class="w-full h-auto rounded-lg md:rounded-xl border border-slate-100 mb-2 md:mb-3" /> 
                                     <div class="mt-auto flex flex-col gap-1.5 md:gap-2"> 
-                                        <button onclick="window.sharePoster('${finalImageURL}')" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white px-2 py-1.5 md:px-4 md:py-2 rounded-md md:rounded-lg text-[10px] md:text-sm font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm"> 
-                                            <i class="fa-brands fa-whatsapp text-sm md:text-lg"></i> <span class="hidden md:inline">Share Story</span><span class="md:hidden">Share</span> 
-                                        </button> 
-                                        <button onclick="window.downloadPosterImage('${finalImageURL}')" class="w-full bg-slate-50 hover:bg-slate-100 text-slate-600 px-2 py-1.5 md:px-4 md:py-2 rounded-md md:rounded-lg text-[10px] md:text-sm font-bold transition-colors flex items-center justify-center gap-1.5 border border-slate-200"> 
-                                            <i class="fa-solid fa-download"></i> <span class="hidden md:inline">Download Poster</span><span class="md:hidden">Save</span> 
-                                        </button> 
+                                        <div class="grid grid-cols-3 gap-1.5 md:gap-2">
+                                        <button onclick="window.shareWhatsApp('${finalImageURL}')" class="bg-emerald-500 hover:bg-emerald-600 text-white px-1.5 py-2 rounded-lg text-[9px] md:text-xs font-bold flex items-center justify-center gap-1 shadow-sm" title="Share on WhatsApp">
+                                            <i class="fa-brands fa-whatsapp"></i><span>WhatsApp</span>
+                                        </button>
+                                        <button onclick="window.shareFacebook('${finalImageURL}')" class="bg-blue-600 hover:bg-blue-700 text-white px-1.5 py-2 rounded-lg text-[9px] md:text-xs font-bold flex items-center justify-center gap-1 shadow-sm" title="Share on Facebook">
+                                            <i class="fa-brands fa-facebook-f"></i><span>Facebook</span>
+                                        </button>
+                                        <button onclick="window.downloadPosterImage('${finalImageURL}')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-1.5 py-2 rounded-lg text-[9px] md:text-xs font-bold flex items-center justify-center gap-1 border border-slate-200" title="Save poster">
+                                            <i class="fa-solid fa-download"></i><span>Save</span>
+                                        </button>
+                                    </div> 
                                     </div> 
                                 `; 
                                 grid.appendChild(posterDiv); 
