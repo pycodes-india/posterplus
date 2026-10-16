@@ -3576,7 +3576,7 @@
 
             for (
                 const documentSnapshot
-                of querySnapshot.docs
+                of querySnapshot.docs.slice(0, 4)
             ) {
 
                 const templateData =
