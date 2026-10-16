@@ -35,8 +35,8 @@
     <style>
 
         /* =========================================================
-           POSTERPLUS PROFESSIONAL THEME
-           PURPLE + INDIGO / PHONEPE INSPIRED
+            POSTERPLUS PROFESSIONAL THEME
+            PURPLE + INDIGO / PHONEPE INSPIRED
         ========================================================= */
 
         :root {
@@ -124,7 +124,7 @@
         }
 
         /* =========================================================
-           COMMON
+            COMMON
         ========================================================= */
 
         .pp-gradient {
@@ -162,7 +162,7 @@
         }
 
         /* =========================================================
-           LOGIN
+            LOGIN
         ========================================================= */
 
         #loginScreen {
@@ -236,14 +236,8 @@
                 0 15px 35px rgba(91,33,182,.18);
         }
 
-        .login-logo img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
         /* =========================================================
-           INPUTS
+            INPUTS
         ========================================================= */
 
         .pp-input {
@@ -277,7 +271,7 @@
         }
 
         /* =========================================================
-           HEADER
+            HEADER
         ========================================================= */
 
         #mainApp header {
@@ -320,14 +314,8 @@
                 0 5px 15px rgba(76,29,149,.10);
         }
 
-        .brand-logo img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
         /* =========================================================
-           CLIENT APP
+            CLIENT APP
         ========================================================= */
 
         #clientApp {
@@ -345,10 +333,6 @@
 
             scroll-behavior: smooth;
 
-            /*
-             * IMPORTANT:
-             * Space reserved for fixed bottom navigation.
-             */
             padding-bottom:
                 calc(100px + var(--safe-bottom)) !important;
 
@@ -357,7 +341,7 @@
         }
 
         /* =========================================================
-           POSTER GRID
+            POSTER GRID
         ========================================================= */
 
         #postersGrid {
@@ -404,7 +388,7 @@
         }
 
         /* =========================================================
-           POSTER ACTION ICONS
+            POSTER ACTION ICONS
         ========================================================= */
 
         .poster-action {
@@ -460,7 +444,7 @@
         }
 
         /* =========================================================
-           BOTTOM NAVIGATION
+            BOTTOM NAVIGATION
         ========================================================= */
 
         #bottomNavigation {
@@ -580,7 +564,7 @@
         }
 
         /* =========================================================
-           PAYWALL
+            PAYWALL
         ========================================================= */
 
         .paywall-card {
@@ -596,7 +580,7 @@
         }
 
         /* =========================================================
-           PAYMENT CARD
+            PAYMENT CARD
         ========================================================= */
 
         .posterPlus_checkout_card {
@@ -645,7 +629,7 @@
         }
 
         /* =========================================================
-           PROFILE CARD
+            PROFILE CARD
         ========================================================= */
 
         .profile-card {
@@ -675,7 +659,7 @@
         }
 
         /* =========================================================
-           ADMIN
+            ADMIN
         ========================================================= */
 
         #adminPanel {
@@ -726,7 +710,7 @@
         }
 
         /* =========================================================
-           MOBILE
+            MOBILE
         ========================================================= */
 
         @media (max-width: 640px) {
@@ -788,7 +772,7 @@
         }
 
         /* =========================================================
-           VERY SMALL PHONES
+            VERY SMALL PHONES
         ========================================================= */
 
         @media (max-width: 360px) {
@@ -812,7 +796,7 @@
         }
 
         /* =========================================================
-           SPINNER
+            SPINNER
         ========================================================= */
 
         .pp-spinner {
@@ -833,7 +817,7 @@
 <body>
 
 <!-- =========================================================
-     LOGIN
+    LOGIN
 ========================================================= -->
 
 <div id="loginScreen"
@@ -841,11 +825,8 @@
 
     <div class="login-card text-center">
 
-        <div class="login-logo">
-            <img src="logo.png"
-                 alt="PosterPlus"
-                 loading="eager"
-                 onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\'fa-solid fa-palette text-4xl pp-gradient-text\'></i>';">
+        <div class="login-logo flex items-center justify-center">
+            <i class="fa-solid fa-palette text-4xl pp-gradient-text"></i>
         </div>
 
         <h1 class="text-3xl font-extrabold tracking-tight text-slate-900">
@@ -902,7 +883,7 @@
 
 
 <!-- =========================================================
-     REGISTRATION
+    REGISTRATION
 ========================================================= -->
 
 <div id="registrationScreen"
@@ -952,7 +933,7 @@
 
             </div>
 
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-1 gap-3">
 
                 <label class="upload-card p-3 block">
 
@@ -963,21 +944,6 @@
 
                     <input type="file"
                            id="regPhoto"
-                           accept="image/jpeg,image/png,image/webp"
-                           required
-                           class="text-[10px] w-full">
-
-                </label>
-
-                <label class="upload-card p-3 block">
-
-                    <span class="block text-xs font-bold text-indigo-700 mb-2">
-                        <i class="fa-solid fa-store mr-1"></i>
-                        Business Logo
-                    </span>
-
-                    <input type="file"
-                           id="regLogo"
                            accept="image/jpeg,image/png,image/webp"
                            required
                            class="text-[10px] w-full">
@@ -1009,7 +975,7 @@
 
 
 <!-- =========================================================
-     MAIN APP
+    MAIN APP
 ========================================================= -->
 
 <div id="mainApp"
@@ -1022,13 +988,8 @@
 
         <div class="flex items-center gap-3">
 
-            <div class="brand-logo">
-
-                <img src="logo.png"
-                     alt="PosterPlus"
-                     loading="eager"
-                     onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\'fa-solid fa-palette text-xl pp-gradient-text\'></i>'">
-
+            <div class="brand-logo flex items-center justify-center">
+                <i class="fa-solid fa-palette text-xl pp-gradient-text"></i>
             </div>
 
             <div class="leading-tight">
@@ -1191,21 +1152,11 @@
 
 
                         <button onclick="window.addBox('PHOTO')"
-                                class="admin-btn p-3 text-xs font-semibold flex flex-col items-center gap-2">
+                                class="admin-btn p-3 text-xs font-semibold flex flex-col items-center gap-2 col-span-2">
 
                             <i class="fa-solid fa-camera text-lg text-blue-600"></i>
 
                             Photo Box
-
-                        </button>
-
-
-                        <button onclick="window.addBox('LOGO')"
-                                class="admin-btn p-3 text-xs font-semibold flex flex-col items-center gap-2">
-
-                            <i class="fa-solid fa-store text-lg text-amber-500"></i>
-
-                            Logo Box
 
                         </button>
 
@@ -1870,13 +1821,6 @@
 
     /* =========================================================
        IMPORTANT API URL
-       
-       GitHub Pages cannot use:
-       /api/upload
-
-       because that points to GitHub Pages.
-
-       Your API is on Vercel.
     ========================================================= */
 
     const API_BASE_URL =
@@ -2448,13 +2392,6 @@
 
     /* =========================================================
        SECURE IMAGE UPLOAD
-       
-       FIXED:
-       Old:
-       fetch('/api/upload')
-
-       New:
-       fetch('https://posterplus-api.vercel.app/api/upload')
     ========================================================= */
 
     const uploadToImgBB = async (file) => {
@@ -2528,13 +2465,6 @@
                                     }
                                 );
 
-
-                            /*
-                             * IMPORTANT:
-                             * Don't directly call response.json()
-                             * because Vercel/GitHub can return HTML
-                             * error pages.
-                             */
 
                             const rawText =
                                 await response.text();
@@ -2620,6 +2550,8 @@
                 "profSubmitBtn"
             );
 
+        if (!btn) return;
+
 
         const originalHTML =
             btn.innerHTML;
@@ -2638,21 +2570,14 @@
                 null;
 
 
-            let logoUrl =
-                currentClientData?.logo ||
-                null;
+            const photoInput =
+                document.getElementById(
+                    "profPhoto"
+                );
 
 
             const photoFile =
-                document.getElementById(
-                    "profPhoto"
-                ).files[0];
-
-
-            const logoFile =
-                document.getElementById(
-                    "profLogo"
-                ).files[0];
+                photoInput?.files?.[0];
 
 
             if (photoFile) {
@@ -2665,20 +2590,10 @@
             }
 
 
-            if (logoFile) {
-
-                logoUrl =
-                    await uploadToImgBB(
-                        logoFile
-                    );
-
-            }
-
-
-            if (!photoUrl || !logoUrl) {
+            if (!photoUrl) {
 
                 throw new Error(
-                    "Please upload both photo and logo."
+                    "Please upload your photo."
                 );
 
             }
@@ -2692,28 +2607,25 @@
                 name:
                     document.getElementById(
                         "profName"
-                    ).value.trim(),
+                    )?.value.trim() || "",
 
                 bizName:
                     document.getElementById(
                         "profBizName"
-                    ).value.trim(),
+                    )?.value.trim() || "",
 
                 whatsapp:
                     document.getElementById(
                         "profWhatsapp"
-                    ).value.trim(),
+                    )?.value.trim() || "",
 
                 address:
                     document.getElementById(
                         "profAddress"
-                    ).value.trim(),
+                    )?.value.trim() || "",
 
                 photo:
                     photoUrl,
-
-                logo:
-                    logoUrl,
 
                 updatedAt:
                     new Date().toISOString()
@@ -2747,7 +2659,7 @@
                 .getElementById(
                     "profileAlertDot"
                 )
-                .classList.add("hidden");
+                ?.classList.add("hidden");
 
 
             btn.innerHTML =
@@ -2830,32 +2742,22 @@
             const photoFile =
                 document.getElementById(
                     "regPhoto"
-                ).files[0];
+                )?.files?.[0];
 
 
-            const logoFile =
-                document.getElementById(
-                    "regLogo"
-                ).files[0];
-
-
-            if (!photoFile || !logoFile) {
+            if (!photoFile) {
 
                 throw new Error(
-                    "Please select photo and logo."
+                    "Please select your photo."
                 );
 
             }
 
 
-            const [
-                photoUrl,
-                logoUrl
-            ] =
-                await Promise.all([
-                    uploadToImgBB(photoFile),
-                    uploadToImgBB(logoFile)
-                ]);
+            const photoUrl =
+                await uploadToImgBB(
+                    photoFile
+                );
 
 
             const newClient = {
@@ -2866,28 +2768,25 @@
                 name:
                     document.getElementById(
                         "regName"
-                    ).value.trim(),
+                    )?.value.trim() || "",
 
                 bizName:
                     document.getElementById(
                         "regBizName"
-                    ).value.trim(),
+                    )?.value.trim() || "",
 
                 whatsapp:
                     document.getElementById(
                         "regWhatsapp"
-                    ).value.trim(),
+                    )?.value.trim() || "",
 
                 address:
                     document.getElementById(
                         "regAddress"
-                    ).value.trim(),
+                    )?.value.trim() || "",
 
                 photo:
                     photoUrl,
-
-                logo:
-                    logoUrl,
 
                 joinedAt:
                     new Date().toISOString()
@@ -3256,11 +3155,6 @@
                     );
 
 
-                /*
-                 * Mobile:
-                 * Native share sheet opens.
-                 */
-
                 if (
                     navigator.canShare &&
                     navigator.canShare({
@@ -3285,11 +3179,6 @@
 
                 }
 
-
-                /*
-                 * Desktop:
-                 * Save image and open WhatsApp.
-                 */
 
                 window.downloadPosterImage(
                     dataUrl
@@ -3328,11 +3217,6 @@
 
     window.shareFacebook =
         (dataUrl) => {
-
-            /*
-             * Facebook web share cannot directly
-             * receive a local data URL image.
-             */
 
             window.downloadPosterImage(
                 dataUrl
@@ -3474,10 +3358,6 @@
                 "paywallScreen"
             );
 
-
-        /* =====================================================
-           SUBSCRIPTION CHECK
-        ===================================================== */
 
         const expiry =
             getSubscriptionTime(
@@ -3840,10 +3720,6 @@
                                     of objects
                                 ) {
 
-                                    /*
-                                     * TEXT PLACEHOLDERS
-                                     */
-
                                     if (
                                         obj.type === "i-text" ||
                                         obj.type === "text"
@@ -3880,19 +3756,12 @@
                                     }
 
 
-                                    /*
-                                     * PHOTO / LOGO
-                                     */
-
                                     if (
-                                        obj.placeholderType === "PHOTO" ||
-                                        obj.placeholderType === "LOGO"
+                                        obj.placeholderType === "PHOTO"
                                     ) {
 
                                         const imageUrl =
-                                            obj.placeholderType === "PHOTO"
-                                                ? currentClientData.photo
-                                                : currentClientData.logo;
+                                            currentClientData.photo;
 
 
                                         if (!imageUrl) {
@@ -3983,13 +3852,6 @@
                                                             });
 
 
-                                                            /*
-                                                             * FIX:
-                                                             * Remove placeholder and
-                                                             * insert image at the same
-                                                             * position in object stack.
-                                                             */
-
                                                             offscreenFabricCanvas
                                                                 .remove(obj);
 
@@ -4036,11 +3898,6 @@
                                 offscreenFabricCanvas
                                     .renderAll();
 
-
-                                /*
-                                 * JPEG is smaller and faster
-                                 * than PNG for normal posters.
-                                 */
 
                                 const finalImageURL =
                                     offscreenFabricCanvas
@@ -4592,24 +4449,16 @@
                         "center",
 
                     width:
-                        isPhoto
-                            ? 250
-                            : 150,
+                        250,
 
                     height:
-                        isPhoto
-                            ? 300
-                            : 150,
+                        300,
 
                     fill:
-                        isPhoto
-                            ? "rgba(99,102,241,.15)"
-                            : "rgba(245,158,11,.15)",
+                        "rgba(99,102,241,.15)",
 
                     stroke:
-                        isPhoto
-                            ? "#6366f1"
-                            : "#f59e0b",
+                        "#6366f1",
 
                     strokeDashArray:
                         [8,8],
