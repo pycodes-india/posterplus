@@ -1768,10 +1768,11 @@
     } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 
 
-    import {
+      import {
         getAuth,
         GoogleAuthProvider,
         signInWithPopup,
+        signInWithCredential,
         signOut,
         onAuthStateChanged
     } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
@@ -2022,6 +2023,10 @@
         const button =
             document.getElementById("googleLoginBtn");
 
+        if (window.NativeApp) {
+            NativeApp.postMessage("google_login");
+            return;
+        }
 
         status.className =
             "mt-4 text-sm font-semibold text-violet-600 block";
@@ -2058,7 +2063,43 @@
 
     };
 
+        /* =========================================================
+       NATIVE APP LOGIN (Flutter WebView से token आता है)
+    ========================================================= */
 
+    window.nativeGoogleLogin = async (idToken) => {
+
+        const status =
+            document.getElementById("authStatus");
+
+        try {
+
+            status.className =
+                "mt-4 text-sm font-semibold text-violet-600 block";
+
+            status.innerHTML =
+                '<i class="fa-solid fa-circle-notch fa-spin mr-1"></i> Signing in...';
+
+            const credential =
+                GoogleAuthProvider.credential(idToken);
+
+            await signInWithCredential(auth, credential);
+
+        } catch (error) {
+
+            console.error(error);
+
+            status.className =
+                "mt-4 text-sm font-bold text-red-600 block";
+
+            status.innerText =
+                "Login failed: " + error.code;
+
+        }
+
+    };
+
+    
     /* =========================================================
        LOGOUT
     ========================================================= */
@@ -2068,6 +2109,9 @@
         try {
 
             await signOut(auth);
+            if (window.NativeApp) {
+            NativeApp.postMessage("google_logout");
+        }
 
         } catch (error) {
 
